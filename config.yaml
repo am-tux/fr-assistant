@@ -272,8 +272,13 @@ github_api:
   # Authentication (optional but recommended for higher rate limits)
   # Without token: 60 requests/hour
   # With token: 5,000 requests/hour
-  # Set via environment variable: GITHUB_TOKEN or provide here
-  token: "${GITHUB_TOKEN}"  # Read from environment variable
+  #
+  # ⚠️  SECURITY WARNING ⚠️
+  # DO NOT hardcode your token here! Use an environment variable instead:
+  #   export GITHUB_TOKEN=your_token_here
+  # This prevents accidentally committing your token to git.
+  #
+  token: "${GITHUB_TOKEN}"  # Reads from environment variable GITHUB_TOKEN
 
   # Rate limit handling
   respect_rate_limits: true  # Pause when approaching rate limit

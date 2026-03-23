@@ -82,6 +82,74 @@ python3 main.py daily-report
    - `discussions/daily/` - Detailed community activity by channel
    - `discussions/weekly/` - In-depth community analysis
 
+---
+
+## GitHub Token Setup (Optional)
+
+A GitHub token is **optional** for basic usage but **recommended** for tracking discussions.
+
+### Do You Need a Token?
+
+- **Without token:** 60 API requests/hour (sufficient for occasional reports)
+- **With token:** 5,000 API requests/hour (for heavy usage)
+
+**Bottom line:** Start without a token. If you see rate limit errors, then create one.
+
+### How to Create a GitHub Token
+
+1. **Go to GitHub Settings**
+   - Visit https://github.com/settings/tokens
+   - Or: GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+
+2. **Generate New Token**
+   - Click "Generate new token" → "Generate new token (classic)"
+   - Give it a name: `fedramp-tracker`
+   - Set expiration: 90 days or 1 year (recommended for security)
+
+3. **Select Permissions** (minimum required):
+   - ✅ `public_repo` - Access public repositories
+   - ✅ `read:discussion` - Read GitHub Discussions
+   - ❌ **Do NOT** select `repo` (too broad) or any `write`/`delete` permissions
+
+4. **Generate and Copy**
+   - Click "Generate token" at the bottom
+   - **Copy the token immediately** - you won't see it again!
+   - It will look like: `ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+5. **Set Environment Variable**
+   ```bash
+   # In your terminal
+   export GITHUB_TOKEN=ghp_your_token_here
+
+   # Or add to your shell profile (~/.bashrc or ~/.zshrc)
+   echo 'export GITHUB_TOKEN=ghp_your_token_here' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+6. **Verify It Works**
+   ```bash
+   ./tracker.sh rfcs --repo community
+   # Should now work without rate limit errors
+   ```
+
+### ⚠️ Security Warning
+
+**NEVER commit your token to git!**
+
+- ✅ **DO:** Use environment variables (as shown above)
+- ✅ **DO:** Store in password managers or OS keychains
+- ❌ **DON'T:** Hardcode in `config.yaml` or any tracked file
+- ❌ **DON'T:** Commit `.env` files with tokens
+
+See [SECURITY.md](SECURITY.md) for detailed security best practices.
+
+If you accidentally commit a token:
+1. **Immediately revoke it** at https://github.com/settings/tokens
+2. Generate a new one
+3. GitHub will auto-detect committed tokens and email you
+
+---
+
 ## Use Cases
 
 **For Documentation Teams:**

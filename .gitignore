@@ -1,5 +1,35 @@
 # FedRAMP Tracker - Git Ignore
 
+# ⚠️  SECRETS AND TOKENS - NEVER COMMIT THESE ⚠️
+# Environment files that may contain GITHUB_TOKEN
+.env
+.env.*
+.envrc
+*.env
+env.sh
+setenv.sh
+
+# Token files
+.token
+*.token
+token.txt
+secrets.*
+.secrets
+credentials.*
+.credentials
+
+# Config files with hardcoded tokens (use environment variables instead!)
+config.local.yaml
+config.*.yaml
+!config.yaml  # Allow the template config.yaml
+
+# Backup files that might contain secrets
+*.bak
+*.backup
+*.old
+*.orig
+*~
+
 # User preferences
 .tracker-config
 
