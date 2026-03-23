@@ -1252,6 +1252,479 @@ generateWeeklyDiscussionsReport(12, 2026, "community")
 generateDiscussionsReport(startDate, endDate, repository, channels)
 ```
 
+### Open RFCs Report
+
+**Function:** `getOpenRFCs(repository, status, sortBy)`
+
+**Purpose:** List all Request for Comments (RFC) discussions in the RFCs channel, showing what proposals are currently open, under review, or have been addressed.
+
+**Parameters:**
+- `repository` - Repository name (e.g., "community")
+- `status` - Filter by status (optional):
+  - "open" - Only open/unanswered RFCs (default)
+  - "answered" - Only answered/addressed RFCs
+  - "closed" - Only closed RFCs
+  - "all" - All RFCs regardless of status
+- `sortBy` - Sort order (optional):
+  - "newest" - Most recently created first (default)
+  - "oldest" - Oldest first
+  - "most_comments" - Most discussed first
+  - "least_comments" - Least discussed first
+  - "most_reactions" - Most reactions first
+
+**Process:**
+1. Fetch all discussions from the RFCs channel
+2. Filter by status (open/answered/closed)
+3. Sort according to sortBy parameter
+4. For each RFC, collect:
+   - Title and URL
+   - Creation date and author
+   - Status (open, answered, closed)
+   - Comment count and reaction count
+   - Last activity date
+   - If answered: who answered and when
+   - Summary of the proposal (first 200 characters)
+5. Apply AI interpretation to analyze:
+   - Key themes across current RFCs
+   - Which RFCs need more community input
+   - Which RFCs are ready for decision
+   - Emerging patterns in proposals
+
+**Report Format:**
+
+```markdown
+# Open RFCs Report
+**Repository:** FedRAMP/community
+**Status Filter:** Open
+**Sort By:** Newest
+**Generated:** [timestamp]
+
+---
+
+## Summary
+
+- Total RFCs tracked: X
+- Currently open: X
+- Answered/Addressed: X
+- Closed: X
+- Average age of open RFCs: X days
+- Average comments per open RFC: X
+
+---
+
+## Open RFCs (Newest First)
+
+### 1. RFC: [Proposal Title](URL)
+**Status:** Open | **Created:** 2026-03-20 by @username | **Age:** 3 days
+
+**Engagement:**
+- Comments: 12
+- Reactions: 8 (👍 5, 🎉 2, 👀 1)
+- Participants: 7
+- Last activity: 4 hours ago
+
+**Proposal Summary:**
+[First 200 characters of the RFC discussion body...]
+
+**Key Discussion Points:**
+- Point raised by @user1: [brief summary]
+- Point raised by @user2: [brief summary]
+- Official response: [if any]
+
+🤖 AI INTERPRETATION:
+This RFC proposes [topic]. The discussion shows strong community interest with 12 comments
+from 7 participants. Main themes:
+- Implementation concerns (4 comments)
+- Support for the proposal (5 comments)
+- Clarifying questions (3 comments)
+
+The RFC appears to have good community engagement and mostly positive sentiment.
+Remaining questions focus on implementation details and timeline.
+
+**Status Assessment:** Ready for official review - community input is substantial and supportive.
+
+---
+
+### 2. RFC: [Proposal Title](URL)
+[Same format as above]
+
+---
+
+### 3. RFC: [Proposal Title](URL)
+[Same format as above]
+
+[... continue for all open RFCs ...]
+
+---
+
+## RFCs Analysis
+
+### By Age
+- Less than 1 week old: X RFCs
+- 1-2 weeks old: X RFCs
+- 2-4 weeks old: X RFCs
+- More than 1 month old: X RFCs
+
+⚠️ **Aging RFCs (>30 days without resolution):**
+- [RFC Title](URL) - 45 days old, 8 comments
+- [RFC Title](URL) - 38 days old, 15 comments
+
+### By Engagement Level
+- High engagement (10+ comments): X RFCs
+- Medium engagement (5-9 comments): X RFCs
+- Low engagement (1-4 comments): X RFCs
+- No comments yet: X RFCs
+
+⚠️ **RFCs Needing More Input:**
+- [RFC Title](URL) - 14 days old, only 2 comments
+- [RFC Title](URL) - 7 days old, no comments yet
+
+### By Topic/Theme
+🤖 AI INTERPRETATION:
+
+Current open RFCs group into these themes:
+1. **Security and Compliance** (3 RFCs)
+   - Focus on automated security scanning
+   - Baseline update proposals
+
+2. **Process Improvements** (2 RFCs)
+   - Streamlining authorization workflows
+   - Documentation structure changes
+
+3. **Technical Standards** (2 RFCs)
+   - Cloud service provider requirements
+   - API standardization
+
+---
+
+## Recently Answered RFCs (Last 30 Days)
+
+### [RFC Title](URL)
+**Status:** Answered | **Answered on:** 2026-03-18 by @official_account
+**Time to answer:** 12 days | **Final comment count:** 25
+
+**Summary:** [Brief summary of the RFC and resolution]
+
+---
+
+## RFCs Ready for Decision
+
+🤖 AI INTERPRETATION:
+
+Based on engagement patterns and discussion maturity, these RFCs appear ready for official decision:
+
+1. **[RFC Title](URL)** - 21 days old, 18 comments
+   - Strong community consensus (15 supportive comments)
+   - Implementation details clarified
+   - No major objections raised
+   - Recommendation: Move to approval process
+
+2. **[RFC Title](URL)** - 14 days old, 12 comments
+   - Good engagement from diverse stakeholders
+   - Technical concerns addressed
+   - Timeline proposed and accepted
+   - Recommendation: Ready for review
+
+---
+
+## Action Items
+
+### Immediate Attention
+1. **Aging RFCs:** 2 RFCs are >30 days old without resolution
+   - Provide status updates or decisions
+
+2. **Low Engagement:** 3 RFCs have minimal community input
+   - Consider highlighting to broader audience
+   - May need clarification or restructuring
+
+### Recommendations
+- Review RFCs marked as "ready for decision"
+- Update status on aging RFCs
+- Encourage community participation on low-engagement proposals
+- Consider closing stale RFCs with explanation
+
+---
+
+## Comparison with Previous Period
+
+**Month-over-Month Trends:**
+- New RFCs created: X (+/- Y% from last month)
+- RFCs answered/closed: X (+/- Y% from last month)
+- Average time to answer: X days (+/- Y% from last month)
+- Average engagement per RFC: X comments (+/- Y% from last month)
+```
+
+**Usage Examples:**
+
+```bash
+# Get all currently open RFCs
+getOpenRFCs("community", "open", "newest")
+
+# Get all RFCs sorted by most discussed
+getOpenRFCs("community", "all", "most_comments")
+
+# Get recently answered RFCs
+getOpenRFCs("community", "answered", "newest")
+
+# Get oldest open RFCs (potentially stale)
+getOpenRFCs("community", "open", "oldest")
+
+# Natural language queries
+"What RFCs are currently open?"
+"Show me open RFCs from the RFC discussion group"
+"Which RFCs have been answered recently?"
+"What are the most discussed RFCs?"
+"Are there any stale RFCs that need attention?"
+```
+
+**Integration with Other Reports:**
+
+This function can be called independently or integrated into:
+- Daily discussions reports (new RFCs created in last 24 hours)
+- Weekly discussions reports (RFC activity summary)
+- Monthly RFC summary reports
+- On-demand RFC status checks
+
+### Most Responded Discussions Report
+
+**Function:** `getMostRespondedDiscussions(repository, timeframe, channel, limit)`
+
+**Purpose:** Identify and analyze discussions with the highest response counts (comments) to understand what topics are generating the most community engagement.
+
+**Parameters:**
+- `repository` - Repository name (e.g., "community")
+- `timeframe` - Time period to analyze:
+  - "24h" - Last 24 hours
+  - "7d" - Last 7 days
+  - "30d" - Last 30 days
+  - "all" - All time
+  - Custom date range: "2026-03-01 to 2026-03-31"
+- `channel` - Channel to filter by (optional):
+  - "20x" - Only 20x channel discussions
+  - "Rev5" - Only Rev5 channel discussions
+  - "RFCs" - Only RFCs channel discussions
+  - "all" - All channels (default)
+- `limit` - Number of top discussions to return (default: 10)
+
+**Process:**
+1. Fetch all discussions matching the channel and timeframe criteria
+2. Sort by comment count (descending)
+3. For each discussion, collect:
+   - Title, URL, and creation date
+   - Total comment count and reaction count
+   - Author and channel
+   - Current status (open, answered, closed)
+   - List of top contributors to the discussion
+   - Timeline of responses (when comments were added)
+4. Apply AI interpretation to analyze:
+   - Why the discussion is generating high engagement
+   - Common themes in the responses
+   - Whether the discussion has been adequately addressed
+   - Community sentiment (supportive, critical, mixed)
+   - Actionable takeaways or unresolved issues
+5. Generate report following the Most Responded Discussions Report Format
+
+**Report Format:**
+
+```markdown
+# Most Responded Discussions Report
+**Repository:** FedRAMP/community
+**Timeframe:** Last 7 days
+**Channel:** All
+**Generated:** [timestamp]
+
+---
+
+## Summary
+
+- Total discussions analyzed: X
+- Total comments across top discussions: X
+- Average comments per top discussion: X
+- Most active channel: [channel name]
+- Peak engagement day: [day of week]
+
+---
+
+## Top 10 Most Responded Discussions
+
+### 1. [Discussion Title](URL)
+**Channel:** 20x | **Status:** Open | **Created:** 2026-03-15 by @username
+
+**Engagement Metrics:**
+- Comments: 45
+- Reactions: 23 (👍 15, ❤️ 5, 🎉 3)
+- Participants: 12 unique contributors
+- Last activity: 2 hours ago
+
+**Response Timeline:**
+- Day 1: 15 comments (initial discussion)
+- Day 2: 20 comments (peak engagement)
+- Day 3: 10 comments (follow-up questions)
+
+**Top Contributors:**
+- @user1: 8 comments
+- @user2: 6 comments
+- @developer3: 5 comments (official responses)
+
+**First 100 characters of discussion:**
+[Discussion body preview...]
+
+🤖 AI INTERPRETATION:
+This discussion is generating high engagement because it addresses a critical pain point
+in the 20x modernization process - automated security scanning integration. The responses
+show a mix of users sharing their own implementations, asking clarifying questions, and
+requesting official guidance. Key themes include:
+- Technical implementation challenges (15 comments)
+- Request for official examples (8 comments)
+- Integration with existing tools (7 comments)
+
+The discussion remains open with unresolved questions about official recommendations.
+Community members have shared workarounds, but official guidance would help standardize
+approaches. This topic may warrant:
+- Official documentation section on automated scanning
+- Example implementation or reference architecture
+- Potential RFC to standardize approach
+
+---
+
+### 2. [Discussion Title](URL)
+[Same format as above]
+
+---
+
+### 3. [Discussion Title](URL)
+[Same format as above]
+
+[... continue for remaining discussions ...]
+
+---
+
+## Analysis by Channel
+
+### 20x Channel
+- Top discussions: 4 out of top 10
+- Total comments: 125
+- Average comments per discussion: 31
+- Common themes: Automation, scanning, CI/CD integration
+
+### Rev5 Channel
+- Top discussions: 3 out of top 10
+- Total comments: 89
+- Average comments per discussion: 30
+- Common themes: Control updates, baseline changes, migration
+
+### RFCs Channel
+- Top discussions: 2 out of top 10
+- Total comments: 67
+- Average comments per discussion: 34
+- Common themes: Proposed changes, community feedback
+
+### Uncategorized
+- Top discussions: 1 out of top 10
+- Total comments: 15
+- Average comments per discussion: 15
+
+---
+
+## Cross-Discussion Patterns
+
+🤖 AI INTERPRETATION (Overall):
+
+**High-Engagement Topics:**
+1. Implementation guidance (40% of top discussions)
+2. Technical challenges and solutions (30%)
+3. Policy clarifications (20%)
+4. Feature requests (10%)
+
+**Community Behavior Patterns:**
+- Discussions asking "how to" questions generate most responses
+- Technical implementation discussions have highest participant counts
+- Official responses boost engagement by average 50%
+- Unanswered technical questions accumulate comments as users share workarounds
+
+**Response Quality:**
+- 60% of top discussions have received official responses
+- Average time to official response: 1.5 days
+- Community members actively help each other in absence of official guidance
+- Some discussions have evolved into de facto documentation in comments
+
+**Recommended Actions:**
+1. Address unanswered technical questions in top 3 discussions
+2. Convert common "how to" discussions into documentation
+3. Create RFCs for topics with 30+ comments and no clear resolution
+4. Pin discussions with valuable community solutions
+
+---
+
+## Comparison with Previous Period
+
+**Week-over-Week Trends:**
+- Total comments in top 10: +15% compared to last week
+- Average comments per discussion: +8%
+- New topics appearing in top 10: 3
+- Recurring topics: 2 (automation, baseline updates)
+
+**Engagement Velocity:**
+- Discussions reaching 20+ comments: 18% faster than last week
+- Time to first response: 2.3 hours (improved from 4.1 hours)
+
+---
+
+## Attention Required
+
+⚠️ **High-Response Discussions Without Resolution:**
+
+1. [Discussion Title](URL) - 45 comments, 5 days old, no official response
+   - Summary: [Brief description of the issue]
+   - Impact: Blocking multiple users' implementation
+   - Suggested action: Provide official guidance or create documentation
+
+2. [Discussion Title](URL) - 38 comments, 3 days old, conflicting information
+   - Summary: [Brief description]
+   - Impact: Community uncertainty, multiple workarounds shared
+   - Suggested action: Clarify official position, update documentation
+
+---
+
+## Success Stories
+
+✅ **Well-Addressed High-Engagement Discussions:**
+
+1. [Discussion Title](URL) - 42 comments, answered and resolved
+   - Official response provided clear guidance
+   - Community validated the solution
+   - Follow-up documentation created
+
+2. [Discussion Title](URL) - 35 comments, evolved into RFC
+   - High-value community input collected
+   - RFC drafted based on discussion
+   - Demonstrates effective community engagement
+```
+
+**Usage Examples:**
+
+```bash
+# Get top 10 most responded discussions from last 7 days across all channels
+getMostRespondedDiscussions("community", "7d", "all", 10)
+
+# Get top 5 most responded 20x discussions from last 30 days
+getMostRespondedDiscussions("community", "30d", "20x", 5)
+
+# Get top 20 most responded discussions of all time
+getMostRespondedDiscussions("community", "all", "all", 20)
+
+# Get most responded Rev5 discussions from specific date range
+getMostRespondedDiscussions("community", "2026-03-01 to 2026-03-31", "Rev5", 10)
+```
+
+**Integration with Other Reports:**
+
+This function can be called independently or integrated into:
+- Daily discussions reports (top 3 most responded from last 24 hours)
+- Weekly discussions reports (top 5 most responded from last 7 days)
+- Monthly summary reports
+- On-demand community health checks
+
 ## Example Commands and Usage
 
 ### Query Commands (Git Repository Data)
@@ -1311,6 +1784,27 @@ generateDiscussionsReport(startDate, endDate, repository, channels)
 "Show me discussions with no response in the last 48 hours"
 ```
 
+**Most Responded Discussions:**
+```
+"Show me the top 10 most responded discussions from the last week"
+→ Returns: Ranked list with comment counts, participants + 🤖 AI analysis of engagement drivers
+
+"What discussions in the 20x channel have the most responses?"
+→ Returns: 20x channel top discussions + 🤖 AI interpretation of why they're popular
+
+"Which high-response discussions need official attention?"
+→ Returns: Discussions with 30+ comments and no official response + recommended actions
+
+"Why is discussion X getting so many responses?"
+→ Returns: Comment timeline, participants, themes + 🤖 AI analysis of engagement patterns
+
+"Compare most responded discussions between 20x and Rev5 channels"
+→ Returns: Top discussions per channel + 🤖 AI comparison of engagement topics
+
+"Show me all-time most responded discussions"
+→ Returns: Historical top discussions + patterns over time
+```
+
 **Theme and Sentiment:**
 ```
 "What are the common themes in Rev5 discussions?"
@@ -1360,6 +1854,17 @@ generateWeeklyDiscussionsReport(12, 2026, "community")
 
 # Generate custom date range report
 generateDiscussionsReport("2026-03-01", "2026-03-31", "community", ["20x", "Rev5", "RFCs"])
+
+# Get most responded discussions (top 10 from last 7 days, all channels)
+getMostRespondedDiscussions("community", "7d", "all", 10)
+
+# Get most responded discussions by channel
+getMostRespondedDiscussions("community", "30d", "20x", 5)
+getMostRespondedDiscussions("community", "30d", "Rev5", 5)
+getMostRespondedDiscussions("community", "30d", "RFCs", 5)
+
+# Get all-time most responded discussions
+getMostRespondedDiscussions("community", "all", "all", 20)
 ```
 
 ### Combined Analysis Commands

@@ -40,6 +40,7 @@ Rather than code-centric metrics like commit volume, this tool prioritizes:
 4. **Ask questions:**
    - "What new documentation was added this week?"
    - "What are the top discussions in the 20x channel?"
+   - "What RFCs are currently open?"
    - "Show me what changed in authentication.md"
 5. **Review automated reports** in `./reports/`:
    - `daily/` - Repository changes
@@ -57,10 +58,16 @@ Rather than code-centric metrics like commit volume, this tool prioritizes:
 
 **For Community Managers:**
 - Monitor discussion channels (20x, Rev5, RFCs) in one place
+- **Track open RFCs** - see all Request for Comments proposals and their status
+- **Track most responded discussions** to identify hot topics and community priorities
 - Identify trending topics and common concerns
 - Track answer rates and response times
 - Get AI-powered insights on community sentiment and themes
 - Find unanswered questions needing attention
+- Discover high-engagement discussions needing official response
+- Identify RFCs ready for decision or needing more input
+- Track time-to-answer for RFCs and community questions
+- Understand what makes discussions generate high participation
 
 **For Project Leaders:**
 - See both technical progress (commits) and community feedback (discussions)
@@ -84,11 +91,14 @@ Rather than code-centric metrics like commit volume, this tool prioritizes:
 
 ### 💬 GitHub Discussions Tracking
 - **Community engagement monitoring** for repositories with GitHub Discussions
+- **RFC (Request for Comments) tracking** - list open RFCs, track status, identify readiness
 - Track new discussions, questions, announcements, and ideas
 - Monitor discussion activity (comments, reactions, answers)
 - Identify unanswered questions and trending topics
+- Track most responded discussions to find hot topics
 - **Clearly labeled** with 💬 prefix to distinguish from git data
 - Separate from repository code/documentation changes
+- Organized by channels: 20x, Rev5, RFCs
 
 ### 📊 Factual Data + AI Interpretation
 **Factual Data First (Always):**
@@ -129,6 +139,7 @@ Rather than code-centric metrics like commit volume, this tool prioritizes:
 **Daily Discussions Reports** (generated at 09:00 each day):
 - 💬 Community engagement grouped by channels: **20x**, **Rev5**, **RFCs**
 - New discussions, active discussions, answered questions per channel
+- **Top 3 most responded discussions** from last 24 hours
 - 🤖 AI interpretation of themes, sentiment, and urgency
 - Unanswered questions needing attention
 - Saved to `./reports/discussions/daily/YYYY-MM-DD.md`
@@ -136,9 +147,11 @@ Rather than code-centric metrics like commit volume, this tool prioritizes:
 **Weekly Discussions Reports** (generated Monday at 09:00):
 - 💬 Community summary grouped by channels: **20x**, **Rev5**, **RFCs**
 - Top discussions, engagement metrics, answer rates per channel
+- **Top 10 most responded discussions** from last 7 days with analysis
 - Cross-channel theme analysis
 - Community health indicators
 - 🤖 AI interpretation with actionable insights and recommendations
+- 🤖 AI analysis of why high-response discussions are generating engagement
 - Saved to `./reports/discussions/weekly/YYYY-Www.md`
 
 ### 💬 Question Answering
@@ -417,8 +430,33 @@ Both daily and weekly reports can be generated manually for any historical perio
 ```
 "What are the active discussions in the 20x channel?"
 "Show me new questions in the Rev5 channel this week"
-"What RFCs are currently being discussed?"
 "List unanswered questions in the RFCs channel"
+```
+
+**RFC (Request for Comments) tracking:**
+```
+# Get all currently open RFCs
+getOpenRFCs("community", "open", "newest")
+# Returns: List of open RFC proposals with status + 🤖 AI assessment
+
+# Natural language queries
+"What RFCs are currently open?"
+"Show me open RFCs from the RFC discussion group"
+"Which RFCs have been answered recently?"
+"What are the most discussed RFCs?"
+"Are there any stale RFCs that need attention?"
+
+# Get RFCs by status
+getOpenRFCs("community", "answered", "newest")  # Recently answered
+getOpenRFCs("community", "closed", "newest")    # Closed RFCs
+getOpenRFCs("community", "all", "most_comments") # All RFCs, most discussed first
+
+# Find specific types
+"Show me RFCs ready for decision"
+# Returns: RFCs with good engagement and apparent consensus + 🤖 AI recommendation
+
+"Which RFCs need more community input?"
+# Returns: RFCs with low engagement or aging without resolution
 ```
 
 **Engagement and trends:**
@@ -427,6 +465,25 @@ Both daily and weekly reports can be generated manually for any historical perio
 "Which discussions have the most comments?"
 "What questions were answered today?"
 "Show me discussions with no response in the last 48 hours"
+```
+
+**Most responded discussions:**
+```
+# Get top 10 most responded discussions from last 7 days (all channels)
+getMostRespondedDiscussions("community", "7d", "all", 10)
+# Returns: Ranked list with comment counts + 🤖 AI analysis of engagement drivers
+
+# Get top 5 most responded 20x discussions from last 30 days
+getMostRespondedDiscussions("community", "30d", "20x", 5)
+# Returns: 20x channel top discussions + why they're generating high engagement
+
+# Get top discussions that need attention (high responses, no resolution)
+"Show me high-response discussions without official answers"
+# Returns: Discussions with 30+ comments needing attention
+
+# Analyze most responded discussions
+"Why is discussion X getting so many responses?"
+# Returns: Comment count data + 🤖 AI analysis of engagement patterns
 ```
 
 **Community insights:**
@@ -475,11 +532,24 @@ generateDailyReport("2026-03-15")
 # Weekly repository report
 generateWeeklyReport(12, 2026)
 
-# Today's discussions report
+# Today's discussions report (includes top 3 most responded discussions)
 generateDailyDiscussionsReport(today, "community")
 
-# Weekly discussions report
+# Weekly discussions report (includes top 10 most responded discussions)
 generateWeeklyDiscussionsReport(12, 2026, "community")
+
+# On-demand most responded discussions report
+getMostRespondedDiscussions("community", "7d", "all", 10)
+
+# Get most responded discussions by specific channel
+getMostRespondedDiscussions("community", "30d", "20x", 5)
+getMostRespondedDiscussions("community", "30d", "Rev5", 5)
+getMostRespondedDiscussions("community", "30d", "RFCs", 5)
+
+# Open RFCs report
+getOpenRFCs("community", "open", "newest")  # All currently open RFCs
+getOpenRFCs("community", "all", "most_comments")  # All RFCs by engagement
+getOpenRFCs("community", "answered", "newest")  # Recently answered RFCs
 ```
 
 ### Example Response

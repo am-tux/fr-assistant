@@ -176,6 +176,65 @@ discussions_reports:
     interpret_health: true              # Community health assessment
     provide_recommendations: true       # Suggest actions for community managers
 
+  # Most Responded Discussions Analysis
+  most_responded:
+    enabled: true                       # Enable most responded discussions tracking
+
+    # Default settings for queries
+    default_timeframe: "7d"             # Default: last 7 days (options: "24h", "7d", "30d", "all")
+    default_limit: 10                   # Default: top 10 discussions
+    default_channel: "all"              # Default: all channels (options: "20x", "Rev5", "RFCs", "all")
+
+    # Include in automated reports
+    include_in_daily_reports: true      # Show top 3 in daily reports
+    include_in_weekly_reports: true     # Show top 10 in weekly reports
+    daily_report_limit: 3               # How many to show in daily reports
+    weekly_report_limit: 10             # How many to show in weekly reports
+
+    # Thresholds for highlighting
+    high_response_threshold: 20         # Consider "high response" if 20+ comments
+    very_high_response_threshold: 50    # Consider "very high response" if 50+ comments
+    needs_attention_threshold: 30       # Flag for attention if 30+ comments and no official response
+
+    # Analysis settings
+    analyze_response_timeline: true     # Track when responses were added
+    identify_top_contributors: true     # List most active participants
+    compare_with_previous_period: true  # Week-over-week or day-over-day comparison
+    track_response_velocity: true       # How quickly discussions gain responses
+
+    # AI interpretation
+    enable_ai_interpretation: true      # Analyze why discussions get high engagement
+    interpret_engagement_drivers: true  # Identify what makes discussions popular
+    identify_unresolved_issues: true    # Flag high-response discussions without resolution
+    suggest_actions: true               # Recommend documentation, RFCs, or responses needed
+
+  # Open RFCs Tracking
+  open_rfcs:
+    enabled: true                       # Enable RFC tracking and reporting
+
+    # Default settings for queries
+    default_status: "open"              # Default: show only open RFCs (options: "open", "answered", "closed", "all")
+    default_sort: "newest"              # Default: newest first (options: "newest", "oldest", "most_comments", "most_reactions")
+
+    # Include in automated reports
+    include_in_daily_reports: true      # Show new RFCs in daily reports
+    include_in_weekly_reports: true     # Show RFC summary in weekly reports
+
+    # Aging thresholds
+    stale_rfc_days: 30                  # Flag RFC as "stale" if open for >30 days without answer
+    low_engagement_threshold: 2         # Flag RFC as "needs input" if <2 comments after 7 days
+
+    # Analysis settings
+    track_time_to_answer: true          # Track how long RFCs take to get answered
+    identify_ready_for_decision: true   # Flag RFCs that appear ready for official decision
+    analyze_themes: true                # Group RFCs by topic/theme
+
+    # AI interpretation
+    enable_ai_interpretation: true      # Analyze RFC proposals and discussions
+    assess_readiness: true              # Determine if RFC is ready for decision
+    identify_consensus: true            # Identify community consensus or objections
+    suggest_next_steps: true            # Recommend actions for each RFC
+
 # Update frequency
 polling:
   interval_minutes: 60  # Check repositories every 60 minutes
