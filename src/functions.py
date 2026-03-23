@@ -4,12 +4,11 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 from .config_loader import Config
 from .git_tracker import GitTracker
-from .discussions_tracker import DiscussionsTracker
 from .report_generator import ReportGenerator
 
 
 class TrackerFunctions:
-    """Implementation of all query functions from SPEC.md"""
+    """Implementation of git repository tracking functions"""
 
     def __init__(self, config: Config):
         """Initialize tracker functions
@@ -19,21 +18,11 @@ class TrackerFunctions:
         """
         self.config = config
         self.git_trackers = {}
-        self.discussions_trackers = {}
 
-        # Initialize trackers for each repository
+        # Initialize git trackers for each repository
         for repo_config in config.get_repositories():
             repo_name = repo_config['name']
-
-            # Git tracker
             self.git_trackers[repo_name] = GitTracker(repo_config)
-
-            # Discussions tracker (if enabled)
-            if repo_config.get('track_discussions', False):
-                github_api_config = config.get_github_api_config()
-                self.discussions_trackers[repo_name] = DiscussionsTracker(
-                    repo_config, github_api_config
-                )
 
         # Report generator
         self.report_generator = ReportGenerator(
@@ -52,13 +41,11 @@ class TrackerFunctions:
             results[repo_name] = tracker.ensure_repository()
         return results
 
-    def generate_daily_report(self, date: Optional[datetime] = None,
-                              include_discussions: bool = False) -> str:
+    def generate_daily_report(self, date: Optional[datetime] = None) -> str:
         """Generate daily report for a specific date
 
         Args:
             date: Date for report (defaults to today)
-            include_discussions: Whether to include discussions data (requires API calls)
 
         Returns:
             Path to generated report file
@@ -79,21 +66,14 @@ class TrackerFunctions:
             repo_data = self._collect_repo_data(tracker, start_time, end_time)
             repos_data.append(repo_data)
 
-        # Collect discussions data ONLY if explicitly requested
-        discussions_data = None
-        if include_discussions and self.discussions_trackers:
-            discussions_data = self._collect_discussions_daily_data(start_time, end_time)
+        # Generate report (git data only)
+        return self.report_generator.generate_daily_report(date, repos_data, None)
 
-        # Generate report
-        return self.report_generator.generate_daily_report(date, repos_data, discussions_data)
-
-    def generate_weekly_report(self, date: Optional[datetime] = None,
-                                include_discussions: bool = False) -> str:
+    def generate_weekly_report(self, date: Optional[datetime] = None) -> str:
         """Generate weekly report for the week containing the given date
 
         Args:
             date: Date within the week (defaults to today)
-            include_discussions: Whether to include discussions data (requires API calls)
 
         Returns:
             Path to generated report file
@@ -114,60 +94,8 @@ class TrackerFunctions:
             repo_data = self._collect_repo_weekly_data(tracker, start_date, end_date)
             repos_data.append(repo_data)
 
-        # Collect discussions data ONLY if explicitly requested
-        discussions_data = None
-        if include_discussions and self.discussions_trackers:
-            discussions_data = self._collect_discussions_weekly_data(start_date, end_date)
-
-        # Generate report
-        return self.report_generator.generate_weekly_report(start_date, end_date, repos_data, discussions_data)
-
-    def get_open_rfcs(self, repository: str, status: str = 'open',
-                      sort_by: str = 'newest') -> List[Dict[str, Any]]:
-        """Get open RFCs from a repository
-
-        Args:
-            repository: Repository name
-            status: RFC status (open, answered, closed, all)
-            sort_by: Sort order (newest, oldest, most_comments, most_reactions)
-
-        Returns:
-            List of RFC dictionaries with topic classification
-        """
-        if repository not in self.discussions_trackers:
-            raise ValueError(f"Repository '{repository}' does not have discussions tracking enabled")
-
-        tracker = self.discussions_trackers[repository]
-        rfcs = tracker.get_open_rfcs(sort_by=sort_by)
-
-        # Filter by status if needed
-        if status == 'answered':
-            rfcs = [rfc for rfc in rfcs if rfc['is_answered']]
-        elif status == 'open':
-            rfcs = [rfc for rfc in rfcs if not rfc['is_answered']]
-        # 'all' returns everything
-
-        return rfcs
-
-    def get_most_responded_discussions(self, repository: str, timeframe: str = '7d',
-                                        channel: str = 'all',
-                                        limit: int = 10) -> List[Dict[str, Any]]:
-        """Get discussions with most responses
-
-        Args:
-            repository: Repository name
-            timeframe: Time window (24h, 7d, 30d, all)
-            channel: Channel filter (20x, Rev5, RFCs, General, all)
-            limit: Maximum number to return
-
-        Returns:
-            List of discussion dictionaries sorted by response count
-        """
-        if repository not in self.discussions_trackers:
-            raise ValueError(f"Repository '{repository}' does not have discussions tracking enabled")
-
-        tracker = self.discussions_trackers[repository]
-        return tracker.get_most_responded_discussions(timeframe, channel, limit)
+        # Generate report (git data only)
+        return self.report_generator.generate_weekly_report(start_date, end_date, repos_data, None)
 
     def get_new_files_since(self, repository: str, since: datetime,
                             branch: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -242,204 +170,6 @@ class TrackerFunctions:
 
         tracker = self.git_trackers[repository]
         return tracker.get_contributor_activity(contributor, since, branch)
-
-    def get_unanswered_questions(self, repository: str,
-                                  older_than_hours: int = 48) -> List[Dict[str, Any]]:
-        """Get unanswered discussions older than specified hours
-
-        Args:
-            repository: Repository name
-            older_than_hours: Get unanswered discussions older than this many hours
-
-        Returns:
-            List of unanswered discussion dictionaries
-        """
-        if repository not in self.discussions_trackers:
-            raise ValueError(f"Repository '{repository}' does not have discussions tracking enabled")
-
-        tracker = self.discussions_trackers[repository]
-        return tracker.get_unanswered_discussions(older_than_hours)
-
-    def get_discussions_by_channel(self, repository: str, channel: str,
-                                    since: Optional[datetime] = None) -> List[Dict[str, Any]]:
-        """Get discussions for a specific channel
-
-        Args:
-            repository: Repository name
-            channel: Channel name (20x, Rev5, RFCs, General)
-            since: Optional datetime filter
-
-        Returns:
-            List of discussion dictionaries
-        """
-        if repository not in self.discussions_trackers:
-            raise ValueError(f"Repository '{repository}' does not have discussions tracking enabled")
-
-        tracker = self.discussions_trackers[repository]
-        return tracker.get_discussions_by_channel(channel, since)
-
-    def generate_daily_discussions_report(self, repository: str,
-                                           date: Optional[datetime] = None) -> str:
-        """Generate detailed daily discussions report for community managers
-
-        Args:
-            repository: Repository name
-            date: Date for report (defaults to today)
-
-        Returns:
-            Path to generated report file
-        """
-        if repository not in self.discussions_trackers:
-            raise ValueError(f"Repository '{repository}' does not have discussions tracking enabled")
-
-        if date is None:
-            date = datetime.now()
-
-        # Normalize to start of day
-        date = date.replace(hour=0, minute=0, second=0, microsecond=0)
-        start_time = date - timedelta(days=1)
-
-        tracker = self.discussions_trackers[repository]
-
-        # Collect data by channel
-        channels_data = {}
-        for channel_name in ['20x', 'Rev5', 'RFCs', 'General']:
-            new_discussions = [d for d in tracker.get_discussions_by_channel(channel_name, start_time)
-                               if d['created_at'] >= start_time]
-            active_discussions = [d for d in tracker.get_discussions_by_channel(channel_name, start_time)
-                                  if d['updated_at'] >= start_time]
-            channels_data[channel_name] = {
-                'new': new_discussions,
-                'active': active_discussions
-            }
-
-        # Generate report
-        report_date = date.strftime('%Y-%m-%d')
-        filename = f"{report_date}.md"
-        discussions_daily_dir = self.config.output_directory / 'discussions' / 'daily'
-        discussions_daily_dir.mkdir(parents=True, exist_ok=True)
-        filepath = discussions_daily_dir / filename
-
-        lines = [
-            f"# Daily GitHub Discussions Report - {report_date}",
-            f"**Repository:** {repository}",
-            "",
-            "## Overview",
-            ""
-        ]
-
-        total_new = sum(len(data['new']) for data in channels_data.values())
-        total_active = sum(len(data['active']) for data in channels_data.values())
-
-        lines.append(f"- New discussions today: {total_new}")
-        lines.append(f"- Active discussions today: {total_active}")
-        lines.append("")
-
-        # Per-channel breakdown
-        for channel_name, data in channels_data.items():
-            if data['new'] or data['active']:
-                lines.append(f"## {channel_name} Channel")
-                lines.append("")
-
-                if data['new']:
-                    lines.append(f"### New Discussions ({len(data['new'])})")
-                    for disc in data['new']:
-                        lines.append(f"- **{disc['title']}**")
-                        lines.append(f"  - By: {disc['author']} | Created: {disc['created_at'].strftime('%Y-%m-%d %H:%M')}")
-                        lines.append(f"  - Comments: {disc['comment_count']} | Reactions: {disc['reaction_count']}")
-                        lines.append(f"  - URL: {disc['url']}")
-                        lines.append("")
-
-                if data['active']:
-                    lines.append(f"### Active Discussions ({len(data['active'])})")
-                    for disc in data['active']:
-                        status = "Answered" if disc['is_answered'] else "Open"
-                        lines.append(f"- [{status}] **{disc['title']}**")
-                        lines.append(f"  - Updated: {disc['updated_at'].strftime('%Y-%m-%d %H:%M')} | Comments: {disc['comment_count']}")
-                        lines.append(f"  - URL: {disc['url']}")
-                        lines.append("")
-
-        content = '\n'.join(lines)
-        filepath.write_text(content)
-
-        return str(filepath)
-
-    def generate_weekly_discussions_report(self, repository: str,
-                                            date: Optional[datetime] = None) -> str:
-        """Generate detailed weekly discussions report for community managers
-
-        Args:
-            repository: Repository name
-            date: Date within the week (defaults to today)
-
-        Returns:
-            Path to generated report file
-        """
-        if repository not in self.discussions_trackers:
-            raise ValueError(f"Repository '{repository}' does not have discussions tracking enabled")
-
-        if date is None:
-            date = datetime.now()
-
-        # Get start of week (Monday)
-        start_date = date - timedelta(days=date.weekday())
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-        end_date = start_date + timedelta(days=6, hours=23, minutes=59, seconds=59)
-
-        tracker = self.discussions_trackers[repository]
-
-        # Collect data by channel
-        channels_data = {}
-        for channel_name in ['20x', 'Rev5', 'RFCs', 'General']:
-            discussions = tracker.get_discussions_by_channel(channel_name, start_date)
-            channels_data[channel_name] = discussions
-
-        # Generate report
-        week_num = start_date.isocalendar()[1]
-        year = start_date.year
-        filename = f"{year}-W{week_num:02d}.md"
-        discussions_weekly_dir = self.config.output_directory / 'discussions' / 'weekly'
-        discussions_weekly_dir.mkdir(parents=True, exist_ok=True)
-        filepath = discussions_weekly_dir / filename
-
-        lines = [
-            f"# Weekly GitHub Discussions Report - Week {week_num}, {year}",
-            f"**Repository:** {repository}",
-            f"**Period:** {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}",
-            "",
-            "## Overview",
-            ""
-        ]
-
-        total_discussions = sum(len(discussions) for discussions in channels_data.values())
-        total_comments = sum(d['comment_count'] for discussions in channels_data.values() for d in discussions)
-
-        lines.append(f"- Total discussions this week: {total_discussions}")
-        lines.append(f"- Total comments: {total_comments}")
-        lines.append("")
-
-        # Per-channel breakdown
-        for channel_name, discussions in channels_data.items():
-            if discussions:
-                lines.append(f"## {channel_name} Channel ({len(discussions)} discussions)")
-                lines.append("")
-
-                # Sort by comment count
-                discussions.sort(key=lambda x: x['comment_count'], reverse=True)
-
-                for disc in discussions[:20]:  # Top 20 per channel
-                    status = "Answered" if disc['is_answered'] else "Open"
-                    lines.append(f"- [{status}] **{disc['title']}**")
-                    lines.append(f"  - Comments: {disc['comment_count']} | Reactions: {disc['reaction_count']}")
-                    lines.append(f"  - Created: {disc['created_at'].strftime('%Y-%m-%d')} by {disc['author']}")
-                    lines.append(f"  - URL: {disc['url']}")
-                    lines.append("")
-
-        content = '\n'.join(lines)
-        filepath.write_text(content)
-
-        return str(filepath)
-
     def _collect_repo_data(self, tracker: GitTracker,
                            start_time: datetime, end_time: datetime) -> Dict[str, Any]:
         """Collect repository data for a time range (daily report)"""
@@ -577,56 +307,4 @@ class TrackerFunctions:
             'new_files': new_files,
             'deleted_files': deleted_files,
             'most_active_files': most_active_files
-        }
-
-    def _collect_discussions_daily_data(self, start_time: datetime,
-                                         end_time: datetime) -> Dict[str, Any]:
-        """Collect discussions data for daily report"""
-        # For now, use the first discussions tracker
-        # In the future, this could aggregate across multiple repos
-        tracker = list(self.discussions_trackers.values())[0]
-
-        new_discussions = tracker.get_new_discussions(start_time)
-        active_discussions = tracker.get_active_discussions(start_time)
-        top_engagement = tracker.get_most_responded_discussions('24h', 'all', 3)
-
-        return {
-            'new_discussions': [self._format_discussion_summary(d) for d in new_discussions],
-            'active_discussions': [self._format_discussion_summary(d) for d in active_discussions],
-            'top_engagement': [self._format_discussion_summary(d) for d in top_engagement]
-        }
-
-    def _collect_discussions_weekly_data(self, start_date: datetime,
-                                          end_date: datetime) -> Dict[str, Any]:
-        """Collect discussions data for weekly report"""
-        tracker = list(self.discussions_trackers.values())[0]
-
-        new_discussions = tracker.get_new_discussions(start_date)
-        active_discussions = tracker.get_active_discussions(start_date)
-        top_discussions = tracker.get_most_responded_discussions('7d', 'all', 5)
-
-        return {
-            'overview': {
-                'new_discussions': len(new_discussions),
-                'active_discussions': len(active_discussions),
-                'answered': sum(1 for d in active_discussions if d['is_answered']),
-                'total_comments': sum(d['comment_count'] for d in active_discussions),
-                'participants': len(set(d['author'] for d in active_discussions))
-            },
-            'top_discussions': [self._format_discussion_summary(d) for d in top_discussions]
-        }
-
-    def _format_discussion_summary(self, discussion: Dict[str, Any]) -> Dict[str, Any]:
-        """Format discussion for report inclusion"""
-        return {
-            'title': discussion['title'],
-            'url': discussion['url'],
-            'author': discussion['author'],
-            'created_at': discussion['created_at'].strftime('%Y-%m-%d %H:%M'),
-            'channel': discussion['channel'],
-            'category': discussion['category'],
-            'comment_count': discussion['comment_count'],
-            'total_comments': discussion['comment_count'],
-            'status': 'Answered' if discussion['is_answered'] else 'Open',
-            'preview': discussion['body'][:150] + '...' if len(discussion['body']) > 150 else discussion['body']
         }

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(chmod +x:*)",
+      "Bash(python3:*)",
+      "Bash(./tracker.sh commits:*)",
+      "Bash(./tracker.sh:*)",
+      "Bash(/Users/andrew/projects/claude-projects/fr-git-tracker/.tracker-config:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

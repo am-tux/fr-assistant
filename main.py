@@ -29,37 +29,17 @@ Examples:
   # Generate this week's weekly report
   %(prog)s weekly-report
 
-  # Get open RFCs
-  %(prog)s rfcs --repo community
-
-  # Get open RFCs by topic
-  %(prog)s rfcs --repo community --topic Rev5
-  %(prog)s rfcs --repo community --topic 20x
-
-  # Get most responded discussions
-  %(prog)s top-discussions --repo community --limit 10
-
-  # Get most responded discussions in specific channel
-  %(prog)s top-discussions --repo community --channel 20x --timeframe 7d
-
   # Get new files added in last 7 days
   %(prog)s new-files --repo docs --days 7
+
+  # List recent commits
+  %(prog)s commits --repo docs --days 30
 
   # Show history of a specific file
   %(prog)s file-history --repo docs --file README.md
 
   # Show contributor activity
   %(prog)s contributor --repo docs --name "john@example.com" --days 30
-
-  # Show unanswered questions
-  %(prog)s unanswered --repo community --hours 48
-
-  # Show discussions in a specific channel
-  %(prog)s channel-discussions --repo community --channel 20x --days 7
-
-  # Generate detailed discussions reports (for community managers)
-  %(prog)s daily-discussions-report --repo community
-  %(prog)s weekly-discussions-report --repo community
         '''
     )
 
@@ -75,36 +55,12 @@ Examples:
     init_parser = subparsers.add_parser('init', help='Initialize repositories (clone/fetch)')
 
     # Daily report command
-    daily_parser = subparsers.add_parser('daily-report', help='Generate daily report (git only, no API calls)')
+    daily_parser = subparsers.add_parser('daily-report', help='Generate daily git activity report')
     daily_parser.add_argument('--date', help='Date for report (YYYY-MM-DD, defaults to today)')
-    daily_parser.add_argument('--with-discussions', action='store_true',
-                               help='Include discussions data (requires GitHub API, may hit rate limits)')
 
     # Weekly report command
-    weekly_parser = subparsers.add_parser('weekly-report', help='Generate weekly report (git only, no API calls)')
+    weekly_parser = subparsers.add_parser('weekly-report', help='Generate weekly git activity report')
     weekly_parser.add_argument('--date', help='Date within the week (YYYY-MM-DD, defaults to this week)')
-    weekly_parser.add_argument('--with-discussions', action='store_true',
-                                help='Include discussions data (requires GitHub API, may hit rate limits)')
-
-    # RFCs command
-    rfcs_parser = subparsers.add_parser('rfcs', help='List open RFCs')
-    rfcs_parser.add_argument('--repo', required=True, help='Repository name')
-    rfcs_parser.add_argument('--status', default='open', choices=['open', 'answered', 'closed', 'all'],
-                             help='RFC status filter (default: open)')
-    rfcs_parser.add_argument('--sort', default='newest',
-                             choices=['newest', 'oldest', 'most_comments', 'most_reactions'],
-                             help='Sort order (default: newest)')
-    rfcs_parser.add_argument('--topic', choices=['Rev5', '20x', 'General'],
-                             help='Filter by topic classification')
-
-    # Top discussions command
-    top_parser = subparsers.add_parser('top-discussions', help='Get most responded discussions')
-    top_parser.add_argument('--repo', required=True, help='Repository name')
-    top_parser.add_argument('--timeframe', default='7d', choices=['24h', '7d', '30d', 'all'],
-                            help='Timeframe (default: 7d)')
-    top_parser.add_argument('--channel', default='all',
-                            help='Channel filter (20x, Rev5, RFCs, General, all)')
-    top_parser.add_argument('--limit', type=int, default=10, help='Number of discussions (default: 10)')
 
     # New files command
     files_parser = subparsers.add_parser('new-files', help='List new files added')
@@ -127,30 +83,6 @@ Examples:
     contributor_parser.add_argument('--name', required=True, help='Contributor name or email')
     contributor_parser.add_argument('--days', type=int, default=30, help='Days to look back (default: 30)')
 
-    # Unanswered questions command
-    unanswered_parser = subparsers.add_parser('unanswered', help='Show unanswered discussions')
-    unanswered_parser.add_argument('--repo', required=True, help='Repository name')
-    unanswered_parser.add_argument('--hours', type=int, default=48,
-                                     help='Show questions older than N hours (default: 48)')
-
-    # Discussions by channel command
-    channel_parser = subparsers.add_parser('channel-discussions', help='Show discussions in a channel')
-    channel_parser.add_argument('--repo', required=True, help='Repository name')
-    channel_parser.add_argument('--channel', required=True, choices=['20x', 'Rev5', 'RFCs', 'General'],
-                                 help='Channel name')
-    channel_parser.add_argument('--days', type=int, default=7, help='Days to look back (default: 7)')
-
-    # Detailed discussions reports
-    daily_disc_parser = subparsers.add_parser('daily-discussions-report',
-                                               help='Generate detailed daily discussions report')
-    daily_disc_parser.add_argument('--repo', required=True, help='Repository name')
-    daily_disc_parser.add_argument('--date', help='Date for report (YYYY-MM-DD, defaults to today)')
-
-    weekly_disc_parser = subparsers.add_parser('weekly-discussions-report',
-                                                help='Generate detailed weekly discussions report')
-    weekly_disc_parser.add_argument('--repo', required=True, help='Repository name')
-    weekly_disc_parser.add_argument('--date', help='Date within the week (YYYY-MM-DD, defaults to this week)')
-
     args = parser.parse_args()
 
     if not args.command:
@@ -172,12 +104,6 @@ Examples:
         elif args.command == 'weekly-report':
             return cmd_weekly_report(functions, args)
 
-        elif args.command == 'rfcs':
-            return cmd_rfcs(functions, args)
-
-        elif args.command == 'top-discussions':
-            return cmd_top_discussions(functions, args)
-
         elif args.command == 'new-files':
             return cmd_new_files(functions, args)
 
@@ -189,18 +115,6 @@ Examples:
 
         elif args.command == 'contributor':
             return cmd_contributor(functions, args)
-
-        elif args.command == 'unanswered':
-            return cmd_unanswered(functions, args)
-
-        elif args.command == 'channel-discussions':
-            return cmd_channel_discussions(functions, args)
-
-        elif args.command == 'daily-discussions-report':
-            return cmd_daily_discussions_report(functions, args)
-
-        elif args.command == 'weekly-discussions-report':
-            return cmd_weekly_discussions_report(functions, args)
 
         else:
             print(f"Unknown command: {args.command}")
@@ -237,17 +151,13 @@ def cmd_daily_report(functions: TrackerFunctions, args) -> int:
     else:
         date = datetime.now()
 
-    print(f"Generating daily report for {date.strftime('%Y-%m-%d')}...")
-    if args.with_discussions:
-        print("  Including discussions data (this requires GitHub API access)...")
-    else:
-        print("  Git data only (no API calls). Use --with-discussions to include community data.")
+    print(f"Generating daily git activity report for {date.strftime('%Y-%m-%d')}...")
 
     # Ensure repos are up to date
     functions.ensure_repositories()
 
     # Generate report
-    report_path = functions.generate_daily_report(date, include_discussions=args.with_discussions)
+    report_path = functions.generate_daily_report(date)
     print(f"\n✓ Report generated: {report_path}")
 
     return 0
@@ -265,17 +175,13 @@ def cmd_weekly_report(functions: TrackerFunctions, args) -> int:
     week_num = start_date.isocalendar()[1]
     year = start_date.year
 
-    print(f"Generating weekly report for Week {week_num}, {year}...")
-    if args.with_discussions:
-        print("  Including discussions data (this requires GitHub API access)...")
-    else:
-        print("  Git data only (no API calls). Use --with-discussions to include community data.")
+    print(f"Generating weekly git activity report for Week {week_num}, {year}...")
 
     # Ensure repos are up to date
     functions.ensure_repositories()
 
     # Generate report
-    report_path = functions.generate_weekly_report(date, include_discussions=args.with_discussions)
+    report_path = functions.generate_weekly_report(date)
     print(f"\n✓ Report generated: {report_path}")
 
     return 0
@@ -468,94 +374,6 @@ def cmd_contributor(functions: TrackerFunctions, args) -> int:
     if len(activity['commits']) > 10:
         print(f"... and {len(activity['commits']) - 10} more commits")
     print()
-
-    return 0
-
-
-def cmd_unanswered(functions: TrackerFunctions, args) -> int:
-    """Show unanswered discussions"""
-    print(f"Fetching unanswered questions from {args.repo} (older than {args.hours} hours)...")
-
-    unanswered = functions.get_unanswered_questions(args.repo, args.hours)
-
-    if not unanswered:
-        print(f"\n✓ No unanswered questions older than {args.hours} hours!")
-        return 0
-
-    print(f"\nFound {len(unanswered)} unanswered questions:")
-    print()
-
-    for disc in unanswered:
-        age_hours = (datetime.now().astimezone() - disc['created_at']).total_seconds() / 3600
-        age_days = int(age_hours / 24)
-
-        print(f"- **{disc['title']}**")
-        print(f"  Channel: {disc['channel']} | Age: {age_days} days")
-        print(f"  Comments: {disc['comment_count']} | Reactions: {disc['reaction_count']}")
-        print(f"  Created: {disc['created_at'].strftime('%Y-%m-%d')} by {disc['author']}")
-        print(f"  URL: {disc['url']}")
-        print()
-
-    return 0
-
-
-def cmd_channel_discussions(functions: TrackerFunctions, args) -> int:
-    """Show discussions in a specific channel"""
-    since = datetime.now() - timedelta(days=args.days)
-
-    print(f"Fetching {args.channel} channel discussions from {args.repo} (last {args.days} days)...")
-
-    discussions = functions.get_discussions_by_channel(args.repo, args.channel, since)
-
-    if not discussions:
-        print(f"\nNo discussions found in {args.channel} channel.")
-        return 0
-
-    print(f"\nFound {len(discussions)} discussions in {args.channel} channel:")
-    print()
-
-    for disc in discussions:
-        status = "Answered" if disc['is_answered'] else "Open"
-        print(f"- [{status}] **{disc['title']}**")
-        print(f"  Comments: {disc['comment_count']} | Reactions: {disc['reaction_count']}")
-        print(f"  Created: {disc['created_at'].strftime('%Y-%m-%d')} by {disc['author']}")
-        print(f"  URL: {disc['url']}")
-        print()
-
-    return 0
-
-
-def cmd_daily_discussions_report(functions: TrackerFunctions, args) -> int:
-    """Generate detailed daily discussions report"""
-    if args.date:
-        date = datetime.strptime(args.date, '%Y-%m-%d')
-    else:
-        date = datetime.now()
-
-    print(f"Generating detailed daily discussions report for {args.repo} ({date.strftime('%Y-%m-%d')})...")
-
-    report_path = functions.generate_daily_discussions_report(args.repo, date)
-    print(f"\n✓ Report generated: {report_path}")
-
-    return 0
-
-
-def cmd_weekly_discussions_report(functions: TrackerFunctions, args) -> int:
-    """Generate detailed weekly discussions report"""
-    if args.date:
-        date = datetime.strptime(args.date, '%Y-%m-%d')
-    else:
-        date = datetime.now()
-
-    # Get week info
-    start_date = date - timedelta(days=date.weekday())
-    week_num = start_date.isocalendar()[1]
-    year = start_date.year
-
-    print(f"Generating detailed weekly discussions report for {args.repo} (Week {week_num}, {year})...")
-
-    report_path = functions.generate_weekly_discussions_report(args.repo, date)
-    print(f"\n✓ Report generated: {report_path}")
 
     return 0
 
