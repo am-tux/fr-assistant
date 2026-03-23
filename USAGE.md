@@ -112,9 +112,11 @@ export TRACKER_MODE=container
 
 ### Generate Reports
 
-**Daily Report (today):**
+**Daily Report (git data only, no API calls):**
 ```bash
 python3 main.py daily-report
+# Or with wrapper
+./tracker.sh daily-report
 ```
 
 **Daily Report (specific date):**
@@ -122,10 +124,28 @@ python3 main.py daily-report
 python3 main.py daily-report --date 2026-03-22
 ```
 
-**Weekly Report (this week):**
+**Daily Report with discussions (requires GitHub API):**
+```bash
+python3 main.py daily-report --with-discussions
+# May hit rate limits without token
+```
+
+**Weekly Report (git data only, no API calls):**
 ```bash
 python3 main.py weekly-report
+# Or with wrapper
+./tracker.sh weekly-report
 ```
+
+**Weekly Report with discussions (requires GitHub API):**
+```bash
+python3 main.py weekly-report --with-discussions
+```
+
+**Key Points:**
+- Default reports = **NO API calls** (git only, always work)
+- Add `--with-discussions` = Includes community data (requires API, may hit rate limits)
+- Separate detailed discussion reports available: `daily-discussions-report`, `weekly-discussions-report`
 
 Reports are saved to:
 - Daily: `./reports/daily/YYYY-MM-DD.md`

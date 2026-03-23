@@ -93,6 +93,10 @@ daily_report:
   time: "09:00"  # Time to generate daily report (24-hour format)
   output_directory: "./reports/daily"  # Where to save daily reports
 
+  # NOTE: Daily reports include GIT data only by default (no API calls required)
+  # To include discussions data, use: python3 main.py daily-report --with-discussions
+  # This avoids GitHub API rate limits unless you explicitly want discussions included
+
   # Thresholds for determining "big changes" (optimized for documentation repos)
   thresholds:
     min_commits: 3           # Report if more than 3 commits (docs have fewer commits)
@@ -112,6 +116,10 @@ weekly_report:
   day: "Monday"            # Day of week to generate report
   time: "09:00"            # Time to generate weekly report (24-hour format)
   output_directory: "./reports/weekly"  # Where to save weekly reports
+
+  # NOTE: Weekly reports include GIT data only by default (no API calls required)
+  # To include discussions data, use: python3 main.py weekly-report --with-discussions
+  # This avoids GitHub API rate limits unless you explicitly want discussions included
 
   # Weekly reports cover the previous 7 days
   lookback_days: 7

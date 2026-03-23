@@ -75,12 +75,16 @@ Examples:
     init_parser = subparsers.add_parser('init', help='Initialize repositories (clone/fetch)')
 
     # Daily report command
-    daily_parser = subparsers.add_parser('daily-report', help='Generate daily report')
+    daily_parser = subparsers.add_parser('daily-report', help='Generate daily report (git only, no API calls)')
     daily_parser.add_argument('--date', help='Date for report (YYYY-MM-DD, defaults to today)')
+    daily_parser.add_argument('--with-discussions', action='store_true',
+                               help='Include discussions data (requires GitHub API, may hit rate limits)')
 
     # Weekly report command
-    weekly_parser = subparsers.add_parser('weekly-report', help='Generate weekly report')
+    weekly_parser = subparsers.add_parser('weekly-report', help='Generate weekly report (git only, no API calls)')
     weekly_parser.add_argument('--date', help='Date within the week (YYYY-MM-DD, defaults to this week)')
+    weekly_parser.add_argument('--with-discussions', action='store_true',
+                                help='Include discussions data (requires GitHub API, may hit rate limits)')
 
     # RFCs command
     rfcs_parser = subparsers.add_parser('rfcs', help='List open RFCs')
@@ -234,12 +238,16 @@ def cmd_daily_report(functions: TrackerFunctions, args) -> int:
         date = datetime.now()
 
     print(f"Generating daily report for {date.strftime('%Y-%m-%d')}...")
+    if args.with_discussions:
+        print("  Including discussions data (this requires GitHub API access)...")
+    else:
+        print("  Git data only (no API calls). Use --with-discussions to include community data.")
 
     # Ensure repos are up to date
     functions.ensure_repositories()
 
     # Generate report
-    report_path = functions.generate_daily_report(date)
+    report_path = functions.generate_daily_report(date, include_discussions=args.with_discussions)
     print(f"\n✓ Report generated: {report_path}")
 
     return 0
@@ -258,12 +266,16 @@ def cmd_weekly_report(functions: TrackerFunctions, args) -> int:
     year = start_date.year
 
     print(f"Generating weekly report for Week {week_num}, {year}...")
+    if args.with_discussions:
+        print("  Including discussions data (this requires GitHub API access)...")
+    else:
+        print("  Git data only (no API calls). Use --with-discussions to include community data.")
 
     # Ensure repos are up to date
     functions.ensure_repositories()
 
     # Generate report
-    report_path = functions.generate_weekly_report(date)
+    report_path = functions.generate_weekly_report(date, include_discussions=args.with_discussions)
     print(f"\n✓ Report generated: {report_path}")
 
     return 0

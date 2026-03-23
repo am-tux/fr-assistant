@@ -52,11 +52,13 @@ class TrackerFunctions:
             results[repo_name] = tracker.ensure_repository()
         return results
 
-    def generate_daily_report(self, date: Optional[datetime] = None) -> str:
+    def generate_daily_report(self, date: Optional[datetime] = None,
+                              include_discussions: bool = False) -> str:
         """Generate daily report for a specific date
 
         Args:
             date: Date for report (defaults to today)
+            include_discussions: Whether to include discussions data (requires API calls)
 
         Returns:
             Path to generated report file
@@ -77,19 +79,21 @@ class TrackerFunctions:
             repo_data = self._collect_repo_data(tracker, start_time, end_time)
             repos_data.append(repo_data)
 
-        # Collect discussions data
+        # Collect discussions data ONLY if explicitly requested
         discussions_data = None
-        if self.discussions_trackers:
+        if include_discussions and self.discussions_trackers:
             discussions_data = self._collect_discussions_daily_data(start_time, end_time)
 
         # Generate report
         return self.report_generator.generate_daily_report(date, repos_data, discussions_data)
 
-    def generate_weekly_report(self, date: Optional[datetime] = None) -> str:
+    def generate_weekly_report(self, date: Optional[datetime] = None,
+                                include_discussions: bool = False) -> str:
         """Generate weekly report for the week containing the given date
 
         Args:
             date: Date within the week (defaults to today)
+            include_discussions: Whether to include discussions data (requires API calls)
 
         Returns:
             Path to generated report file
@@ -110,9 +114,9 @@ class TrackerFunctions:
             repo_data = self._collect_repo_weekly_data(tracker, start_date, end_date)
             repos_data.append(repo_data)
 
-        # Collect discussions data
+        # Collect discussions data ONLY if explicitly requested
         discussions_data = None
-        if self.discussions_trackers:
+        if include_discussions and self.discussions_trackers:
             discussions_data = self._collect_discussions_weekly_data(start_date, end_date)
 
         # Generate report

@@ -70,30 +70,48 @@ python3 main.py daily-report
 ### Basic Workflow
 
 1. **Place this directory** anywhere on your system (fully portable)
-2. **Set GitHub token** (optional): `export GITHUB_TOKEN=your_token_here`
-3. **Initialize:** `./tracker.sh init` or `python3 main.py init`
-4. **Run commands:**
-   - `./tracker.sh daily-report` - Generate today's report
+2. **Initialize:** `./tracker.sh init` or `python3 main.py init`
+3. **Generate reports** (no API calls, no token needed):
+   - `./tracker.sh daily-report` - Git activity only
+   - `./tracker.sh weekly-report` - Git summary only
+4. **Query discussions** (requires GitHub API, optional token):
    - `./tracker.sh rfcs --repo community` - List open RFCs
-   - `./tracker.sh file-history --repo docs --file README.md` - File history
-5. **Review automated reports** in `./reports/`:
-   - `daily/` - Daily git activity + discussion highlights
-   - `weekly/` - Weekly summaries + discussion insights
-   - `discussions/daily/` - Detailed community activity by channel
-   - `discussions/weekly/` - In-depth community analysis
+   - `./tracker.sh unanswered --repo community` - Questions needing attention
+5. **Include discussions in reports** (optional, requires API):
+   - `./tracker.sh daily-report --with-discussions`
+   - `./tracker.sh weekly-report --with-discussions`
+6. **Review generated reports** in `./reports/`:
+   - `daily/` - Daily git activity (+ discussions if requested)
+   - `weekly/` - Weekly summaries (+ discussions if requested)
+   - `discussions/daily/` - Detailed community reports (separate)
+   - `discussions/weekly/` - In-depth community analysis (separate)
 
 ---
 
 ## GitHub Token Setup (Optional)
 
-A GitHub token is **optional** for basic usage but **recommended** for tracking discussions.
+**Daily and weekly reports work perfectly WITHOUT a token** - they only track git repository changes.
+
+A GitHub token is only needed if you want to track GitHub Discussions (community questions, RFCs, etc.).
 
 ### Do You Need a Token?
 
-- **Without token:** 60 API requests/hour (sufficient for occasional reports)
-- **With token:** 5,000 API requests/hour (for heavy usage)
+**NO token needed for:**
+- ✅ Daily/weekly git activity reports
+- ✅ File history tracking
+- ✅ Contributor activity
+- ✅ Commit queries
 
-**Bottom line:** Start without a token. If you see rate limit errors, then create one.
+**Token needed for:**
+- 📊 Discussions tracking (RFCs, community questions)
+- 📊 Adding `--with-discussions` to daily/weekly reports
+- 📊 Unanswered questions monitoring
+
+**API Limits:**
+- **Without token:** 60 API requests/hour (sufficient for occasional queries)
+- **With token:** 5,000 API requests/hour (for heavy discussions tracking)
+
+**Bottom line:** Start without a token! Only create one if you want discussions tracking.
 
 ### How to Create a GitHub Token
 
