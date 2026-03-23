@@ -1,6 +1,26 @@
 # FedRAMP Git Tracker - Usage Guide
 
+## Choose Your Method
+
+You can run the tracker in **two ways**:
+
+### Option 1: Native Python (Recommended for development)
+- Direct Python execution
+- Faster startup
+- Easier debugging
+- **Requirements:** Python 3.11+, Git
+
+### Option 2: Container (Recommended for production/isolation)
+- Runs in Podman/Docker container
+- Isolated environment
+- No Python installation needed on host
+- **Requirements:** Podman or Docker
+
+---
+
 ## Installation
+
+### Native Python Setup
 
 1. **Install Python dependencies:**
    ```bash
@@ -12,7 +32,51 @@
    python3 main.py init
    ```
 
-   This will clone all configured repositories to the `./repos/` directory.
+### Container Setup
+
+1. **Build the container image (one-time):**
+   ```bash
+   ./tracker.sh --build
+   ```
+   Or manually:
+   ```bash
+   podman build -t fedramp-tracker .
+   # OR
+   docker build -t fedramp-tracker .
+   ```
+
+2. **Initialize repositories:**
+   ```bash
+   ./tracker.sh init
+   ```
+
+---
+
+## Universal Wrapper Script
+
+The `tracker.sh` script **auto-detects** the best method and runs the tracker:
+
+```bash
+# Auto-detect and run
+./tracker.sh daily-report
+
+# Force native mode
+./tracker.sh --mode native daily-report
+
+# Force container mode
+./tracker.sh --mode container daily-report
+
+# Set default mode via environment variable
+export TRACKER_MODE=container
+./tracker.sh daily-report
+```
+
+**Note:** All examples below work with either:
+- `python3 main.py [command]` (native)
+- `./tracker.sh [command]` (auto-detect/container)
+- Direct podman/docker run (see Advanced Usage)
+
+---
 
 ## Quick Start
 
@@ -234,3 +298,111 @@ Minimum scopes needed: `public_repo`, `read:discussion`
 - Make sure repositories are up to date: `python3 main.py init`
 - Check date range - may be no activity in the selected timeframe
 - For discussions, ensure GitHub token is set
+
+**Container-specific issues:**
+- **Permission errors:** Container creates files as container user
+  - The wrapper script runs as your user to avoid this
+  - Or manually: `podman run --user $(id -u):$(id -g) ...`
+- **Image not found:** Build it first: `./tracker.sh --build`
+- **Volume mount errors:** Check that config.yaml exists in current directory
+
+## Advanced Container Usage
+
+### Direct Podman/Docker Commands
+
+If you prefer not to use the wrapper script:
+
+```bash
+# Build image
+podman build -t fedramp-tracker .
+
+# Run a command
+podman run --rm \
+  --user=$(id -u):$(id -g) \
+  -v ./config.yaml:/data/config.yaml:ro \
+  -v ./repos:/data/repos \
+  -v ./reports:/data/reports \
+  -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+  fedramp-tracker daily-report
+
+# Initialize repos
+podman run --rm \
+  --user=$(id -u):$(id -g) \
+  -v ./config.yaml:/data/config.yaml:ro \
+  -v ./repos:/data/repos \
+  -v ./reports:/data/reports \
+  fedramp-tracker init
+```
+
+Replace `podman` with `docker` if using Docker.
+
+### Container Image Details
+
+- **Base:** python:3.11-slim
+- **Size:** ~250MB
+- **Includes:** Python, Git, PyYAML, requests
+- **User:** Runs as your UID/GID to avoid permission issues
+- **Volumes:**
+  - `/data/config.yaml` - Configuration (read-only)
+  - `/data/repos` - Git repositories (read-write)
+  - `/data/reports` - Generated reports (read-write)
+
+### When to Use Container vs Native
+
+**Use Container when:**
+- ✅ You want isolation from host system
+- ✅ You're deploying to production/server
+- ✅ You don't want to install Python locally
+- ✅ You're running in CI/CD pipelines
+- ✅ You want reproducible environments
+
+**Use Native when:**
+- ✅ You're actively developing/debugging
+- ✅ You want faster startup times
+- ✅ You're comfortable with Python environments
+- ✅ You want direct access to git operations
+
+## Automation Examples
+
+### Cron Jobs (Native)
+```bash
+# Daily report at 9 AM
+0 9 * * * cd /path/to/fr-git-tracker && python3 main.py daily-report
+
+# Weekly report on Monday at 9 AM
+0 9 * * 1 cd /path/to/fr-git-tracker && python3 main.py weekly-report
+```
+
+### Cron Jobs (Container)
+```bash
+# Daily report at 9 AM
+0 9 * * * cd /path/to/fr-git-tracker && ./tracker.sh --mode container daily-report
+
+# Weekly report on Monday at 9 AM
+0 9 * * 1 cd /path/to/fr-git-tracker && ./tracker.sh --mode container weekly-report
+```
+
+### Systemd Timer (Container)
+```ini
+# /etc/systemd/system/fedramp-tracker-daily.service
+[Unit]
+Description=FedRAMP Tracker Daily Report
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/fr-git-tracker
+ExecStart=/opt/fr-git-tracker/tracker.sh --mode container daily-report
+User=tracker
+Group=tracker
+
+# /etc/systemd/system/fedramp-tracker-daily.timer
+[Unit]
+Description=FedRAMP Tracker Daily Report Timer
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```

@@ -31,22 +31,41 @@ Rather than code-centric metrics like commit volume, this tool prioritizes:
 
 ## Quick Start
 
+### Choose Your Running Method
+
+**Option 1: Native Python** (direct execution, faster)
+```bash
+pip3 install -r requirements.txt
+python3 main.py init
+python3 main.py daily-report
+```
+
+**Option 2: Container** (isolated, no Python install needed)
+```bash
+./tracker.sh --build
+./tracker.sh init
+./tracker.sh daily-report
+```
+
+**Option 3: Auto-detect** (wrapper chooses best method)
+```bash
+./tracker.sh daily-report
+```
+
+### Basic Workflow
+
 1. **Place this directory** anywhere on your system (fully portable)
 2. **Set GitHub token** (optional): `export GITHUB_TOKEN=your_token_here`
-3. **Run the tracker** - it will automatically:
-   - Clone FedRAMP repositories (docs, roadmap, community)
-   - Fetch GitHub Discussions data
-   - Generate daily and weekly reports
-4. **Ask questions:**
-   - "What new documentation was added this week?"
-   - "What are the top discussions in the 20x channel?"
-   - "What RFCs are currently open?"
-   - "Show me what changed in authentication.md"
+3. **Initialize:** `./tracker.sh init` or `python3 main.py init`
+4. **Run commands:**
+   - `./tracker.sh daily-report` - Generate today's report
+   - `./tracker.sh rfcs --repo community` - List open RFCs
+   - `./tracker.sh file-history --repo docs --file README.md` - File history
 5. **Review automated reports** in `./reports/`:
-   - `daily/` - Repository changes
-   - `weekly/` - Repository summaries
-   - `discussions/daily/` - Community activity by channel
-   - `discussions/weekly/` - Community insights with AI analysis
+   - `daily/` - Daily git activity + discussion highlights
+   - `weekly/` - Weekly summaries + discussion insights
+   - `discussions/daily/` - Detailed community activity by channel
+   - `discussions/weekly/` - In-depth community analysis
 
 ## Use Cases
 
@@ -186,30 +205,37 @@ Answer detailed questions about repositories and community:
 
 ```
 fr-git-tracker/
-├── README.md           # This file
-├── SPEC.md            # Detailed specification
-├── config.yaml        # Configuration file
-├── repos/             # Cloned repositories (visible directory)
+├── README.md              # This file
+├── SPEC.md                # Detailed specification
+├── USAGE.md               # Complete usage guide
+├── config.yaml            # Configuration file
+├── main.py                # Python CLI entry point
+├── tracker.sh             # Universal wrapper (native/container)
+├── Dockerfile             # Container image definition
+├── requirements.txt       # Python dependencies
+├── src/                   # Python source code
+│   ├── config_loader.py   # Config parser
+│   ├── git_tracker.py     # Git operations
+│   ├── discussions_tracker.py  # GitHub Discussions API
+│   ├── report_generator.py     # Report generation
+│   └── functions.py       # High-level query functions
+├── repos/                 # Cloned repositories (auto-created)
 │   ├── docs/
 │   ├── roadmap/
 │   └── community/
-└── reports/           # Generated reports (visible directory)
-    ├── daily/         # Daily repository reports
+└── reports/               # Generated reports (auto-created)
+    ├── daily/             # Daily git activity + discussion highlights
     │   ├── 2026-03-23.md
-    │   ├── 2026-03-24.md
     │   └── ...
-    ├── weekly/        # Weekly repository reports
+    ├── weekly/            # Weekly summaries + discussion insights
     │   ├── 2026-W12.md
-    │   ├── 2026-W13.md
     │   └── ...
-    └── discussions/   # GitHub Discussions reports
-        ├── daily/     # Daily discussions reports (grouped by channels)
+    └── discussions/       # Detailed community manager reports
+        ├── daily/         # In-depth daily breakdown by channel
         │   ├── 2026-03-23.md
-        │   ├── 2026-03-24.md
         │   └── ...
-        └── weekly/    # Weekly discussions reports (with AI analysis)
+        └── weekly/        # In-depth weekly analysis by channel
             ├── 2026-W12.md
-            ├── 2026-W13.md
             └── ...
 ```
 
