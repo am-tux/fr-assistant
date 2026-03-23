@@ -1279,16 +1279,22 @@ generateDiscussionsReport(startDate, endDate, repository, channels)
 4. For each RFC, collect:
    - Title and URL
    - Creation date and author
+   - **Topic classification:** Rev5, 20x, or General (based on labels, keywords, and content)
    - Status (open, answered, closed)
    - Comment count and reaction count
    - Last activity date
    - If answered: who answered and when
    - Summary of the proposal (first 200 characters)
-5. Apply AI interpretation to analyze:
+5. Classify RFCs by topic:
+   - **Rev5 RFCs:** Related to Revision 5, baseline updates, control changes
+   - **20x RFCs:** Related to FedRAMP 2.0, modernization, automation initiatives
+   - **General RFCs:** Process improvements, documentation, or other topics
+6. Apply AI interpretation to analyze:
    - Key themes across current RFCs
    - Which RFCs need more community input
    - Which RFCs are ready for decision
    - Emerging patterns in proposals
+   - Balance between Rev5, 20x, and general topics
 
 **Report Format:**
 
@@ -1305,6 +1311,9 @@ generateDiscussionsReport(startDate, endDate, repository, channels)
 
 - Total RFCs tracked: X
 - Currently open: X
+  - Rev5 related: X
+  - 20x related: X
+  - General: X
 - Answered/Addressed: X
 - Closed: X
 - Average age of open RFCs: X days
@@ -1315,7 +1324,7 @@ generateDiscussionsReport(startDate, endDate, repository, channels)
 ## Open RFCs (Newest First)
 
 ### 1. RFC: [Proposal Title](URL)
-**Status:** Open | **Created:** 2026-03-20 by @username | **Age:** 3 days
+**Topic:** Rev5 | **Status:** Open | **Created:** 2026-03-20 by @username | **Age:** 3 days
 
 **Engagement:**
 - Comments: 12
@@ -1379,28 +1388,47 @@ Remaining questions focus on implementation details and timeline.
 - [RFC Title](URL) - 14 days old, only 2 comments
 - [RFC Title](URL) - 7 days old, no comments yet
 
-### By Topic/Theme
+### By Topic Classification
+
+**Rev5 Related RFCs:** X
+- [RFC Title](URL) - Rev5: [brief description]
+- [RFC Title](URL) - Rev5: [brief description]
+
+**20x Related RFCs:** X
+- [RFC Title](URL) - 20x: [brief description]
+- [RFC Title](URL) - 20x: [brief description]
+
+**General RFCs:** X
+- [RFC Title](URL) - General: [brief description]
+- [RFC Title](URL) - General: [brief description]
+
 🤖 AI INTERPRETATION:
 
-Current open RFCs group into these themes:
-1. **Security and Compliance** (3 RFCs)
-   - Focus on automated security scanning
-   - Baseline update proposals
+Current open RFCs by topic area:
+1. **Rev5 RFCs** (X RFCs)
+   - Focus on Revision 5 baseline updates
+   - Control modifications and clarifications
+   - Migration guidance and timelines
 
-2. **Process Improvements** (2 RFCs)
-   - Streamlining authorization workflows
-   - Documentation structure changes
+2. **20x RFCs** (X RFCs)
+   - FedRAMP 2.0 modernization initiatives
+   - Automation and continuous monitoring
+   - Cloud-native security approaches
 
-3. **Technical Standards** (2 RFCs)
-   - Cloud service provider requirements
-   - API standardization
+3. **General RFCs** (X RFCs)
+   - Process improvements and streamlining
+   - Documentation enhancements
+   - Technical standards and APIs
+
+**Topic Balance:** The RFC pipeline shows [balanced/heavy Rev5/heavy 20x] focus, with
+[X]% Rev5-related, [X]% 20x-related, and [X]% general process improvements.
 
 ---
 
 ## Recently Answered RFCs (Last 30 Days)
 
 ### [RFC Title](URL)
-**Status:** Answered | **Answered on:** 2026-03-18 by @official_account
+**Topic:** Rev5 | **Status:** Answered | **Answered on:** 2026-03-18 by @official_account
 **Time to answer:** 12 days | **Final comment count:** 25
 
 **Summary:** [Brief summary of the RFC and resolution]
@@ -1475,6 +1503,13 @@ getOpenRFCs("community", "open", "oldest")
 "Which RFCs have been answered recently?"
 "What are the most discussed RFCs?"
 "Are there any stale RFCs that need attention?"
+
+# Topic-specific queries
+"What Rev5 RFCs are currently open?"
+"Show me all 20x-related RFCs"
+"Are there more Rev5 or 20x RFCs in the pipeline?"
+"What RFCs are about Rev5 baseline updates?"
+"Show me RFCs related to FedRAMP 2.0 modernization"
 ```
 
 **Integration with Other Reports:**

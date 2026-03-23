@@ -446,6 +446,14 @@ getOpenRFCs("community", "open", "newest")
 "What are the most discussed RFCs?"
 "Are there any stale RFCs that need attention?"
 
+# Topic-specific queries (RFCs are classified as Rev5, 20x, or General)
+"What Rev5 RFCs are currently open?"
+"Show me all 20x-related RFCs"
+"Are there more Rev5 or 20x RFCs in the pipeline?"
+"What RFCs are about Rev5 baseline updates?"
+"Show me RFCs related to FedRAMP 2.0 modernization"
+# Returns: RFCs grouped by topic with classification (Rev5, 20x, or General)
+
 # Get RFCs by status
 getOpenRFCs("community", "answered", "newest")  # Recently answered
 getOpenRFCs("community", "closed", "newest")    # Closed RFCs

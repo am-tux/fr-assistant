@@ -229,11 +229,34 @@ discussions_reports:
     identify_ready_for_decision: true   # Flag RFCs that appear ready for official decision
     analyze_themes: true                # Group RFCs by topic/theme
 
+    # Topic classification (automatically categorize RFCs)
+    classify_by_topic: true             # Classify RFCs as Rev5, 20x, or General
+    show_topic_in_reports: true         # Display topic classification in reports
+    show_topic_breakdown: true          # Show counts by topic (X Rev5, Y 20x, Z General)
+
+    # Topic classification rules
+    rev5_keywords:                      # Keywords to identify Rev5 RFCs
+      - "Rev5"
+      - "Rev 5"
+      - "Revision 5"
+      - "baseline"
+      - "control update"
+      - "control modification"
+
+    twentyx_keywords:                   # Keywords to identify 20x RFCs
+      - "20x"
+      - "FedRAMP 2.0"
+      - "modernization"
+      - "automation"
+      - "continuous monitoring"
+      - "cloud-native"
+
     # AI interpretation
     enable_ai_interpretation: true      # Analyze RFC proposals and discussions
     assess_readiness: true              # Determine if RFC is ready for decision
     identify_consensus: true            # Identify community consensus or objections
     suggest_next_steps: true            # Recommend actions for each RFC
+    analyze_topic_balance: true         # Analyze balance between Rev5, 20x, and general RFCs
 
 # Update frequency
 polling:
