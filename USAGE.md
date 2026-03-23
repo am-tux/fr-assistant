@@ -1,20 +1,50 @@
 # FedRAMP Git Tracker - Usage Guide
 
+## First Run Setup
+
+**On your first run**, the tracker will interactively prompt you to choose your preferred method:
+
+```bash
+./tracker.sh init
+```
+
+You'll see a menu asking you to choose between:
+1. **Native Python** - Direct execution, faster startup
+2. **Container** - Isolated environment via Podman/Docker
+
+The tracker will:
+- Detect what's available on your system
+- Recommend the best option
+- Save your choice for future runs
+- Allow you to change it anytime with `--reset-config`
+
+---
+
 ## Choose Your Method
 
 You can run the tracker in **two ways**:
 
 ### Option 1: Native Python (Recommended for development)
 - Direct Python execution
-- Faster startup
+- Faster startup (~100ms)
 - Easier debugging
 - **Requirements:** Python 3.11+, Git
 
 ### Option 2: Container (Recommended for production/isolation)
 - Runs in Podman/Docker container
-- Isolated environment
+- Isolated environment (~1s startup)
 - No Python installation needed on host
 - **Requirements:** Podman or Docker
+
+### Change Your Preference
+
+```bash
+# Reset and be prompted again
+./tracker.sh --reset-config
+
+# View current preference
+./tracker.sh --show-config
+```
 
 ---
 

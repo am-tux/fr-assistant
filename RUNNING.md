@@ -1,5 +1,42 @@
 # Running the Tracker - Quick Reference
 
+## First Run Setup
+
+**On your first run**, the tracker will interactively prompt you to choose your preferred mode:
+
+```bash
+./tracker.sh init
+
+# You'll see:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FedRAMP Git & Community Tracker - First Run Setup
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Choose how you want to run the tracker:
+
+1) Native Python
+   - Direct execution, faster startup (~100ms)
+   - Requires: Python 3.11+
+   - Best for: Development, debugging, quick queries
+
+2) Container (Podman/Docker)
+   - Isolated environment, reproducible
+   - Requires: Podman or Docker
+   - Best for: Production, automation, isolation
+
+Enter your choice [1-2]:
+```
+
+Your preference is saved in `.tracker-config` and used for all future runs.
+
+**Change your preference anytime:**
+```bash
+./tracker.sh --reset-config  # Will prompt again on next run
+./tracker.sh --show-config   # Show current preference
+```
+
+---
+
 ## Three Ways to Run
 
 ### 1. Universal Wrapper (Recommended)

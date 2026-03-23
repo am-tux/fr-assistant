@@ -31,7 +31,21 @@ Rather than code-centric metrics like commit volume, this tool prioritizes:
 
 ## Quick Start
 
-### Choose Your Running Method
+### First Run - Choose Your Method
+
+On your **first run**, the tracker will interactively ask how you want to run it:
+
+```bash
+./tracker.sh init
+
+# You'll be prompted to choose:
+# 1) Native Python - Fast, direct execution
+# 2) Container - Isolated, reproducible environment
+```
+
+Your choice is saved and used automatically for future runs.
+
+### Manual Method Selection
 
 **Option 1: Native Python** (direct execution, faster)
 ```bash
@@ -47,9 +61,10 @@ python3 main.py daily-report
 ./tracker.sh daily-report
 ```
 
-**Option 3: Auto-detect** (wrapper chooses best method)
+**Change Your Preference:**
 ```bash
-./tracker.sh daily-report
+./tracker.sh --reset-config  # Choose again
+./tracker.sh --show-config   # See current choice
 ```
 
 ### Basic Workflow
