@@ -1,0 +1,166 @@
+# Git Repository Tracker Configuration
+# Monitoring FedRAMP GitHub Organization Repositories
+#
+# DOCUMENTATION-FOCUSED CONFIGURATION
+# These repositories primarily contain documentation, not code.
+# Configuration emphasizes file-level changes and content updates
+# over commit volume.
+#
+# PRIORITY: NEW FILES - Any new documentation files added are ALWAYS reported
+#           and highlighted as they indicate new topics/features being documented.
+#
+# All repositories will be cloned to subdirectories under ./repos/
+# relative to this configuration file's location
+
+repositories:
+  - name: "Marketplace-poc"
+    url: "https://github.com/FedRAMP/Marketplace-poc"
+    path: "./repos/Marketplace-poc"
+    primary_branch: "main"
+    critical_files:
+      - "README.md"
+      - "CHANGELOG.md"
+      - "docs/**/*.md"           # All documentation files
+      - "*.config.js"            # Configuration files
+      - "package.json"           # Dependencies that affect docs build
+      - ".github/workflows/*"    # CI/CD affecting documentation
+
+  - name: "docs"
+    url: "https://github.com/FedRAMP/docs"
+    path: "./repos/docs"
+    primary_branch: "main"
+    critical_files:
+      - "README.md"
+      - "**/*.md"                # All markdown files
+      - "**/*.mdx"               # MDX files if using
+      - "_config.yml"            # Jekyll/site configuration
+      - "mkdocs.yml"             # MkDocs configuration
+      - "docusaurus.config.js"   # Docusaurus configuration
+      - "SUMMARY.md"             # GitBook-style navigation
+      - "_sidebar.md"            # Sidebar navigation
+      - "package.json"           # Build dependencies
+      - ".github/workflows/*"    # Documentation build/deploy
+
+  - name: "roadmap"
+    url: "https://github.com/FedRAMP/roadmap"
+    path: "./repos/roadmap"
+    primary_branch: "main"
+    critical_files:
+      - "README.md"
+      - "**/*.md"                # All roadmap documentation
+      - ".github/workflows/*"
+
+  - name: "community"
+    url: "https://github.com/FedRAMP/community"
+    path: "./repos/community"
+    primary_branch: "main"
+    critical_files:
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "CODE_OF_CONDUCT.md"
+      - "**/*.md"                # All community documentation
+      - ".github/ISSUE_TEMPLATE/*"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - ".github/workflows/*"
+
+# Daily report configuration
+daily_report:
+  enabled: true
+  time: "09:00"  # Time to generate daily report (24-hour format)
+
+  # Thresholds for determining "big changes" (optimized for documentation repos)
+  thresholds:
+    min_commits: 3           # Report if more than 3 commits (docs have fewer commits)
+    min_lines_changed: 100   # Report if more than 100 lines in single file
+    min_files_changed: 5     # Report if more than 5 files modified
+
+  # Documentation-specific triggers (ALWAYS report these regardless of thresholds)
+  always_report:
+    - new_files_added        # ANY new files - CRITICAL for tracking new documentation
+    - files_deleted          # Any deleted files - indicates deprecated content
+    - files_renamed          # Any renamed/moved files - indicates reorganization
+    - critical_files_changed # Changes to navigation, config, or structure files
+
+# Update frequency
+polling:
+  interval_minutes: 60  # Check repositories every 60 minutes
+  fetch_on_poll: true   # Run 'git fetch' to get latest changes
+
+# Output configuration
+output:
+  format: "markdown"
+  output_directory: "./reports"  # Relative to this config file's directory
+  include_diffs: false      # Set to true to include full diffs in reports (can be verbose)
+  max_commits_shown: 50     # Maximum number of commits to show in detail
+  truncate_long_messages: true  # Truncate commit messages longer than 200 chars
+
+  # New file reporting (CRITICAL for documentation tracking)
+  highlight_new_files: true  # Visually highlight new files in reports
+  show_new_file_content_preview: false  # Set to true to include first few lines of new files
+  list_new_files_first: true  # Always list new files at top of daily reports
+
+# Reporting preferences (optimized for documentation tracking)
+reporting:
+  # Primary focus: file changes over commit volume
+  prioritize_file_changes: true
+
+  # Show detailed file-level changes (what files, how much changed)
+  show_file_stats: true
+  show_file_diffs_summary: true  # Brief summary of what changed in each file
+
+  # Group by file rather than by author for documentation
+  group_by_file: true
+  group_by_author: false
+
+  # Include structural changes
+  show_branch_activity: true
+  show_tags: true
+  show_file_additions_deletions: true  # Highlight new/removed docs
+
+  # Documentation-specific reporting
+  highlight_new_content: true     # Emphasize new documentation added
+  track_content_reorganization: true  # Note when files are moved/renamed
+
+# Excluded files/patterns (don't report changes to these in daily reports)
+# These are still tracked but won't trigger "big change" alerts
+excluded_patterns:
+  - "package-lock.json"  # Lock files (less relevant for docs)
+  - "yarn.lock"
+  - "Gemfile.lock"
+  - "*.min.js"           # Minified assets
+  - "*.min.css"
+  - "dist/*"             # Build output
+  - "build/*"            # Build artifacts
+  - "_site/*"            # Jekyll build output
+  - ".docusaurus/*"      # Docusaurus cache
+  - "node_modules/*"     # Dependencies
+  - ".cache/*"           # Cache directories
+
+# Repository storage location
+storage:
+  repos_directory: "./repos"  # Where repositories will be cloned (relative to this file)
+                               # "./repos" = visible "repos" directory (NOT hidden)
+                               # A hidden directory would be ".repos" (starting with dot)
+
+# IMPORTANT: Setup instructions
+# All paths are relative to the location of this config file.
+# You can place this entire directory anywhere on any system.
+#
+# The tool will automatically:
+# 1. Create ./repos/ directory if it doesn't exist
+# 2. Clone repositories to ./repos/[repo-name]/ if not already present
+# 3. Run 'git fetch' on existing repositories to get updates
+# 4. Create ./reports/ directory for daily reports
+
+# Manual setup (optional - tool will do this automatically):
+# cd [directory-containing-this-file]
+# mkdir -p repos reports
+# cd repos
+# git clone https://github.com/FedRAMP/Marketplace-poc
+# git clone https://github.com/FedRAMP/docs
+# git clone https://github.com/FedRAMP/roadmap
+# git clone https://github.com/FedRAMP/community
+
+# Prerequisites:
+# - Git must be installed and accessible in PATH
+# - Network access to clone from GitHub (repositories are public)
