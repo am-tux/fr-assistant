@@ -199,6 +199,45 @@ New files indicate new documentation topics or features being documented.
 - New documentation sections added
 - Navigation/TOC files modified
 - Configuration changes affecting site structure
+
+### 💬 GitHub Discussions Highlights (if enabled)
+
+#### New Discussions Today
+- **[Discussion Title]** in [Channel: 20x/Rev5/RFCs/General]
+  - By: [author] | Opened: [time]
+  - Category: [Q&A/Announcement/Idea/etc]
+  - Link: [URL]
+  - Preview: [First 1-2 sentences or key point]
+
+#### Active Discussions (with activity today)
+- **[Discussion Title]** in [Channel: 20x/Rev5/RFCs/General]
+  - New comments today: X | Total comments: Y
+  - Last activity: [time] by [author]
+  - Status: [Open/Answered/Closed]
+  - Link: [URL]
+
+#### Answered Today
+- **[Discussion Title]** was marked as answered
+  - Answered by: [author]
+  - Time to answer: X hours/days
+  - Link: [URL]
+
+#### 🔔 Needs Attention
+- **[Discussion Title]** - Unanswered for >48 hours
+  - Channel: [20x/Rev5/RFCs/General]
+  - Comments: X | Reactions: Y
+  - Link: [URL]
+
+#### Top Engagement Today
+Top 3 discussions by comment count in last 24 hours:
+1. **[Discussion Title]** ([X comments])
+   - Channel: [20x/Rev5/RFCs/General]
+   - Link: [URL]
+
+#### 🤖 AI INTERPRETATION: Discussion Themes
+- [Summary of common themes or patterns across today's discussions]
+- [Notable community sentiment or concerns]
+- [Suggested follow-up actions if urgent issues identified]
 ```
 
 ## Weekly Change Reporting
@@ -282,6 +321,72 @@ For reference, link to daily reports:
 - [Monday date] - [Link to daily report] - X commits, Y files changed
 - [Tuesday date] - [Link to daily report] - X commits, Y files changed
 [...]
+
+### 💬 GitHub Discussions Weekly Summary (if enabled)
+
+#### Week Overview
+- New discussions this week: X
+- Total active discussions: Y
+- Discussions answered: Z
+- Total comments this week: N
+- Active participants: M
+
+#### Top Discussions by Engagement
+Top 5 discussions by total comment count this week:
+1. **[Discussion Title]** ([X total comments, Y new this week])
+   - Channel: [20x/Rev5/RFCs/General]
+   - Status: [Open/Answered/Closed]
+   - Participants: [count]
+   - Link: [URL]
+   - Summary: [1-2 sentence summary of topic]
+
+#### New Discussions by Channel
+
+**20x Channel:**
+- **[Discussion Title]** by [author] on [date]
+  - Comments: X | Reactions: Y
+  - Link: [URL]
+
+**Rev5 Channel:**
+- **[Discussion Title]** by [author] on [date]
+  - Comments: X | Reactions: Y
+  - Link: [URL]
+
+**RFCs:**
+- **[Discussion Title]** by [author] on [date]
+  - Status: [Open/Answered]
+  - Comments: X | Reactions: Y
+  - Link: [URL]
+
+#### Open RFCs This Week
+RFCs currently open (by topic):
+- **Rev5 RFCs:** X open
+- **20x RFCs:** Y open
+- **General RFCs:** Z open
+
+Notable open RFCs:
+- **[RFC Title]** - Open for X days
+  - Topic: [Rev5/20x/General]
+  - Comments: Y | Needs: [Input/Decision/Response]
+  - Link: [URL]
+
+#### Questions Needing Attention
+Unanswered questions >48 hours old:
+- **[Discussion Title]** - Unanswered for X days
+  - Channel: [20x/Rev5/RFCs/General]
+  - Comments: Y
+  - Link: [URL]
+
+#### Community Activity Trends
+- Most active channel: [Channel name] (X discussions, Y comments)
+- Average time to first response: X hours
+- Average comments per discussion: Y
+
+#### 🤖 AI INTERPRETATION: Weekly Themes
+- [Key themes or patterns across the week's discussions]
+- [Notable shifts in community focus or concerns]
+- [Cross-channel patterns (e.g., similar questions in 20x and Rev5)]
+- [Suggested actions or areas needing official guidance]
 ```
 
 ### Weekly Report Analysis Rules

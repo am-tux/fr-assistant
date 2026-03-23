@@ -122,7 +122,13 @@ Rather than code-centric metrics like commit volume, this tool prioritizes:
 - Deleted or renamed files
 - Documentation structure changes
 - Branch and release activity
-- 💬 GitHub Discussions activity (new discussions, active discussions)
+- 💬 **GitHub Discussions Highlights:**
+  - New discussions created today (by channel: 20x, Rev5, RFCs)
+  - Active discussions with new comments
+  - Questions answered today
+  - Top 3 discussions by engagement
+  - Discussions needing attention (unanswered >48 hours)
+  - 🤖 AI interpretation of discussion themes
 - Saved to `./reports/daily/YYYY-MM-DD.md`
 
 **Weekly Reports** (generated Monday at 09:00):
@@ -132,24 +138,35 @@ Rather than code-centric metrics like commit volume, this tool prioritizes:
 - Contributor activity statistics
 - Commit timeline by day of week
 - Aggregated changes and trends
-- 💬 GitHub Discussions summary (top discussions, answered questions)
+- 💬 **GitHub Discussions Weekly Summary:**
+  - Week overview (new discussions, answers, comment counts)
+  - Top 5 discussions by engagement with summaries
+  - New discussions by channel (20x, Rev5, RFCs)
+  - Open RFCs breakdown by topic (Rev5/20x/General)
+  - Questions needing attention
+  - Community activity trends
+  - 🤖 AI interpretation of weekly themes and patterns
 - Links to daily reports
 - Saved to `./reports/weekly/YYYY-Www.md`
 
+**Detailed Discussions Reports** (optional, for community managers):
+
+*Note: Discussion highlights are already included in the main daily/weekly reports above. These detailed reports provide deeper channel-by-channel analysis.*
+
 **Daily Discussions Reports** (generated at 09:00 each day):
-- 💬 Community engagement grouped by channels: **20x**, **Rev5**, **RFCs**
-- New discussions, active discussions, answered questions per channel
+- 💬 In-depth community engagement grouped by channels: **20x**, **Rev5**, **RFCs**
+- Detailed breakdown of new discussions, active discussions, answered questions per channel
 - **Top 3 most responded discussions** from last 24 hours
-- 🤖 AI interpretation of themes, sentiment, and urgency
-- Unanswered questions needing attention
+- 🤖 AI interpretation of themes, sentiment, and urgency per channel
+- Unanswered questions needing attention with channel context
 - Saved to `./reports/discussions/daily/YYYY-MM-DD.md`
 
 **Weekly Discussions Reports** (generated Monday at 09:00):
-- 💬 Community summary grouped by channels: **20x**, **Rev5**, **RFCs**
-- Top discussions, engagement metrics, answer rates per channel
-- **Top 10 most responded discussions** from last 7 days with analysis
+- 💬 In-depth community summary grouped by channels: **20x**, **Rev5**, **RFCs**
+- Detailed engagement metrics, answer rates, and trends per channel
+- **Top 10 most responded discussions** from last 7 days with detailed analysis
 - Cross-channel theme analysis
-- Community health indicators
+- Community health indicators and participation metrics
 - 🤖 AI interpretation with actionable insights and recommendations
 - 🤖 AI analysis of why high-response discussions are generating engagement
 - Saved to `./reports/discussions/weekly/YYYY-Www.md`
