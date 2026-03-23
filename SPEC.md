@@ -2003,6 +2003,34 @@ Consider linking to the new SAML documentation in the discussion thread.
 
 ## Implementation Notes
 
+### Implementation Philosophy
+
+**Preference for Existing Capabilities:**
+When implementing features or responding to user queries, prefer using existing defined functions and capabilities over creating new scripts or tools. This is a **preference, not a hard requirement**.
+
+**Rationale:**
+- Existing functions have defined interfaces and documented behavior
+- Using defined capabilities keeps the system predictable and maintainable
+- Reduces complexity and potential for inconsistent behavior
+- Makes the system easier to understand and extend
+
+**When to use existing functions:**
+- A defined function (e.g., `getOpenRFCs()`, `getMostRespondedDiscussions()`) already provides the needed capability
+- The query can be answered by combining existing functions
+- The existing function provides a close-enough match to the request
+
+**When creating new capabilities is appropriate:**
+- No existing function covers the use case
+- The request requires significantly different data processing
+- Creating a new reusable function would benefit future queries
+- The user explicitly requests a new approach
+
+**Examples:**
+- ✅ User asks "What RFCs are open?" → Use `getOpenRFCs()` function
+- ✅ User asks "Show me 20x discussions" → Use `getMostRespondedDiscussions("community", "7d", "20x", 10)`
+- ✅ User asks "What changed today?" → Use daily report generation function
+- ⚠️ User asks for data not covered by existing functions → Create new capability or explain limitation
+
 ### Repository Storage Structure
 
 **IMPORTANT:** All tracked repositories will be cloned and stored in subdirectories under the directory containing this specification file. All paths are relative to the spec file location, making this setup portable across different systems and users.
