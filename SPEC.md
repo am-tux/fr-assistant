@@ -1,9 +1,48 @@
-# Git Repository Tracker Specification
+# Git Repository & Community Tracker Specification
 
 ## Purpose
-An AI-powered tool that monitors a collection of git repositories containing primarily documentation, reports significant daily changes, and answers detailed questions about tracked projects based solely on factual data.
+An AI-powered tool that monitors **two complementary data sources** for documentation-focused projects:
 
-**Documentation-Focused:** This tool is optimized for tracking documentation repositories where the primary concern is what content changed and how much changed in specific files, rather than commit volume.
+1. **Git Repositories** - Track documentation files, changes, commits, and code evolution
+2. **GitHub Discussions** - Track community engagement, questions, feedback, and conversations
+
+This dual-tracking approach provides a complete picture of both **what is being built** (git commits) and **what the community is saying about it** (discussions).
+
+## Scope
+
+### Git Repository Tracking
+**Primary Focus:** Documentation repositories where content changes matter more than commit volume.
+
+**Tracks:**
+- New, modified, and deleted documentation files
+- Line-by-line changes in specific files
+- File reorganizations and structure changes
+- Commit history, authors, and timestamps
+- Branch activity and releases
+- Configuration and build file changes
+
+**Optimized For:**
+- Documentation-heavy repositories (Markdown, MDX, etc.)
+- Identifying new content additions
+- Understanding documentation evolution
+- Tracking contributor activity
+
+### GitHub Discussions Tracking
+**Primary Focus:** Community engagement and feedback channels organized by topic areas.
+
+**Tracks:**
+- Discussions grouped by channels (20x, Rev5, RFCs)
+- New questions, announcements, and ideas
+- Discussion activity (comments, reactions, answers)
+- Community sentiment and themes
+- Unanswered questions and trending topics
+- Engagement patterns and community health
+
+**Optimized For:**
+- Community-driven projects with active discussions
+- Identifying common questions and concerns
+- Understanding community feedback patterns
+- Supporting community managers with actionable insights
 
 ## Core Principles
 
@@ -362,6 +401,124 @@ The tool must collect and maintain:
    - **Purpose:** Enable AI interpretation of what code/documentation actually does or says
    - **Usage:** Only accessed when AI interpretation is requested or beneficial
 
+7. **GitHub Discussions Data (When Enabled)**
+   - **Source:** GitHub API (https://api.github.com/repos/[owner]/[repo]/discussions)
+   - **Data collected:**
+     - Discussion title, body, author, creation date, last updated date
+     - Discussion category (Q&A, Announcements, General, etc.)
+     - Number of comments and reactions
+     - Discussion state (open, closed, answered)
+     - Labels and participants
+     - Top-level comments (configurable depth)
+   - **Labeling:** All discussions data MUST be prefixed with 💬 GITHUB DISCUSSIONS:
+   - **Separation:** Keep discussions data completely separate from git repository data
+   - **Privacy:** Only track public discussions, respect GitHub's API rate limits
+
+## GitHub Discussions Tracking
+
+### Purpose
+
+GitHub Discussions provide community engagement data that complements repository code/documentation changes. Tracking discussions helps understand:
+- Community questions and concerns
+- Feature requests and feedback
+- Announcements and their reception
+- Active community topics
+- User engagement levels
+
+### What to Track
+
+**Per Discussion:**
+- Discussion ID, title, and URL
+- Author (username)
+- Created date and last updated date
+- Category (Announcements, Q&A, General, Ideas, etc.)
+- Body content (first post)
+- Number of comments
+- Number of reactions (👍, ❤️, etc.)
+- Status (open, closed, answered, unanswered)
+- Labels/tags if present
+
+**Aggregated Metrics:**
+- New discussions created (daily/weekly)
+- Most active discussions (by comment count)
+- Most popular discussions (by reactions)
+- Answered vs. unanswered questions
+- Discussions by category
+- Top contributors (by discussion creation and comments)
+
+### Discussions in Reports
+
+**Daily Reports:**
+```markdown
+## GitHub Discussions Activity
+
+💬 GITHUB DISCUSSIONS (community repository):
+
+### New Discussions Created
+- [Discussion Title](URL) by @username in Category
+  - Created: [timestamp]
+  - Current: X comments, Y reactions
+
+### Active Discussions (Updated Today)
+- [Discussion Title](URL)
+  - Last updated: [timestamp]
+  - Activity: +X new comments
+
+### Recently Answered
+- [Discussion Title](URL) marked as answered
+  - Answer by: @username
+```
+
+**Weekly Reports:**
+```markdown
+## GitHub Discussions Summary
+
+💬 GITHUB DISCUSSIONS (community repository):
+
+### Week Overview
+- New discussions created: X
+- Total comments added: X
+- Questions answered: X
+- Most active category: [category name]
+
+### Top Discussions This Week (by engagement)
+1. [Discussion Title](URL) - X comments, Y reactions
+2. [Discussion Title](URL) - X comments, Y reactions
+
+### Unanswered Questions
+- [Discussion Title](URL) - Created [date], X days old
+```
+
+### API Rate Limits and Caching
+
+- GitHub API allows 5,000 requests/hour for authenticated requests
+- Cache discussions data between polls to minimize API calls
+- Update existing discussions less frequently than checking for new ones
+- Recommended: Check for new discussions hourly, update existing discussions every 6 hours
+
+### Configuration Requirements
+
+Each repository can optionally enable discussions tracking:
+
+```yaml
+repositories:
+  - name: "community"
+    url: "https://github.com/FedRAMP/community"
+    path: "./repos/community"
+    primary_branch: "main"
+
+    # GitHub Discussions tracking (optional)
+    track_discussions: true
+    discussions_url: "https://github.com/FedRAMP/community/discussions"
+    discussions_categories:
+      - "Announcements"
+      - "Q&A"
+      - "General"
+      - "Ideas"
+    discussions_include_answered: true  # Include answered discussions in reports
+    discussions_max_age_days: 30        # Only track discussions from last 30 days
+```
+
 ## Response Guidelines
 
 ### When Answering Questions
@@ -716,6 +873,594 @@ generateWeeklyReport(12, 2026)  // Week 12 of 2026
 
 This allows retrospective analysis or regeneration of reports if needed.
 
+## GitHub Discussions Report Generation Functions
+
+### Daily Discussions Report Generation
+
+**Function:** `generateDailyDiscussionsReport(date, repository)`
+
+**Purpose:** Generate a daily report of GitHub Discussions activity grouped by high-level channels: 20x, Rev5, and RFCs.
+
+**Process:**
+1. Fetch discussions data from GitHub API for the 24-hour period
+2. Group discussions by channel labels/categories:
+   - **20x Channel**: Discussions labeled or categorized as "20x" or related to FedRAMP 2.0 initiatives
+   - **Rev5 Channel**: Discussions labeled or categorized as "Rev5" or related to Revision 5 updates
+   - **RFCs Channel**: Discussions labeled or categorized as "RFC" or Request for Comments
+3. For each channel, collect:
+   - New discussions created in the last 24 hours
+   - Active discussions (with new comments or updates)
+   - Answered questions (marked as answered in the period)
+   - Trending discussions (high engagement)
+4. Apply AI interpretation to identify:
+   - Common themes or topics within each channel
+   - Sentiment of community feedback
+   - Urgent questions needing attention
+5. Generate report following the Daily Discussions Report Format
+6. Save to `./reports/discussions/daily/YYYY-MM-DD.md`
+
+**Data Sources:**
+- GitHub API: `GET /repos/FedRAMP/community/discussions`
+- Filter by labels: "20x", "Rev5", "RFC"
+- Query parameters: `since={24_hours_ago}`
+
+**Report Format:**
+```markdown
+# Daily GitHub Discussions Report - [DATE]
+
+💬 GITHUB DISCUSSIONS (FedRAMP/community)
+
+## Summary
+- Total new discussions: X
+- Total active discussions: X
+- Total comments added: X
+- Questions answered: X
+
+---
+
+## 20x Channel
+
+### New Discussions
+- [Discussion Title](URL) by @username
+  - Created: [timestamp]
+  - Category: [category]
+  - Current: X comments, Y reactions
+  - Summary: First 100 characters of discussion body...
+
+### Active Discussions (Updated Today)
+- [Discussion Title](URL)
+  - Last updated: [timestamp]
+  - New activity: +X comments, +Y reactions
+  - Recent contributors: @user1, @user2
+
+### Answered Questions
+- [Discussion Title](URL) marked as answered
+  - Answered by: @username at [timestamp]
+  - Time to answer: X hours/days
+
+🤖 AI INTERPRETATION (20x Channel):
+[Analysis of common themes, urgent questions, community sentiment for 20x discussions]
+
+---
+
+## Rev5 Channel
+
+### New Discussions
+[Same structure as 20x]
+
+### Active Discussions
+[Same structure as 20x]
+
+### Answered Questions
+[Same structure as 20x]
+
+🤖 AI INTERPRETATION (Rev5 Channel):
+[Analysis of common themes, urgent questions, community sentiment for Rev5 discussions]
+
+---
+
+## RFCs Channel
+
+### New Discussions
+[Same structure as 20x]
+
+### Active Discussions
+[Same structure as 20x]
+
+### Answered Questions
+[Same structure as 20x]
+
+🤖 AI INTERPRETATION (RFCs Channel):
+[Analysis of common themes, urgent questions, community sentiment for RFC discussions]
+
+---
+
+## Uncategorized Discussions
+
+### New Discussions
+[Discussions not in 20x, Rev5, or RFC channels]
+
+---
+
+## Attention Needed
+
+⚠️ **Unanswered Questions (>48 hours old):**
+- [Discussion Title](URL) in [Channel] - Created [date], X days old
+  - Summary: [Brief description]
+
+⚠️ **High Engagement Without Response:**
+- [Discussion Title](URL) - X comments but no official response
+```
+
+### Weekly Discussions Report Generation
+
+**Function:** `generateWeeklyDiscussionsReport(weekNumber, year, repository)`
+
+**Purpose:** Generate a weekly summary of GitHub Discussions activity grouped by channels with trend analysis.
+
+**Process:**
+1. Fetch discussions data from GitHub API for the 7-day period
+2. Group discussions by channel: 20x, Rev5, RFCs
+3. For each channel, calculate:
+   - Total discussions created
+   - Total comments and engagement
+   - Answer rate (questions answered / total questions)
+   - Most active participants
+   - Top trending topics
+4. Aggregate cross-channel metrics:
+   - Overall activity trends (increasing/decreasing)
+   - Common themes across channels
+   - Community health indicators
+5. Apply AI interpretation to identify:
+   - Emerging topics or concerns
+   - Patterns in community questions
+   - Effectiveness of community engagement
+   - Recommendations for community management
+6. Generate report following the Weekly Discussions Report Format
+7. Save to `./reports/discussions/weekly/YYYY-Www.md`
+
+**Report Format:**
+```markdown
+# Weekly GitHub Discussions Report - Week [WEEK], [YEAR]
+**Period:** [START_DATE] to [END_DATE]
+
+💬 GITHUB DISCUSSIONS (FedRAMP/community)
+
+## Executive Summary
+
+### Overall Metrics
+- Total discussions created: X
+- Total comments posted: X
+- Questions answered: X (Y% answer rate)
+- Average time to answer: X hours
+- Active participants: X users
+- Total engagement (comments + reactions): X
+
+### Week-over-Week Trends
+- New discussions: +X% compared to last week
+- Engagement: +X% compared to last week
+- Answer rate: +X% compared to last week
+
+🤖 AI INTERPRETATION (Overall):
+[High-level analysis of community health, emerging themes, notable patterns]
+
+---
+
+## 20x Channel
+
+### Week Overview
+- New discussions: X
+- Active discussions: X
+- Comments posted: X
+- Reactions: X
+- Questions answered: X (Y% answer rate)
+- Avg time to answer: X hours
+
+### Top Discussions (by engagement)
+1. [Discussion Title](URL) - X comments, Y reactions
+   - Created by: @username on [date]
+   - Summary: [Brief description]
+   - Status: [Open/Answered/Closed]
+
+2. [Discussion Title](URL) - X comments, Y reactions
+   [...]
+
+### Key Topics Discussed
+- [Topic 1]: X discussions, Y comments
+- [Topic 2]: X discussions, Y comments
+- [Topic 3]: X discussions, Y comments
+
+### Top Contributors
+- @username1: X comments, Y discussions started
+- @username2: X comments, Y discussions started
+- @username3: X comments, Y discussions started
+
+### Unanswered Questions (Aging)
+- [Discussion Title](URL) - Created [date], X days old
+- [Discussion Title](URL) - Created [date], X days old
+
+🤖 AI INTERPRETATION (20x Channel):
+[Analysis of:
+- Dominant themes and concerns in 20x discussions
+- Community sentiment (positive/negative/neutral)
+- Recurring questions or confusion points
+- Suggested areas needing more documentation or clarification
+- Notable community feedback or feature requests]
+
+---
+
+## Rev5 Channel
+
+[Same structure as 20x Channel]
+
+🤖 AI INTERPRETATION (Rev5 Channel):
+[Analysis specific to Rev5 discussions]
+
+---
+
+## RFCs Channel
+
+[Same structure as 20x Channel]
+
+🤖 AI INTERPRETATION (RFCs Channel):
+[Analysis specific to RFC discussions]
+
+---
+
+## Cross-Channel Analysis
+
+### Common Themes Across Channels
+- [Theme 1]: Appeared in X channels, Y total discussions
+- [Theme 2]: Appeared in X channels, Y total discussions
+
+### Community Engagement Patterns
+- Peak activity times: [Day of week, time of day]
+- Average discussion lifespan: X days
+- Most engaged topic: [Topic name]
+
+### Health Indicators
+✅ Positive Indicators:
+- [e.g., High answer rate, quick response times, growing participation]
+
+⚠️ Areas for Improvement:
+- [e.g., Aging unanswered questions, declining engagement in specific channel]
+
+🤖 AI INTERPRETATION (Cross-Channel):
+[Strategic analysis including:
+- Overall community health assessment
+- Emerging trends that span multiple channels
+- Recommendations for community managers
+- Potential areas for proactive communication
+- Comparison between channels (which is most active, which needs attention)]
+
+---
+
+## Actionable Insights
+
+### Immediate Attention Required
+1. [Specific discussion or issue] - [Why it needs attention]
+2. [Specific discussion or issue] - [Why it needs attention]
+
+### Recommended Actions
+1. [Action recommendation based on patterns observed]
+2. [Action recommendation based on patterns observed]
+
+### Success Stories
+- [Example of effective community engagement]
+- [Example of quickly resolved issue]
+
+---
+
+## Appendix: Day-by-Day Breakdown
+
+- Monday [DATE]: X new discussions, Y comments
+  - [Link to daily report]
+- Tuesday [DATE]: X new discussions, Y comments
+  - [Link to daily report]
+[...]
+```
+
+### AI Interpretation Guidelines for Discussions Reports
+
+**What to Include:**
+
+1. **Theme Identification**
+   - Read discussion titles and bodies to identify recurring topics
+   - Group related discussions by subject matter
+   - Note emerging vs. ongoing themes
+
+2. **Sentiment Analysis**
+   - Assess tone of community feedback (positive, negative, neutral)
+   - Identify areas of confusion or frustration
+   - Note expressions of appreciation or satisfaction
+
+3. **Urgency Assessment**
+   - Flag discussions that indicate blocking issues
+   - Identify questions that suggest widespread confusion
+   - Note requests that appear time-sensitive
+
+4. **Pattern Recognition**
+   - Identify frequently asked questions
+   - Note topics that generate high engagement
+   - Recognize areas where documentation may be lacking
+
+5. **Community Health Metrics**
+   - Assess response times and answer rates
+   - Note participation levels and trends
+   - Identify active vs. inactive channels
+
+**What NOT to Include:**
+
+- ❌ Speculation about internal FedRAMP decisions or strategy
+- ❌ Assumptions about individual users' motivations
+- ❌ Predictions about future policy changes
+- ❌ Definitive statements about what FedRAMP "should" do
+- ❌ Comparisons to other programs without factual basis
+
+**Prefacing Requirements:**
+
+All AI interpretations in discussions reports MUST be clearly prefaced with:
+```
+🤖 AI INTERPRETATION ([Channel Name]):
+```
+
+And should acknowledge uncertainty with phrases like:
+- "Discussions suggest..."
+- "Common themes appear to be..."
+- "Community sentiment seems..."
+- "This may indicate..."
+- "Potentially..."
+
+### Discussion Channel Identification
+
+**20x Channel:**
+- Discussions labeled with "20x" tag
+- Discussions in "20x" category
+- Discussions mentioning "FedRAMP 2.0", "modernization", "20x initiative" in title or first post
+- Related keywords: "automation", "continuous monitoring", "modern cloud"
+
+**Rev5 Channel:**
+- Discussions labeled with "Rev5" or "Revision 5" tag
+- Discussions in "Rev5" category
+- Discussions mentioning "Rev 5", "Revision 5", "Rev5" in title or first post
+- Related keywords: "baseline updates", "control updates", "latest revision"
+
+**RFCs Channel:**
+- Discussions labeled with "RFC" tag
+- Discussions in "RFC" or "Request for Comments" category
+- Discussions with titles starting with "RFC:", "[RFC]"
+- Discussions explicitly requesting community feedback on proposals
+
+**Uncategorized:**
+- Discussions not matching any of the above channels
+- General Q&A, announcements, or other categories
+
+### Manual Discussions Report Generation
+
+**Daily Discussions Report for Specific Date:**
+```
+generateDailyDiscussionsReport("2026-03-15", "community")
+```
+
+**Weekly Discussions Report for Specific Week:**
+```
+generateWeeklyDiscussionsReport(12, 2026, "community")
+```
+
+**Custom Date Range:**
+```
+generateDiscussionsReport(startDate, endDate, repository, channels)
+```
+
+## Example Commands and Usage
+
+### Query Commands (Git Repository Data)
+
+**File Change Queries:**
+```
+"What new documentation files were added this week?"
+"Show me all files changed in the docs repository in the last 7 days"
+"What files were deleted or renamed recently?"
+"When was authentication.md first added to the repository?"
+"How much did the README.md change this month?"
+```
+
+**Content Analysis:**
+```
+"What changed in the deployment guide?"
+→ Returns: Factual git data + 🤖 AI interpretation of what the changes cover
+
+"Show me the diff for commit abc123"
+→ Returns: Exact git diff output
+
+"What does the new configuration file do?"
+→ Returns: File content + 🤖 AI interpretation of its purpose
+```
+
+**Contributor Queries:**
+```
+"Who has contributed to the security documentation?"
+"What files did john@example.com modify this week?"
+"List all contributors to the community repository"
+"Show me commits by author in the last 30 days"
+```
+
+**Structure and Organization:**
+```
+"What files were reorganized recently?"
+"Show changes to navigation configuration files"
+"What branches were merged this week?"
+"List all tags and releases"
+```
+
+### Query Commands (GitHub Discussions Data)
+
+**Channel-Specific Queries:**
+```
+"What are the active discussions in the 20x channel?"
+"Show me new questions in the Rev5 channel this week"
+"What RFCs are currently being discussed?"
+"List unanswered questions in the 20x channel"
+```
+
+**Engagement Analysis:**
+```
+"What are the top discussions by engagement this week?"
+"Which discussions have the most comments?"
+"What questions were answered today?"
+"Show me discussions with no response in the last 48 hours"
+```
+
+**Theme and Sentiment:**
+```
+"What are the common themes in Rev5 discussions?"
+→ Returns: Discussion list + 🤖 AI interpretation of themes
+
+"What is the community sentiment about the new guidelines?"
+→ Returns: Reactions/comments data + 🤖 AI sentiment analysis
+
+"What topics are trending in the community?"
+→ Returns: Engagement metrics + 🤖 AI pattern analysis
+```
+
+**Cross-Channel Analysis:**
+```
+"What themes appear across multiple channels?"
+"Compare engagement between 20x and Rev5 channels"
+"Show me the community health indicators"
+```
+
+### Report Generation Commands
+
+**Git Repository Reports:**
+```
+# Generate today's report
+generateDailyReport(today)
+
+# Generate report for specific date
+generateDailyReport("2026-03-15")
+
+# Generate weekly report
+generateWeeklyReport(12, 2026)  // Week 12 of 2026
+
+# Generate report for current week
+generateWeeklyReport(currentWeek, currentYear)
+```
+
+**GitHub Discussions Reports:**
+```
+# Generate today's discussions report
+generateDailyDiscussionsReport(today, "community")
+
+# Generate discussions report for specific date
+generateDailyDiscussionsReport("2026-03-15", "community")
+
+# Generate weekly discussions report
+generateWeeklyDiscussionsReport(12, 2026, "community")
+
+# Generate custom date range report
+generateDiscussionsReport("2026-03-01", "2026-03-31", "community", ["20x", "Rev5", "RFCs"])
+```
+
+### Combined Analysis Commands
+
+**Correlating Git and Discussions:**
+```
+"Show me what was committed this week and what the community is discussing"
+→ Returns: Git changes + related discussions activity
+
+"Are there discussions about the recent documentation changes?"
+→ Returns: Recent commits + discussions mentioning those topics
+
+"What documentation is missing based on community questions?"
+→ Returns: Analysis of common questions + gaps in current docs
+```
+
+**Trend Analysis:**
+```
+"Show trends in both commits and discussions for the last month"
+"Compare documentation updates with community question topics"
+"What new documentation corresponds to recent RFCs?"
+```
+
+### Advanced Usage
+
+**Filtering and Search:**
+```
+"Show me discussions tagged 'urgent' in the 20x channel"
+"Find all commits mentioning 'security' in the last 30 days"
+"List discussions with more than 10 comments but no answer"
+"Show files changed by more than 200 lines this week"
+```
+
+**Historical Analysis:**
+```
+"How has community engagement changed over the last 3 months?"
+"What were the most common discussion topics in Q1 2026?"
+"Show documentation evolution for authentication.md over the last year"
+"Compare Rev5 discussion activity between January and February"
+```
+
+**Monitoring and Alerts:**
+```
+"Alert me to new discussions in the RFCs channel"
+"Notify when a question is unanswered for more than 48 hours"
+"Watch for high-engagement discussions without official response"
+"Alert when critical documentation files are modified"
+```
+
+### Example Response Format
+
+**Query:** "What changed in the authentication documentation and what is the community saying about it?"
+
+**Response:**
+```
+GIT REPOSITORY DATA (docs repository):
+
+docs/authentication.md was modified in 2 commits this week:
+- abc123 by user@example.com on 2026-03-20: 'update OAuth2 examples' (+67/-12 lines)
+- def456 by user@example.com on 2026-03-22: 'add SAML configuration' (+145/-3 lines)
+
+Total changes: +212 / -15 lines
+Files affected: 1
+
+🤖 AI INTERPRETATION (Git Changes):
+The authentication documentation received significant updates this week. The OAuth2
+section was enhanced with more detailed examples including error handling scenarios.
+A new SAML configuration section was added (145 lines), covering setup, testing, and
+troubleshooting. The changes appear to address enterprise authentication requirements.
+
+---
+
+💬 GITHUB DISCUSSIONS (community repository):
+
+20x Channel - Authentication Related:
+- "How to implement OAuth2 with Azure AD?" - 8 comments, answered
+  - Created 2026-03-19 by @user123
+  - Answered 2026-03-20 by @developer456
+
+Rev5 Channel - Authentication Related:
+- "SAML configuration questions" - 5 comments, unanswered (2 days old)
+  - Created 2026-03-21 by @enterprise_user
+  - Recent comment: "Looking for SAML examples"
+
+🤖 AI INTERPRETATION (Discussions):
+There's clear community demand for authentication guidance. The OAuth2 question
+was asked just before the documentation update and has been answered, suggesting
+good responsiveness. The SAML discussion started after the commit but hasn't been
+answered yet - the new documentation may help, but a response pointing to it would
+be beneficial. This shows good alignment between community needs and documentation
+updates.
+
+---
+
+CORRELATION:
+The OAuth2 documentation update (March 20) appears to respond to the community
+question from March 19. The SAML documentation addition (March 22) may have been
+motivated by the discussion from March 21, though the discussion remains unanswered.
+Consider linking to the new SAML documentation in the discussion thread.
+```
+
 ## Implementation Notes
 
 ### Repository Storage Structure
@@ -771,17 +1516,32 @@ All data MUST come from:
 - `git diff --name-status --diff-filter=A [ref1]..[ref2]` - Compare file additions between refs
 
 ### Forbidden Data Sources and Operations
-- Do NOT use external APIs or services (except git clone/fetch from repository URLs)
+- Do NOT use external APIs or services (except as explicitly allowed below)
 - Do NOT make assumptions based solely on file names or patterns (unless clearly labeled as AI interpretation)
-- Do NOT use GitHub API, issue trackers, or other external services
 - Do NOT delete repository directories (only clone or fetch, never remove)
 - Do NOT modify repository state (no commits, pushes, resets, or destructive operations)
+- Do NOT use issue trackers, pull request APIs, or other GitHub features beyond what's explicitly allowed
 
-### Allowed When Properly Labeled
+### Allowed Data Sources
+
+**Always Allowed:**
+- ✅ Git commands (log, diff, show, branch, tag, fetch, clone)
+- ✅ Direct file reads from git objects
+
+**Allowed When Properly Labeled:**
 - ✅ AI interpretation of code/documentation content (with 🤖 prefix)
 - ✅ Analysis of what code appears to do (based on actual content via `git show`)
 - ✅ Assessment of documentation quality/clarity (when clearly marked as interpretation)
 - ✅ Pattern recognition in file organization (labeled as AI observation)
+
+**Allowed When Configured (Labeled with 💬):**
+- ✅ GitHub Discussions API (when `track_discussions: true` in config)
+  - Read-only access to public discussions
+  - Must be prefixed with 💬 GITHUB DISCUSSIONS:
+  - Must respect API rate limits
+  - Must keep separate from git repository data
+  - Authentication via GitHub token (if provided) or public API
+  - Endpoint: `https://api.github.com/repos/{owner}/{repo}/discussions`
 
 ### Update Frequency
 - Poll repositories every: [configurable, default: 1 hour]

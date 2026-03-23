@@ -1,15 +1,78 @@
-# Git Repository Tracker for Documentation
+# Git Repository & Community Tracker for Documentation Projects
 
-An AI-powered tool that monitors git repositories containing documentation, tracks daily changes, and answers detailed questions about projects based solely on factual data.
+An AI-powered tool that monitors **both documentation repositories and community discussions**, providing a complete picture of what's being built and what the community is saying about it.
+
+**📊 Track:** Git commits + GitHub Discussions | **🤖 Analyze:** Content changes + Community sentiment | **📝 Report:** Daily + Weekly summaries
+
+---
 
 ## Overview
 
-This tracker is specifically designed for **documentation repositories** (like the FedRAMP organization repos), where the focus is on:
-- **What files changed** (especially new files added)
+This tracker monitors **two complementary data sources** for documentation-focused projects:
+
+### 🔍 Git Repository Tracking
+Track what's being built and documented:
+- **What files changed** (especially new files added - highest priority)
 - **How much content changed** in each file
 - **Documentation structure** evolution
+- Commit history, contributors, and release activity
 
-Rather than code-centric metrics like commit volume, this tool prioritizes content-level changes that matter for documentation tracking.
+### 💬 GitHub Discussions Tracking
+Track what the community is saying:
+- Discussions organized by channels: **20x**, **Rev5**, **RFCs**
+- Questions, feedback, announcements, and ideas
+- Community engagement patterns and sentiment
+- Unanswered questions and trending topics
+
+Rather than code-centric metrics like commit volume, this tool prioritizes:
+- **Content-level changes** (what documentation was added/modified)
+- **Community engagement patterns** (what people are asking/discussing)
+- **Correlation between commits and discussions** (addressing community needs)
+
+## Quick Start
+
+1. **Place this directory** anywhere on your system (fully portable)
+2. **Set GitHub token** (optional): `export GITHUB_TOKEN=your_token_here`
+3. **Run the tracker** - it will automatically:
+   - Clone FedRAMP repositories (docs, roadmap, community)
+   - Fetch GitHub Discussions data
+   - Generate daily and weekly reports
+4. **Ask questions:**
+   - "What new documentation was added this week?"
+   - "What are the top discussions in the 20x channel?"
+   - "Show me what changed in authentication.md"
+5. **Review automated reports** in `./reports/`:
+   - `daily/` - Repository changes
+   - `weekly/` - Repository summaries
+   - `discussions/daily/` - Community activity by channel
+   - `discussions/weekly/` - Community insights with AI analysis
+
+## Use Cases
+
+**For Documentation Teams:**
+- Track what documentation has been added or updated
+- Understand which files are most actively maintained
+- Correlate documentation updates with community questions
+- Identify documentation gaps based on frequently asked questions
+
+**For Community Managers:**
+- Monitor discussion channels (20x, Rev5, RFCs) in one place
+- Identify trending topics and common concerns
+- Track answer rates and response times
+- Get AI-powered insights on community sentiment and themes
+- Find unanswered questions needing attention
+
+**For Project Leaders:**
+- See both technical progress (commits) and community feedback (discussions)
+- Understand if documentation updates address community needs
+- Track engagement trends week over week
+- Get actionable insights for improving community support
+
+**For Contributors:**
+- Find out what changed recently in the documentation
+- See what topics the community is actively discussing
+- Identify areas where contributions would be valuable
+- Understand project evolution over time
 
 ## Key Features
 
@@ -18,6 +81,14 @@ Rather than code-centric metrics like commit volume, this tool prioritizes conte
 - File additions, deletions, and renames are tracked separately
 - Content changes measured per file (not just total commit count)
 - Lower thresholds optimized for documentation update patterns
+
+### 💬 GitHub Discussions Tracking
+- **Community engagement monitoring** for repositories with GitHub Discussions
+- Track new discussions, questions, announcements, and ideas
+- Monitor discussion activity (comments, reactions, answers)
+- Identify unanswered questions and trending topics
+- **Clearly labeled** with 💬 prefix to distinguish from git data
+- Separate from repository code/documentation changes
 
 ### 📊 Factual Data + AI Interpretation
 **Factual Data First (Always):**
@@ -41,6 +112,7 @@ Rather than code-centric metrics like commit volume, this tool prioritizes conte
 - Deleted or renamed files
 - Documentation structure changes
 - Branch and release activity
+- 💬 GitHub Discussions activity (new discussions, active discussions)
 - Saved to `./reports/daily/YYYY-MM-DD.md`
 
 **Weekly Reports** (generated Monday at 09:00):
@@ -50,16 +122,35 @@ Rather than code-centric metrics like commit volume, this tool prioritizes conte
 - Contributor activity statistics
 - Commit timeline by day of week
 - Aggregated changes and trends
+- 💬 GitHub Discussions summary (top discussions, answered questions)
 - Links to daily reports
 - Saved to `./reports/weekly/YYYY-Www.md`
 
+**Daily Discussions Reports** (generated at 09:00 each day):
+- 💬 Community engagement grouped by channels: **20x**, **Rev5**, **RFCs**
+- New discussions, active discussions, answered questions per channel
+- 🤖 AI interpretation of themes, sentiment, and urgency
+- Unanswered questions needing attention
+- Saved to `./reports/discussions/daily/YYYY-MM-DD.md`
+
+**Weekly Discussions Reports** (generated Monday at 09:00):
+- 💬 Community summary grouped by channels: **20x**, **Rev5**, **RFCs**
+- Top discussions, engagement metrics, answer rates per channel
+- Cross-channel theme analysis
+- Community health indicators
+- 🤖 AI interpretation with actionable insights and recommendations
+- Saved to `./reports/discussions/weekly/YYYY-Www.md`
+
 ### 💬 Question Answering
-Answer detailed questions about repositories:
+Answer detailed questions about repositories and community:
 - "What new documentation was added this week?"
 - "What files changed in the last 30 days?"
 - "Who has contributed to [specific file]?"
 - "When was [file] first added?"
-- All answers based on factual git data only
+- "What discussions are active in the community?"
+- "What questions are unanswered?"
+- "What are the top community topics this week?"
+- Git data answers are factual, discussions data labeled with 💬
 
 ## Directory Structure
 
@@ -73,14 +164,23 @@ fr-git-tracker/
 │   ├── roadmap/
 │   └── community/
 └── reports/           # Generated reports (visible directory)
-    ├── daily/         # Daily reports
+    ├── daily/         # Daily repository reports
     │   ├── 2026-03-23.md
     │   ├── 2026-03-24.md
     │   └── ...
-    └── weekly/        # Weekly reports
-        ├── 2026-W12.md
-        ├── 2026-W13.md
-        └── ...
+    ├── weekly/        # Weekly repository reports
+    │   ├── 2026-W12.md
+    │   ├── 2026-W13.md
+    │   └── ...
+    └── discussions/   # GitHub Discussions reports
+        ├── daily/     # Daily discussions reports (grouped by channels)
+        │   ├── 2026-03-23.md
+        │   ├── 2026-03-24.md
+        │   └── ...
+        └── weekly/    # Weekly discussions reports (with AI analysis)
+            ├── 2026-W12.md
+            ├── 2026-W13.md
+            └── ...
 ```
 
 All paths are relative to this directory, making the setup portable across systems and users.
@@ -92,6 +192,11 @@ All paths are relative to this directory, making the setup portable across syste
 - **Git** installed and accessible in PATH
 - Network access to clone from GitHub (repositories are public)
 - AI tool capable of running this specification (e.g., Claude)
+- **GitHub API token** (optional but recommended for Discussions tracking)
+  - Without token: 60 API requests/hour
+  - With token: 5,000 API requests/hour
+  - Create token at: https://github.com/settings/tokens
+  - Set environment variable: `export GITHUB_TOKEN=your_token_here`
 
 ### Setup
 
@@ -123,7 +228,7 @@ The tool handles setup automatically, but you can manually prepare repositories:
 cd fr-git-tracker
 
 # Create directories
-mkdir -p repos reports/daily reports/weekly
+mkdir -p repos reports/daily reports/weekly reports/discussions/daily reports/discussions/weekly
 
 # Clone repositories
 cd repos
@@ -140,6 +245,9 @@ Currently tracking 3 FedRAMP repositories (excludes docs-alpha, fedramp-marketpl
 - **docs** - Main documentation
 - **roadmap** - FedRAMP roadmap
 - **community** - Community resources
+  - 💬 Also tracks GitHub Discussions (https://github.com/FedRAMP/community/discussions)
+  - **Discussion Channels:** 20x, Rev5, RFCs
+  - Generates dedicated daily and weekly discussions reports with AI interpretation
 
 ### Thresholds (Optimized for Documentation)
 
@@ -195,6 +303,20 @@ Generated daily at 09:00 (configurable), covering the previous 24 hours:
 
 ### Documentation Structure Changes
 - Files renamed, navigation changes, etc.
+
+## GitHub Discussions Activity
+
+💬 GITHUB DISCUSSIONS (community repository):
+
+### New Discussions Created
+- [Discussion Title](URL) by @username in Q&A
+  - Created: 2026-03-23 10:30
+  - Current: 3 comments, 5 reactions
+
+### Active Discussions (Updated Today)
+- [Discussion Title](URL)
+  - Last updated: 2026-03-23 14:15
+  - Activity: +2 new comments by @user1, @user2
 ```
 
 ### Weekly Report Format
@@ -231,6 +353,23 @@ Generated weekly on Monday at 09:00 (configurable), covering the previous 7 days
 - Tuesday: 3 commits
 [...]
 
+## GitHub Discussions Summary
+
+💬 GITHUB DISCUSSIONS (community repository):
+
+### Week Overview
+- New discussions created: 8
+- Total comments added: 34
+- Questions answered: 5
+- Most active category: Q&A
+
+### Top Discussions This Week (by engagement)
+1. [How to implement X feature?](URL) - 12 comments, 8 reactions
+2. [Announcement: New guidelines](URL) - 6 comments, 15 reactions
+
+### Unanswered Questions
+- [Question about Y](URL) - Created 2026-03-20, 3 days old
+
 ### Day-by-Day Breakdown
 - Monday 2026-03-17 - [Link to daily report] - 5 commits, 8 files
 - Tuesday 2026-03-18 - [Link to daily report] - 3 commits, 4 files
@@ -240,6 +379,144 @@ Generated weekly on Monday at 09:00 (configurable), covering the previous 7 days
 ### Manual Report Generation
 
 Both daily and weekly reports can be generated manually for any historical period, allowing retrospective analysis or report regeneration.
+
+## Example Commands
+
+### Git Repository Queries
+
+**Find what changed:**
+```
+"What new documentation files were added this week?"
+"Show me all files changed in the last 7 days"
+"What files were deleted or renamed in March?"
+"How much did the authentication.md file change this month?"
+```
+
+**Understand content changes:**
+```
+"What changed in the deployment guide?"
+# Returns: Git diff data + 🤖 AI interpretation of changes
+
+"What does the new OAuth2 section cover?"
+# Returns: File content + 🤖 AI summary of what it explains
+
+"Show me the diff for commit abc123"
+# Returns: Exact git diff output
+```
+
+**Track contributors:**
+```
+"Who has contributed to the security documentation?"
+"What files did john@example.com modify this week?"
+"List all contributors to the docs repository"
+```
+
+### GitHub Discussions Queries
+
+**Channel-specific questions:**
+```
+"What are the active discussions in the 20x channel?"
+"Show me new questions in the Rev5 channel this week"
+"What RFCs are currently being discussed?"
+"List unanswered questions in the RFCs channel"
+```
+
+**Engagement and trends:**
+```
+"What are the top discussions by engagement this week?"
+"Which discussions have the most comments?"
+"What questions were answered today?"
+"Show me discussions with no response in the last 48 hours"
+```
+
+**Community insights:**
+```
+"What are the common themes in Rev5 discussions?"
+# Returns: Discussion list + 🤖 AI theme analysis
+
+"What is the community sentiment about the new guidelines?"
+# Returns: Engagement data + 🤖 AI sentiment assessment
+
+"What topics are trending in the community?"
+# Returns: Metrics + 🤖 AI pattern analysis
+```
+
+### Combined Git + Discussions Analysis
+
+**Correlate commits and discussions:**
+```
+"Show me what was committed this week and what the community is discussing"
+# Returns: Git changes + related discussions activity
+
+"Are there discussions about the recent authentication documentation changes?"
+# Returns: Recent commits + discussions mentioning those topics
+
+"What documentation is missing based on community questions?"
+# Returns: Analysis of common questions + gaps in current docs
+```
+
+**Trend analysis:**
+```
+"Compare documentation updates with community question topics"
+"What new documentation corresponds to recent RFCs?"
+"How has community engagement changed with the new Rev5 updates?"
+```
+
+### Report Generation
+
+**Generate reports:**
+```
+# Today's repository report
+generateDailyReport(today)
+
+# Specific date repository report
+generateDailyReport("2026-03-15")
+
+# Weekly repository report
+generateWeeklyReport(12, 2026)
+
+# Today's discussions report
+generateDailyDiscussionsReport(today, "community")
+
+# Weekly discussions report
+generateWeeklyDiscussionsReport(12, 2026, "community")
+```
+
+### Example Response
+
+**Query:** "What changed in authentication docs and what is the community asking about it?"
+
+**Response:**
+```
+GIT REPOSITORY DATA:
+docs/authentication.md modified in 2 commits:
+- abc123: 'update OAuth2 examples' (+67/-12 lines)
+- def456: 'add SAML configuration' (+145/-3 lines)
+
+🤖 AI INTERPRETATION (Git):
+OAuth2 section enhanced with error handling examples.
+New SAML configuration section added covering setup and troubleshooting.
+
+---
+
+💬 GITHUB DISCUSSIONS:
+20x Channel:
+- "How to implement OAuth2 with Azure AD?" (answered)
+- Asked before the doc update, addressed in new changes
+
+Rev5 Channel:
+- "SAML configuration questions" (unanswered, 2 days old)
+- Asked after SAML docs were added
+
+🤖 AI INTERPRETATION (Discussions):
+Community questions align with documentation updates. OAuth2 question
+was answered and addressed in docs. SAML discussion needs response
+pointing to the new documentation section.
+
+CORRELATION:
+Documentation updates are responsive to community needs. Consider
+linking to new SAML docs in the unanswered discussion.
+```
 
 ## Report-Only Principle
 
@@ -257,7 +534,7 @@ Local repository directories can be safely deleted; they will be re-cloned on ne
 
 ### Data Collection
 
-All data comes exclusively from git commands:
+**Git Repository Data** (from git commands):
 - `git log --diff-filter=A` - Track new files added
 - `git log --diff-filter=D` - Track deleted files
 - `git log --diff-filter=R` - Track renamed/moved files
@@ -266,12 +543,19 @@ All data comes exclusively from git commands:
 - `git show` - Specific commit details
 - `git branch` and `git tag` - Branch/tag listings
 
+**GitHub Discussions Data** (from GitHub API - when enabled):
+- `GET /repos/{owner}/{repo}/discussions` - Fetch discussions
+- Track: new discussions, comments, reactions, answers
+- Labeled with 💬 to distinguish from git data
+- Cached to respect API rate limits
+
 ### Update Frequency
 
-- **Polling:** Every 60 minutes (configurable)
+- **Git polling:** Every 60 minutes (configurable)
+- **Discussions polling:** Every 60 minutes for new, every 6 hours for updates (configurable)
 - **Daily reports:** Generated at 09:00 daily (configurable)
 - **Weekly reports:** Generated at 09:00 on Mondays (configurable)
-- **Data caching:** Git data cached in memory between polls
+- **Data caching:** Git data and discussions data cached to minimize API calls
 
 ### Report Generation
 
@@ -338,32 +622,74 @@ documentation appears to have expanded authentication coverage and improved
 example clarity with real-world scenarios.
 ```
 
-## How the Tool Works: Factual Data + AI Interpretation
+## How the Tool Works
+
+### Dual Data Sources
+
+**Git Repository Data (Factual):**
+- Exact commits, diffs, file changes, timestamps, authors
+- Precise line counts and file statistics
+- New files, deletions, and renames
+- Branches, tags, and releases
+- All sourced from git commands
+
+**GitHub Discussions Data (Factual + Community):**
+- Discussion titles, bodies, authors, timestamps
+- Comments, reactions, answers, engagement metrics
+- Grouped by channels (20x, Rev5, RFCs)
+- All sourced from GitHub API
+- Labeled with 💬 to distinguish from git data
 
 ### ✅ What the Tool DOES:
 
-**Factual Reporting (Always):**
-- Reports exact commits, diffs, file changes, timestamps, authors from git
-- Shows precise line counts and file statistics
-- Tracks new files, deletions, and renames
-- Lists branches, tags, and releases
+**Repository Tracking:**
+- Monitors git repositories for documentation changes
+- Identifies new content, modifications, and reorganizations
+- Tracks contributor activity and commit patterns
+- Generates daily and weekly repository reports
 
-**AI Interpretation (When Labeled as 🤖):**
+**Community Tracking:**
+- Monitors GitHub Discussions across organized channels
+- Identifies questions, feedback, and community concerns
+- Tracks engagement, answers, and trending topics
+- Generates daily and weekly discussions reports with AI insights
+
+**AI Interpretation (Clearly Labeled with 🤖):**
 - Interprets what code/documentation appears to do (based on actual content)
-- Assesses documentation quality, clarity, organization
+- Assesses documentation quality, clarity, or completeness
 - Analyzes apparent purpose of changes
-- Provides context for understanding significance
-- All clearly marked with 🤖 AI INTERPRETATION prefix
+- Identifies discussion themes and community sentiment
+- Provides actionable insights for community managers
+- Offers context for understanding significance
+- Never replaces or obscures factual data
 
 ### ❌ What the Tool Does NOT Do:
 
+**Repository Management:**
+- Does NOT modify or delete repositories
+- Does NOT push changes or create commits
+- Does NOT modify repository state
+
+**Predictions and Speculation:**
 - Does NOT predict future changes or roadmaps
 - Does NOT make definitive claims about developer motivations
-- Does NOT use external APIs (GitHub API, issue trackers, etc.)
-- Does NOT modify or delete repositories
-- Does NOT present AI interpretation as factual git data
+- Does NOT speculate about internal FedRAMP decisions
 
-**Key Principle:** Factual data always comes first, AI interpretation is clearly labeled and supplementary.
+**External Services:**
+- Does NOT use issue trackers or pull request APIs
+- Does NOT access private repositories
+- Only uses GitHub API for public discussions (when configured)
+
+**AI Limitations:**
+- Does NOT present AI interpretation as factual data (always labeled with 🤖)
+- Does NOT make security assessments without explicit request
+- Does NOT compare to external standards without basis
+
+**Key Principles:**
+1. **Factual data always comes first** - Git/API data before interpretation
+2. **Clear labeling** - 💬 for discussions, 🤖 for AI interpretation
+3. **Read-only operations** - Never modifies tracked repositories
+4. **Transparency** - Always clear about data source and certainty level
 
 ## Customization
 
@@ -433,9 +759,9 @@ This entire directory is **fully portable**:
 
 ## Documentation
 
-- **SPEC.md** - Complete technical specification
-- **config.yaml** - Configuration with inline comments
-- This README - User guide and quick start
+- **SPEC.md** - Complete technical specification with example commands
+- **config.yaml** - Configuration with inline comments and channel definitions
+- **README.md** - This file: user guide and quick start
 
 ## License
 
@@ -443,4 +769,9 @@ Configuration for tracking FedRAMP public repositories. All tracked repositories
 
 ---
 
-**Built for factual, reliable documentation tracking with zero speculation.**
+**Built for comprehensive documentation and community tracking.**
+
+**📊 Dual-Source Data:** Git commits + GitHub Discussions
+**🤖 AI-Enhanced:** Factual data first, AI interpretation clearly labeled
+**💬 Channel-Organized:** 20x, Rev5, and RFCs discussions grouped and analyzed
+**📝 Automated Reports:** Daily and weekly summaries for both repos and community
