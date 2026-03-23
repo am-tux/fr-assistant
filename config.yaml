@@ -13,18 +13,6 @@
 # relative to this configuration file's location
 
 repositories:
-  - name: "Marketplace-poc"
-    url: "https://github.com/FedRAMP/Marketplace-poc"
-    path: "./repos/Marketplace-poc"
-    primary_branch: "main"
-    critical_files:
-      - "README.md"
-      - "CHANGELOG.md"
-      - "docs/**/*.md"           # All documentation files
-      - "*.config.js"            # Configuration files
-      - "package.json"           # Dependencies that affect docs build
-      - ".github/workflows/*"    # CI/CD affecting documentation
-
   - name: "docs"
     url: "https://github.com/FedRAMP/docs"
     path: "./repos/docs"
@@ -156,7 +144,6 @@ storage:
 # cd [directory-containing-this-file]
 # mkdir -p repos reports
 # cd repos
-# git clone https://github.com/FedRAMP/Marketplace-poc
 # git clone https://github.com/FedRAMP/docs
 # git clone https://github.com/FedRAMP/roadmap
 # git clone https://github.com/FedRAMP/community
