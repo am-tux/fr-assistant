@@ -112,7 +112,7 @@ export TRACKER_MODE=container
 
 ### Generate Reports
 
-**Daily Report (git data only, no API calls):**
+**Daily Report:**
 ```bash
 python3 main.py daily-report
 # Or with wrapper
@@ -124,28 +124,12 @@ python3 main.py daily-report
 python3 main.py daily-report --date 2026-03-22
 ```
 
-**Daily Report with discussions (requires GitHub API):**
-```bash
-python3 main.py daily-report --with-discussions
-# May hit rate limits without token
-```
-
-**Weekly Report (git data only, no API calls):**
+**Weekly Report:**
 ```bash
 python3 main.py weekly-report
 # Or with wrapper
 ./tracker.sh weekly-report
 ```
-
-**Weekly Report with discussions (requires GitHub API):**
-```bash
-python3 main.py weekly-report --with-discussions
-```
-
-**Key Points:**
-- Default reports = **NO API calls** (git only, always work)
-- Add `--with-discussions` = Includes community data (requires API, may hit rate limits)
-- Separate detailed discussion reports available: `daily-discussions-report`, `weekly-discussions-report`
 
 Reports are saved to:
 - Daily: `./reports/daily/YYYY-MM-DD.md`
@@ -177,59 +161,14 @@ python3 main.py contributor --repo docs --name "john@example.com" --days 30
 python3 main.py contributor --repo docs --name "Jane Smith"
 ```
 
-### Query GitHub Discussions
-
-**Open RFCs:**
-```bash
-python3 main.py rfcs --repo community
-```
-
-**Filter RFCs by topic:**
-```bash
-python3 main.py rfcs --repo community --topic Rev5
-python3 main.py rfcs --repo community --topic 20x
-```
-
-**Most responded discussions:**
-```bash
-python3 main.py top-discussions --repo community --limit 10
-```
-
-**Filter by channel and timeframe:**
-```bash
-python3 main.py top-discussions --repo community --channel 20x --timeframe 7d
-python3 main.py top-discussions --repo community --channel Rev5 --timeframe 30d
-```
-
-**Unanswered questions:**
-```bash
-# Show questions that need attention
-python3 main.py unanswered --repo community --hours 48
-python3 main.py unanswered --repo community --hours 72
-```
-
-**Discussions by channel:**
-```bash
-# See all discussions in a specific channel
-python3 main.py channel-discussions --repo community --channel 20x --days 7
-python3 main.py channel-discussions --repo community --channel Rev5 --days 30
-```
-
-**Detailed discussions reports (for community managers):**
-```bash
-# In-depth channel-by-channel analysis
-python3 main.py daily-discussions-report --repo community
-python3 main.py weekly-discussions-report --repo community
-```
-
 ## Available Commands
 
 ### Core Reports
 | Command | Description |
 |---------|-------------|
 | `init` | Clone/update all repositories |
-| `daily-report` | Generate daily activity report (git + discussions highlights) |
-| `weekly-report` | Generate weekly activity report (git + discussions summary) |
+| `daily-report` | Generate daily activity report |
+| `weekly-report` | Generate weekly activity report |
 
 ### Git Repository Queries
 | Command | Description |
@@ -239,25 +178,131 @@ python3 main.py weekly-discussions-report --repo community
 | `file-history` | Show complete history of a specific file |
 | `contributor` | Show contributor activity and statistics |
 
-### GitHub Discussions Queries
-| Command | Description |
-|---------|-------------|
-| `rfcs` | List open RFCs with topic classification (Rev5/20x/General) |
-| `top-discussions` | Get most responded discussions |
-| `unanswered` | Show unanswered questions needing attention |
-| `channel-discussions` | Show all discussions in a channel (20x/Rev5/RFCs) |
+## Command Reference
 
-### Detailed Reports (for community managers)
-| Command | Description |
-|---------|-------------|
-| `daily-discussions-report` | In-depth daily discussions breakdown by channel |
-| `weekly-discussions-report` | In-depth weekly discussions summary by channel |
+### init
+
+Clone or update all configured repositories.
+
+```bash
+./tracker.sh init
+python3 main.py init
+```
+
+**What it does:**
+- Clones repositories that don't exist locally
+- Runs `git fetch` on existing repositories
+- Creates necessary directories (`repos/`, `reports/`)
+
+### daily-report
+
+Generate a daily activity report for the last 24 hours.
+
+```bash
+./tracker.sh daily-report
+./tracker.sh daily-report --date 2026-03-20
+```
+
+**Options:**
+- `--date YYYY-MM-DD` - Generate report for specific date
+
+**Output:**
+- Saved to `./reports/daily/YYYY-MM-DD.md`
+- Includes: new files, modified files, commits, contributors
+
+### weekly-report
+
+Generate a weekly summary report.
+
+```bash
+./tracker.sh weekly-report
+./tracker.sh weekly-report --week 12 --year 2026
+```
+
+**Options:**
+- `--week N` - Specific ISO week number
+- `--year YYYY` - Specific year
+
+**Output:**
+- Saved to `./reports/weekly/YYYY-Www.md`
+- Includes: summary statistics, top files, contributor activity
+
+### commits
+
+List recent commits for a repository.
+
+```bash
+./tracker.sh commits --repo docs --days 7
+./tracker.sh commits --repo community --days 30
+```
+
+**Options:**
+- `--repo NAME` - Repository name (required)
+- `--days N` - Number of days to look back (default: 7)
+
+**Output:**
+- List of commits with hash, author, date, message
+- File changes per commit
+
+### new-files
+
+List newly added files in a repository.
+
+```bash
+./tracker.sh new-files --repo docs --days 7
+./tracker.sh new-files --repo roadmap --days 30
+```
+
+**Options:**
+- `--repo NAME` - Repository name (required)
+- `--days N` - Number of days to look back (default: 7)
+
+**Output:**
+- List of new files with creation date, author, size
+- Helps identify new documentation topics
+
+### file-history
+
+Show complete change history for a specific file.
+
+```bash
+./tracker.sh file-history --repo docs --file README.md
+./tracker.sh file-history --repo docs --file tools/site/content/index.md
+```
+
+**Options:**
+- `--repo NAME` - Repository name (required)
+- `--file PATH` - File path relative to repo root (required)
+
+**Output:**
+- All commits that modified the file
+- Line changes per commit
+- Complete timeline of file evolution
+
+### contributor
+
+Show activity and statistics for a specific contributor.
+
+```bash
+./tracker.sh contributor --repo docs --name "john@example.com"
+./tracker.sh contributor --repo docs --name "John Smith" --days 30
+```
+
+**Options:**
+- `--repo NAME` - Repository name (required)
+- `--name NAME` - Contributor name or email (required)
+- `--days N` - Number of days to look back (default: 30)
+
+**Output:**
+- Commit count and timeline
+- Files modified
+- Line changes (+/-)
+- Activity summary
 
 ## Configuration
 
 Edit `config.yaml` to:
 - Add/remove repositories to track
-- Configure discussion channels (20x, Rev5, RFCs)
 - Set report thresholds and preferences
 - Adjust polling intervals
 
@@ -269,7 +314,6 @@ fr-git-tracker/
 ├── src/                    # Source code
 │   ├── config_loader.py   # Configuration parser
 │   ├── git_tracker.py     # Git operations
-│   ├── discussions_tracker.py  # GitHub Discussions API
 │   ├── report_generator.py     # Report generation
 │   └── functions.py       # High-level query functions
 ├── config.yaml            # Configuration file
@@ -294,16 +338,13 @@ python3 main.py commits --repo docs --days 7
 python3 main.py weekly-report
 ```
 
-**Monitor community discussions:**
+**Monitor specific files:**
 ```bash
-# Get all open RFCs
-python3 main.py rfcs --repo community
+# Track changes to README
+./tracker.sh file-history --repo docs --file README.md
 
-# Get Rev5-specific RFCs
-python3 main.py rfcs --repo community --topic Rev5
-
-# See hottest discussions
-python3 main.py top-discussions --repo community --timeframe 7d --limit 5
+# See new files added
+./tracker.sh new-files --repo docs --days 30
 ```
 
 **Automated reporting workflow:**
@@ -315,30 +356,7 @@ python3 main.py daily-report
 python3 main.py weekly-report
 ```
 
-## GitHub Token (Optional)
-
-**Do you need a GitHub token?**
-- **No token needed** for basic usage (daily/weekly reports)
-- **Token recommended** if you're running reports frequently or querying discussions heavily
-
-**GitHub API Limits:**
-- Without token: 60 requests/hour (sufficient for occasional reports)
-- With token: 5,000 requests/hour (for heavy usage)
-
-**To set a token (optional):**
-```bash
-export GITHUB_TOKEN=your_github_personal_access_token
-```
-
-Get a token at: https://github.com/settings/tokens
-Minimum scopes needed: `public_repo`, `read:discussion`
-
 ## Troubleshooting
-
-**"API rate limit exceeded" error:**
-- You've hit GitHub's 60 requests/hour limit
-- Either wait an hour, or set a GitHub token (see above) for 5,000 requests/hour
-- Reports will still generate with git data; only discussions data will be missing
 
 **"Repository not found" error:**
 - Run `python3 main.py init` first to clone repositories
@@ -347,7 +365,6 @@ Minimum scopes needed: `public_repo`, `read:discussion`
 **No data in reports:**
 - Make sure repositories are up to date: `python3 main.py init`
 - Check date range - may be no activity in the selected timeframe
-- For discussions, ensure GitHub token is set
 
 **Container-specific issues:**
 - **Permission errors:** Container creates files as container user
@@ -372,7 +389,6 @@ podman run --rm \
   -v ./config.yaml:/data/config.yaml:ro \
   -v ./repos:/data/repos \
   -v ./reports:/data/reports \
-  -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
   fedramp-tracker daily-report
 
 # Initialize repos
@@ -389,8 +405,8 @@ Replace `podman` with `docker` if using Docker.
 ### Container Image Details
 
 - **Base:** python:3.11-slim
-- **Size:** ~250MB
-- **Includes:** Python, Git, PyYAML, requests
+- **Size:** ~200MB
+- **Includes:** Python, Git, PyYAML
 - **User:** Runs as your UID/GID to avoid permission issues
 - **Volumes:**
   - `/data/config.yaml` - Configuration (read-only)

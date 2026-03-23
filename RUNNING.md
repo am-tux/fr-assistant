@@ -9,7 +9,7 @@
 
 # You'll see:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   FedRAMP Git & Community Tracker - First Run Setup
+   FedRAMP Git Repository Tracker - First Run Setup
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Choose how you want to run the tracker:
@@ -58,7 +58,6 @@ podman run --rm \
   -v ./config.yaml:/data/config.yaml:ro \
   -v ./repos:/data/repos \
   -v ./reports:/data/reports \
-  -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
   fedramp-tracker [command]
 ```
 Run in isolated container (Podman/Docker).
@@ -100,8 +99,8 @@ python3 main.py daily-report
 # Contributor activity
 python3 main.py contributor --repo docs --name "pete-gov" --days 30
 
-# Open RFCs
-./tracker.sh rfcs --repo community --topic Rev5
+# New files
+./tracker.sh new-files --repo docs --days 7
 ```
 
 ### Set Preferred Mode
@@ -211,7 +210,7 @@ pip3 install -r requirements.txt
 
 **Execution Time:**
 - Both modes: Identical once running
-- Bottleneck is git/API operations, not runtime
+- Bottleneck is git operations, not runtime
 
 **Recommendation:**
 - Development: Use native for faster iteration

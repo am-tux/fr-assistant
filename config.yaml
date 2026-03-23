@@ -51,51 +51,11 @@ repositories:
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - ".github/workflows/*"
 
-    # GitHub Discussions tracking (community engagement)
-    track_discussions: true
-    discussions_url: "https://github.com/FedRAMP/community/discussions"
-    discussions_config:
-      # High-level channel groupings for FedRAMP discussions
-      channels:
-        20x:
-          labels: ["20x", "FedRAMP 2.0", "modernization"]
-          keywords: ["20x", "FedRAMP 2.0", "automation", "continuous monitoring", "modern cloud"]
-          categories: ["20x"]  # If GitHub has a specific 20x category
-          enabled: true
-
-        Rev5:
-          labels: ["Rev5", "Revision 5", "Rev 5"]
-          keywords: ["Rev5", "Rev 5", "Revision 5", "baseline updates", "control updates"]
-          categories: ["Rev5"]  # If GitHub has a specific Rev5 category
-          enabled: true
-
-        RFCs:
-          labels: ["RFC", "Request for Comments"]
-          keywords: ["RFC:", "[RFC]"]
-          categories: ["RFC", "RFCs"]
-          enabled: true
-
-      # General tracking settings
-      include_answered: true     # Include answered discussions in reports
-      include_closed: false      # Exclude closed discussions from active reports
-      max_age_days: 90           # Only track discussions from last 90 days
-      min_reactions: 0           # Minimum reactions to include (0 = all)
-      track_comments: true       # Track comment activity
-      max_comments_shown: 5      # Max comments to show per discussion in reports
-
-      # Aging thresholds for alerts
-      unanswered_alert_hours: 48  # Alert if question unanswered for >48 hours
-      high_engagement_threshold: 10  # Comments count to consider "high engagement"
-
 # Daily report configuration
 daily_report:
   enabled: true
   time: "09:00"  # Time to generate daily report (24-hour format)
   output_directory: "./reports/daily"  # Where to save daily reports
-
-  # NOTE: Daily reports include GIT data only by default (no API calls required)
-  # To include discussions data, use: python3 main.py daily-report --with-discussions
-  # This avoids GitHub API rate limits unless you explicitly want discussions included
 
   # Thresholds for determining "big changes" (optimized for documentation repos)
   thresholds:
@@ -117,10 +77,6 @@ weekly_report:
   time: "09:00"            # Time to generate weekly report (24-hour format)
   output_directory: "./reports/weekly"  # Where to save weekly reports
 
-  # NOTE: Weekly reports include GIT data only by default (no API calls required)
-  # To include discussions data, use: python3 main.py weekly-report --with-discussions
-  # This avoids GitHub API rate limits unless you explicitly want discussions included
-
   # Weekly reports cover the previous 7 days
   lookback_days: 7
 
@@ -136,165 +92,10 @@ weekly_report:
   group_by_repository: true           # Organize by repository
   show_most_active_files: true        # Highlight files with most changes
 
-# GitHub Discussions report configuration
-discussions_reports:
-  enabled: true
-
-  # Daily discussions report
-  daily:
-    enabled: true
-    time: "09:00"  # Time to generate daily discussions report
-    output_directory: "./reports/discussions/daily"  # Where to save daily discussions reports
-
-    # What to include in daily reports
-    show_new_discussions: true          # New discussions created today
-    show_active_discussions: true       # Discussions with activity today
-    show_answered_discussions: true     # Questions answered today
-    show_aging_unanswered: true         # Unanswered questions >48 hours old
-    group_by_channel: true              # Group by 20x, Rev5, RFCs
-
-    # AI interpretation settings
-    enable_ai_interpretation: true      # Include AI analysis in reports
-    interpret_themes: true              # Identify common themes per channel
-    interpret_sentiment: true           # Assess community sentiment
-    interpret_urgency: true             # Flag urgent or blocking issues
-    interpret_patterns: true            # Identify recurring questions
-
-  # Weekly discussions report
-  weekly:
-    enabled: true
-    day: "Monday"  # Day of week to generate report
-    time: "09:00"  # Time to generate weekly discussions report
-    output_directory: "./reports/discussions/weekly"  # Where to save weekly discussions reports
-
-    # What to include in weekly reports
-    show_metrics_summary: true          # Overall metrics and trends
-    show_top_discussions: true          # Most engaged discussions
-    show_channel_breakdown: true        # Detailed breakdown per channel
-    show_cross_channel_analysis: true   # Themes spanning channels
-    show_health_indicators: true        # Community health assessment
-    show_actionable_insights: true      # Recommendations and action items
-    top_discussions_count: 5            # How many top discussions to show per channel
-
-    # AI interpretation settings
-    enable_ai_interpretation: true      # Include AI analysis in reports
-    interpret_themes: true              # Identify themes and patterns
-    interpret_sentiment: true           # Community sentiment analysis
-    interpret_trends: true              # Week-over-week trends
-    interpret_health: true              # Community health assessment
-    provide_recommendations: true       # Suggest actions for community managers
-
-  # Most Responded Discussions Analysis
-  most_responded:
-    enabled: true                       # Enable most responded discussions tracking
-
-    # Default settings for queries
-    default_timeframe: "7d"             # Default: last 7 days (options: "24h", "7d", "30d", "all")
-    default_limit: 10                   # Default: top 10 discussions
-    default_channel: "all"              # Default: all channels (options: "20x", "Rev5", "RFCs", "all")
-
-    # Include in automated reports
-    include_in_daily_reports: true      # Show top 3 in daily reports
-    include_in_weekly_reports: true     # Show top 10 in weekly reports
-    daily_report_limit: 3               # How many to show in daily reports
-    weekly_report_limit: 10             # How many to show in weekly reports
-
-    # Thresholds for highlighting
-    high_response_threshold: 20         # Consider "high response" if 20+ comments
-    very_high_response_threshold: 50    # Consider "very high response" if 50+ comments
-    needs_attention_threshold: 30       # Flag for attention if 30+ comments and no official response
-
-    # Analysis settings
-    analyze_response_timeline: true     # Track when responses were added
-    identify_top_contributors: true     # List most active participants
-    compare_with_previous_period: true  # Week-over-week or day-over-day comparison
-    track_response_velocity: true       # How quickly discussions gain responses
-
-    # AI interpretation
-    enable_ai_interpretation: true      # Analyze why discussions get high engagement
-    interpret_engagement_drivers: true  # Identify what makes discussions popular
-    identify_unresolved_issues: true    # Flag high-response discussions without resolution
-    suggest_actions: true               # Recommend documentation, RFCs, or responses needed
-
-  # Open RFCs Tracking
-  open_rfcs:
-    enabled: true                       # Enable RFC tracking and reporting
-
-    # Default settings for queries
-    default_status: "open"              # Default: show only open RFCs (options: "open", "answered", "closed", "all")
-    default_sort: "newest"              # Default: newest first (options: "newest", "oldest", "most_comments", "most_reactions")
-
-    # Include in automated reports
-    include_in_daily_reports: true      # Show new RFCs in daily reports
-    include_in_weekly_reports: true     # Show RFC summary in weekly reports
-
-    # Aging thresholds
-    stale_rfc_days: 30                  # Flag RFC as "stale" if open for >30 days without answer
-    low_engagement_threshold: 2         # Flag RFC as "needs input" if <2 comments after 7 days
-
-    # Analysis settings
-    track_time_to_answer: true          # Track how long RFCs take to get answered
-    identify_ready_for_decision: true   # Flag RFCs that appear ready for official decision
-    analyze_themes: true                # Group RFCs by topic/theme
-
-    # Topic classification (automatically categorize RFCs)
-    classify_by_topic: true             # Classify RFCs as Rev5, 20x, or General
-    show_topic_in_reports: true         # Display topic classification in reports
-    show_topic_breakdown: true          # Show counts by topic (X Rev5, Y 20x, Z General)
-
-    # Topic classification rules
-    rev5_keywords:                      # Keywords to identify Rev5 RFCs
-      - "Rev5"
-      - "Rev 5"
-      - "Revision 5"
-      - "baseline"
-      - "control update"
-      - "control modification"
-
-    twentyx_keywords:                   # Keywords to identify 20x RFCs
-      - "20x"
-      - "FedRAMP 2.0"
-      - "modernization"
-      - "automation"
-      - "continuous monitoring"
-      - "cloud-native"
-
-    # AI interpretation
-    enable_ai_interpretation: true      # Analyze RFC proposals and discussions
-    assess_readiness: true              # Determine if RFC is ready for decision
-    identify_consensus: true            # Identify community consensus or objections
-    suggest_next_steps: true            # Recommend actions for each RFC
-    analyze_topic_balance: true         # Analyze balance between Rev5, 20x, and general RFCs
-
 # Update frequency
 polling:
   interval_minutes: 60  # Check repositories every 60 minutes
   fetch_on_poll: true   # Run 'git fetch' to get latest changes
-
-  # GitHub Discussions polling (when enabled for a repository)
-  discussions_interval_minutes: 60  # Check for new discussions every 60 minutes
-  discussions_update_interval_hours: 6  # Update existing discussions every 6 hours
-
-# GitHub API configuration
-github_api:
-  # Authentication (optional but recommended for higher rate limits)
-  # Without token: 60 requests/hour
-  # With token: 5,000 requests/hour
-  #
-  # ⚠️  SECURITY WARNING ⚠️
-  # DO NOT hardcode your token here! Use an environment variable instead:
-  #   export GITHUB_TOKEN=your_token_here
-  # This prevents accidentally committing your token to git.
-  #
-  token: "${GITHUB_TOKEN}"  # Reads from environment variable GITHUB_TOKEN
-
-  # Rate limit handling
-  respect_rate_limits: true  # Pause when approaching rate limit
-  rate_limit_buffer: 100     # Stop when this many requests remain
-
-  # Cache settings for discussions
-  cache_discussions: true    # Cache discussions data to minimize API calls
-  cache_duration_hours: 6    # How long to cache discussion data
 
 # Output configuration
 output:
@@ -339,30 +140,6 @@ reporting:
   highlight_new_content: true     # Emphasize new documentation added
   track_content_reorganization: true  # Note when files are moved/renamed
 
-  # AI Interpretation (NEW CAPABILITY)
-  enable_ai_interpretation: true  # Allow AI to interpret content when beneficial
-  ai_interpretation_in_reports: true  # Include AI interpretation in daily/weekly reports
-  ai_interpretation_prefix: "🤖 AI INTERPRETATION:"  # Prefix to clearly label AI analysis
-
-  # When to include AI interpretation in automated reports
-  auto_interpret_new_files: true      # Interpret what new documentation covers
-  auto_interpret_large_changes: true  # Interpret files with >200 line changes
-  auto_interpret_restructuring: true  # Interpret apparent purpose of reorganizations
-
-  # GitHub Discussions Reporting (when enabled)
-  include_discussions_in_reports: true  # Include discussions activity in daily/weekly reports
-  discussions_prefix: "💬 GITHUB DISCUSSIONS:"  # Prefix to clearly label discussions data
-  discussions_in_daily_reports: true    # Show new/active discussions in daily reports
-  discussions_in_weekly_reports: true   # Show discussions summary in weekly reports
-
-  # What to show in discussions reports
-  show_new_discussions: true            # New discussions created
-  show_active_discussions: true         # Discussions with recent comments
-  show_answered_discussions: true       # Questions that were answered
-  show_unanswered_questions: true       # Open questions needing answers
-  show_top_discussions: true            # Most engaged discussions (reactions/comments)
-  top_discussions_count: 5              # How many top discussions to show
-
 # Excluded files/patterns (don't report changes to these in daily reports)
 # These are still tracked but won't trigger "big change" alerts
 excluded_patterns:
@@ -381,8 +158,6 @@ excluded_patterns:
 # Repository storage location
 storage:
   repos_directory: "./repos"  # Where repositories will be cloned (relative to this file)
-                               # "./repos" = visible "repos" directory (NOT hidden)
-                               # A hidden directory would be ".repos" (starting with dot)
 
 # IMPORTANT: Setup instructions
 # All paths are relative to the location of this config file.
@@ -392,14 +167,13 @@ storage:
 # 1. Create ./repos/ directory if it doesn't exist
 # 2. Clone repositories to ./repos/[repo-name]/ if not already present
 # 3. Run 'git fetch' on existing repositories to get updates
-# 4. Create ./reports/daily/, ./reports/weekly/, and ./reports/discussions/ directories
+# 4. Create ./reports/daily/ and ./reports/weekly/ directories
 # 5. Generate daily reports at configured time (default: 09:00)
 # 6. Generate weekly reports on configured day (default: Monday 09:00)
-# 7. Generate daily and weekly discussions reports (grouped by 20x, Rev5, RFCs)
 
 # Manual setup (optional - tool will do this automatically):
 # cd [directory-containing-this-file]
-# mkdir -p repos reports/daily reports/weekly reports/discussions/daily reports/discussions/weekly
+# mkdir -p repos reports/daily reports/weekly
 # cd repos
 # git clone https://github.com/FedRAMP/docs
 # git clone https://github.com/FedRAMP/roadmap

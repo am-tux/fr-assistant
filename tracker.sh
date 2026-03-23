@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# FedRAMP Git & Community Tracker - Universal Runner
+# FedRAMP Git Repository Tracker - Universal Runner
 # Supports both native Python and containerized execution
 
 set -e
@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 usage() {
     cat <<EOF
-FedRAMP Git & Community Tracker
+FedRAMP Git Repository Tracker
 
 Usage: $0 [--mode MODE] [COMMAND] [OPTIONS]
 
@@ -51,7 +51,6 @@ Examples:
   $0 --build
 
 Environment Variables:
-  GITHUB_TOKEN      GitHub API token (optional, recommended for discussions)
   TRACKER_MODE      Default mode (native, container, auto) - overrides saved preference
 
 Saved Preference:
@@ -99,7 +98,7 @@ load_saved_mode() {
 
 prompt_mode_selection() {
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" >&2
-    echo -e "${BLUE}   FedRAMP Git & Community Tracker - First Run Setup${NC}" >&2
+    echo -e "${BLUE}   FedRAMP Git Repository Tracker - First Run Setup${NC}" >&2
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" >&2
     echo "" >&2
     echo "Choose how you want to run the tracker:" >&2
@@ -120,7 +119,7 @@ prompt_mode_selection() {
     local has_container=false
 
     if command -v python3 &> /dev/null; then
-        if python3 -c "import yaml, requests" 2>/dev/null; then
+        if python3 -c "import yaml" 2>/dev/null; then
             has_python=true
             echo -e "${GREEN}✓ Python 3 with dependencies detected${NC}" >&2
         else
@@ -198,7 +197,7 @@ detect_mode() {
     # 4. Non-interactive fallback: auto-detect
     # Prefer native if Python is available
     if command -v python3 &> /dev/null; then
-        if python3 -c "import yaml, requests" 2>/dev/null; then
+        if python3 -c "import yaml" 2>/dev/null; then
             echo "native"
             return
         fi
@@ -239,7 +238,7 @@ run_native() {
     cd "${SCRIPT_DIR}"
 
     # Check if dependencies are installed
-    if ! python3 -c "import yaml, requests" 2>/dev/null; then
+    if ! python3 -c "import yaml" 2>/dev/null; then
         echo -e "${YELLOW}Installing Python dependencies...${NC}"
         pip3 install -r requirements.txt
     fi
@@ -256,18 +255,12 @@ run_container() {
         build_container
     fi
 
-    # Prepare volume mounts and environment
+    # Prepare volume mounts
     local mounts=(
         "-v" "${SCRIPT_DIR}/config.yaml:/data/config.yaml:ro"
         "-v" "${SCRIPT_DIR}/repos:/data/repos"
         "-v" "${SCRIPT_DIR}/reports:/data/reports"
     )
-
-    # Pass GitHub token if set
-    local env_vars=()
-    if [[ -n "${GITHUB_TOKEN}" ]]; then
-        env_vars+=("-e" "GITHUB_TOKEN=${GITHUB_TOKEN}")
-    fi
 
     # Run as current user to avoid permission issues
     local user_flag="--user=$(id -u):$(id -g)"
@@ -276,7 +269,6 @@ run_container() {
     ${runtime} run --rm \
         ${user_flag} \
         "${mounts[@]}" \
-        "${env_vars[@]}" \
         ${IMAGE_NAME} "$@"
 }
 
