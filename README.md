@@ -19,20 +19,39 @@ Rather than code-centric metrics like commit volume, this tool prioritizes conte
 - Content changes measured per file (not just total commit count)
 - Lower thresholds optimized for documentation update patterns
 
-### 🚫 No Guessing Policy
-- **ONLY reports factual information** from git data
-- Never interprets code or documentation content
-- Never speculates about reasons or quality
-- Never predicts future changes
+### 📊 Factual Data + AI Interpretation
+**Factual Data First (Always):**
+- **Primary focus:** Factual information from git data
+- Observable facts: commits, diffs, file changes, timestamps, authors
 - Explicitly states when information is not available
 
-### 📊 Daily Reports
-Automatically generates daily reports showing:
-- New documentation files added
+**AI Interpretation (When Helpful):**
+- **Clearly labeled** with 🤖 prefix to distinguish from facts
+- Can interpret what code/documentation appears to do
+- Can assess quality, clarity, or completeness
+- Can analyze apparent purpose of changes
+- Based on actual file content, not speculation
+- Never replaces or obscures factual data
+
+### 📊 Automated Reports
+
+**Daily Reports** (generated at 09:00 each day):
+- New documentation files added (highest priority)
 - Modified files with line change counts
 - Deleted or renamed files
 - Documentation structure changes
 - Branch and release activity
+- Saved to `./reports/daily/YYYY-MM-DD.md`
+
+**Weekly Reports** (generated Monday at 09:00):
+- Summary across all repositories
+- All new documentation added during the week
+- Top 10 most active files
+- Contributor activity statistics
+- Commit timeline by day of week
+- Aggregated changes and trends
+- Links to daily reports
+- Saved to `./reports/weekly/YYYY-Www.md`
 
 ### 💬 Question Answering
 Answer detailed questions about repositories:
@@ -53,8 +72,15 @@ fr-git-tracker/
 │   ├── docs/
 │   ├── roadmap/
 │   └── community/
-└── reports/           # Daily reports (visible directory)
-    └── YYYY-MM-DD.md
+└── reports/           # Generated reports (visible directory)
+    ├── daily/         # Daily reports
+    │   ├── 2026-03-23.md
+    │   ├── 2026-03-24.md
+    │   └── ...
+    └── weekly/        # Weekly reports
+        ├── 2026-W12.md
+        ├── 2026-W13.md
+        └── ...
 ```
 
 All paths are relative to this directory, making the setup portable across systems and users.
@@ -85,7 +111,8 @@ All paths are relative to this directory, making the setup portable across syste
      - Create `./repos/` directory if it doesn't exist
      - Clone repositories to `./repos/[repo-name]/` if not present
      - Run `git fetch` on existing repositories to get updates
-     - Create `./reports/` directory for daily reports
+     - Create `./reports/daily/` and `./reports/weekly/` directories
+     - Generate daily and weekly reports based on configured schedule
 
 ### Manual Setup (Optional)
 
@@ -96,7 +123,7 @@ The tool handles setup automatically, but you can manually prepare repositories:
 cd fr-git-tracker
 
 # Create directories
-mkdir -p repos reports
+mkdir -p repos reports/daily reports/weekly
 
 # Clone repositories
 cd repos
@@ -138,11 +165,13 @@ For each repository, the following file types are considered critical:
 - Build/deploy configuration affecting documentation
 - GitHub workflows for documentation builds
 
-## Daily Reports
+## Generated Reports
 
-Reports are generated in `./reports/` with the following structure:
+Reports are automatically generated and saved in `./reports/` with separate subdirectories for daily and weekly reports.
 
-### Report Format
+### Daily Report Format
+
+Generated daily at 09:00 (configurable), covering the previous 24 hours:
 
 ```markdown
 # Daily Git Activity Report - [DATE]
@@ -167,6 +196,50 @@ Reports are generated in `./reports/` with the following structure:
 ### Documentation Structure Changes
 - Files renamed, navigation changes, etc.
 ```
+
+### Weekly Report Format
+
+Generated weekly on Monday at 09:00 (configurable), covering the previous 7 days:
+
+```markdown
+# Weekly Git Activity Report - Week [WEEK], [YEAR]
+**Period:** [START_DATE] to [END_DATE]
+
+## Summary Across All Repositories
+- Total repositories with changes: X
+- Total files added: X
+- Total files modified: X
+- Total commits: X
+- Active contributors: X
+
+## [Repository Name]
+
+### 🆕 New Documentation Added This Week
+- path/to/new/file.md - Added on [date] by [author]
+  - Size: +150 lines
+
+### Most Active Files (by line changes)
+1. path/to/file.md: +450 / -120 lines (8 commits)
+   - Contributors: author1, author2
+
+### Contributor Activity
+- author1: 12 commits, +500 / -100 lines across 8 files
+- author2: 6 commits, +200 / -50 lines across 4 files
+
+### Commits by Day
+- Monday: 5 commits
+- Tuesday: 3 commits
+[...]
+
+### Day-by-Day Breakdown
+- Monday 2026-03-17 - [Link to daily report] - 5 commits, 8 files
+- Tuesday 2026-03-18 - [Link to daily report] - 3 commits, 4 files
+[...]
+```
+
+### Manual Report Generation
+
+Both daily and weekly reports can be generated manually for any historical period, allowing retrospective analysis or report regeneration.
 
 ## Report-Only Principle
 
@@ -196,8 +269,24 @@ All data comes exclusively from git commands:
 ### Update Frequency
 
 - **Polling:** Every 60 minutes (configurable)
-- **Daily reports:** Generated at 9:00 AM (configurable)
+- **Daily reports:** Generated at 09:00 daily (configurable)
+- **Weekly reports:** Generated at 09:00 on Mondays (configurable)
 - **Data caching:** Git data cached in memory between polls
+
+### Report Generation
+
+The tool automatically generates two types of reports:
+
+1. **Daily Reports** - Created each day covering the previous 24 hours
+   - Saved to `./reports/daily/YYYY-MM-DD.md`
+   - Focus on immediate changes and new files
+
+2. **Weekly Reports** - Created weekly covering the previous 7 days
+   - Saved to `./reports/weekly/YYYY-Www.md` (ISO week format)
+   - Aggregate statistics and trends
+   - Top 10 most active files
+   - Contributor activity summary
+   - Links to daily reports for detailed breakdown
 
 ## Example Questions
 
@@ -223,18 +312,58 @@ The tool can answer questions like:
 - "Show changes to navigation configuration files"
 - "What branches were merged this week?"
 
-## Important: What This Tool Does NOT Do
+**Interpretation Questions:**
+- "What does this new documentation cover?" (Factual + AI interpretation)
+- "Is the documentation complete?" (Factual stats + AI assessment)
+- "Why was this file changed?" (Factual + AI analysis of apparent intent)
 
-Following the "No Guessing" principle:
+### Example Response: Factual + AI Interpretation
 
-❌ Does NOT interpret documentation content or quality
-❌ Does NOT explain why changes were made
-❌ Does NOT assess completeness or accuracy
-❌ Does NOT predict future changes
-❌ Does NOT make assumptions about developer intent
-❌ Does NOT use external APIs (GitHub API, issue trackers, etc.)
+**Question:** "What changed in the authentication guide?"
 
-✅ ONLY reports factual data observable from git history
+**Response:**
+```
+FACTS:
+docs/authentication.md was modified in 2 commits:
+- abc123 by user@example.com on 2026-03-20: 'update auth examples' (+45/-12 lines)
+- def456 by user@example.com on 2026-03-21: 'add OAuth2 section' (+78/-0 lines)
+
+Total changes: +123 / -12 lines
+
+🤖 AI INTERPRETATION:
+Based on the diff content, the changes add a new OAuth2 authentication section
+with configuration examples for Google and GitHub providers. The updated examples
+section now includes more detailed step-by-step flows with error handling. The
+documentation appears to have expanded authentication coverage and improved
+example clarity with real-world scenarios.
+```
+
+## How the Tool Works: Factual Data + AI Interpretation
+
+### ✅ What the Tool DOES:
+
+**Factual Reporting (Always):**
+- Reports exact commits, diffs, file changes, timestamps, authors from git
+- Shows precise line counts and file statistics
+- Tracks new files, deletions, and renames
+- Lists branches, tags, and releases
+
+**AI Interpretation (When Labeled as 🤖):**
+- Interprets what code/documentation appears to do (based on actual content)
+- Assesses documentation quality, clarity, organization
+- Analyzes apparent purpose of changes
+- Provides context for understanding significance
+- All clearly marked with 🤖 AI INTERPRETATION prefix
+
+### ❌ What the Tool Does NOT Do:
+
+- Does NOT predict future changes or roadmaps
+- Does NOT make definitive claims about developer motivations
+- Does NOT use external APIs (GitHub API, issue trackers, etc.)
+- Does NOT modify or delete repositories
+- Does NOT present AI interpretation as factual git data
+
+**Key Principle:** Factual data always comes first, AI interpretation is clearly labeled and supplementary.
 
 ## Customization
 

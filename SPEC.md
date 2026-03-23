@@ -7,12 +7,34 @@ An AI-powered tool that monitors a collection of git repositories containing pri
 
 ## Core Principles
 
-### NO GUESSING RULE
-- The tool MUST ONLY report factual information derived directly from git data
+### FACTUAL DATA FIRST, AI INTERPRETATION OPTIONAL
+
+**Primary Rule: Factual Reporting**
+- The tool MUST ALWAYS lead with factual information derived directly from git data
+- Observable facts are the foundation: commits, diffs, file changes, timestamps, authors, branches, tags
 - If information is not available or unclear, explicitly state "Information not available" or "Cannot be determined from git data"
-- Do NOT infer intentions, reasons, or future implications
-- Do NOT speculate about code quality, purpose, or developer motivations
-- Only report observable facts: commits, diffs, file changes, timestamps, authors, branches, tags
+
+**Secondary Capability: AI Interpretation (When Requested)**
+- The tool MAY provide AI interpretation of code and documentation content
+- **ALL interpretations MUST be clearly prefaced** with labels such as:
+  - "🤖 AI Interpretation:"
+  - "⚠️ AI Analysis (not factual):"
+  - "💭 AI Assessment:"
+- AI interpretations should follow factual data, never replace it
+- Interpretations may include:
+  - What code or documentation appears to do
+  - Apparent purpose or intent based on content
+  - Quality observations (clarity, completeness, structure)
+  - Potential issues or improvements
+- **Users must understand:** AI interpretations are educated guesses based on content analysis, not factual git data
+
+**Separation Principle:**
+Always separate factual data from AI interpretation in responses:
+```
+FACTS: [Observable git data]
+
+🤖 AI INTERPRETATION: [Analysis based on content reading]
+```
 
 ## Tracked Repositories
 
@@ -29,6 +51,36 @@ repositories:
 ```
 
 **Note:** The tool will automatically clone repositories from their URLs if they don't exist locally.
+
+## Report Generation
+
+The tool generates two types of automated reports:
+1. **Daily Reports** - Changes in the last 24 hours
+2. **Weekly Reports** - Aggregated changes over the last 7 days
+
+Both reports focus on factual data from git history and prioritize file-level changes for documentation repositories.
+
+### Report Storage and Naming
+
+Reports are stored in the `./reports/` directory:
+```
+reports/
+├── daily/
+│   ├── 2026-03-23.md
+│   ├── 2026-03-24.md
+│   └── ...
+└── weekly/
+    ├── 2026-W12.md      # Week 12 of 2026
+    ├── 2026-W13.md
+    └── ...
+```
+
+### Report Generation Schedule
+
+- **Daily Reports:** Generated at 09:00 (configurable) covering previous 24 hours
+- **Weekly Reports:** Generated on Monday at 09:00 (configurable) covering previous 7 days
+- Reports are only generated if there are changes to report
+- Empty periods are noted with a brief "No changes" report
 
 ## Daily Change Reporting
 
@@ -109,6 +161,105 @@ New files indicate new documentation topics or features being documented.
 - Navigation/TOC files modified
 - Configuration changes affecting site structure
 ```
+
+## Weekly Change Reporting
+
+Weekly reports provide an aggregated view of the past 7 days, useful for understanding broader documentation evolution patterns.
+
+### Weekly Report Format
+
+```markdown
+# Weekly Git Activity Report - Week [WEEK_NUMBER], [YEAR]
+**Period:** [START_DATE] to [END_DATE]
+
+## Summary Across All Repositories
+
+- Total repositories with changes: X
+- Total files added: X
+- Total files modified: X
+- Total files deleted: X
+- Total commits: X
+- Total lines changed: +X / -X
+- Active contributors: X
+
+## [Repository Name]
+
+### Week Summary
+- Files added: X
+- Files modified: X
+- Files deleted: X
+- Total commits: X
+- Total lines changed: +X / -X
+- Contributors: [list of author names with commit counts]
+
+### 🆕 New Documentation Added This Week
+List all new files added during the week:
+
+- [filename] - Added on [date] by [author]
+  - Size: +X lines
+  - Commit: [hash] - [message]
+
+### Most Active Files (by line changes)
+Top 10 files with most changes:
+
+1. [filename]: +X / -X lines (Y commits)
+   - Contributors: [author list]
+   - Last modified: [date]
+
+2. [filename]: +X / -X lines (Y commits)
+   - Contributors: [author list]
+   - Last modified: [date]
+
+[...]
+
+### Files Deleted or Renamed
+- [old-filename] → [new-filename] on [date] by [author]
+- [deleted-filename] deleted on [date] by [author]
+
+### Commits by Day
+- Monday ([date]): X commits
+- Tuesday ([date]): X commits
+- Wednesday ([date]): X commits
+- Thursday ([date]): X commits
+- Friday ([date]): X commits
+- Saturday ([date]): X commits
+- Sunday ([date]): X commits
+
+### Contributor Activity
+- [author1]: X commits, +Y / -Z lines across N files
+- [author2]: X commits, +Y / -Z lines across N files
+
+### Branch/Release Activity
+- Branches created: [list with dates]
+- Branches merged: [list with source→target and dates]
+- Tags/Releases: [list with dates and commit hashes]
+
+### Critical File Changes
+Documentation structure or configuration changes:
+- [filename] modified on [date]: [brief summary of what changed]
+
+### Day-by-Day Breakdown
+For reference, link to daily reports:
+- [Monday date] - [Link to daily report] - X commits, Y files changed
+- [Tuesday date] - [Link to daily report] - X commits, Y files changed
+[...]
+```
+
+### Weekly Report Analysis Rules
+
+**MUST Include (Factual Data):**
+- Exact counts of files added, modified, deleted
+- Precise line change counts
+- List of all new files (critical for documentation tracking)
+- Contributor names with their commit/line counts
+- Chronological listing of structural changes
+
+**MUST NOT Include (Speculation):**
+- Interpretation of why changes were made
+- Assessment of documentation quality or completeness
+- Predictions about future changes
+- Assumptions about project health or activity
+- Comparative judgments (e.g., "better than last week")
 
 ## Question Answering Capabilities
 
@@ -204,33 +355,49 @@ The tool must collect and maintain:
    - Author name and email from git log
    - Commit timestamps for author activity patterns
 
+6. **File Content Data (For AI Interpretation)**
+   - Ability to read actual file content at any commit using `git show [commit]:[file]`
+   - Access to full diffs with content using `git diff` or `git show`
+   - File content at HEAD for current state analysis
+   - **Purpose:** Enable AI interpretation of what code/documentation actually does or says
+   - **Usage:** Only accessed when AI interpretation is requested or beneficial
+
 ## Response Guidelines
 
 ### When Answering Questions
 
-**MUST DO:**
+**MUST ALWAYS DO (Factual Data):**
 - Quote exact commit messages
 - Provide exact timestamps
 - Give precise line counts
 - List specific file names
 - Show actual diff output when relevant
 - Cite commit hashes for any claims
+- **Lead with factual data first, always**
 
-**MUST NOT DO:**
-- Interpret what code does
-- Explain why changes were made
-- Predict future changes
-- Assess code quality
-- Make assumptions about developer intent
-- Fill in gaps with probable information
+**MAY DO (AI Interpretation - When Useful):**
+- Interpret what code or documentation appears to do
+- Analyze apparent purpose based on content
+- Assess documentation quality, clarity, or completeness
+- Identify potential issues or improvements
+- Explain what changes seem to accomplish
 
-### Example Good vs Bad Responses
+**REQUIREMENTS FOR AI INTERPRETATION:**
+- ✅ **MUST** be clearly labeled with prefix (🤖 AI Interpretation:, ⚠️ AI Analysis:, 💭 AI Assessment:)
+- ✅ **MUST** come after factual data, never before or instead of it
+- ✅ **MUST** be based on actual content from files (via git show or git diff)
+- ✅ **MUST** acknowledge uncertainty when appropriate ("appears to", "likely", "seems to")
+- ❌ **MUST NOT** replace or obscure factual information
+- ❌ **MUST NOT** predict future changes
+- ❌ **MUST NOT** be presented as factual git data
+
+### Example Responses
 
 **Question: "What changed in the authentication documentation?"**
 
-❌ BAD: "The authentication docs were improved with better explanations and updated best practices."
+❌ BAD (Unlabeled interpretation): "The authentication docs were improved with better explanations and updated best practices."
 
-✅ GOOD: "docs/authentication.md was modified in 2 commits:
+✅ GOOD (Factual only): "docs/authentication.md was modified in 2 commits:
 - abc123 by user@example.com on 2026-03-20: 'update auth examples' (+45/-12 lines)
 - def456 by user@example.com on 2026-03-21: 'add OAuth2 section' (+78/-0 lines)
 
@@ -238,11 +405,21 @@ Total changes: +123 / -12 lines
 New content added: OAuth2 section (78 lines)
 To see exact changes, use: git show [hash]"
 
+✅ EXCELLENT (Factual + AI interpretation): "docs/authentication.md was modified in 2 commits:
+- abc123 by user@example.com on 2026-03-20: 'update auth examples' (+45/-12 lines)
+- def456 by user@example.com on 2026-03-21: 'add OAuth2 section' (+78/-0 lines)
+
+Total changes: +123 / -12 lines
+New content added: OAuth2 section (78 lines)
+
+🤖 AI INTERPRETATION (based on diff content):
+The changes appear to add a new OAuth2 authentication section with code examples. The updated examples section shows more detailed step-by-step authentication flows with error handling. The new OAuth2 section includes configuration examples for common providers (Google, GitHub) and redirect URI setup. Overall, the documentation seems to have expanded authentication coverage and improved example clarity."
+
 **Question: "Why was the documentation reorganized?"**
 
-❌ BAD: "They probably wanted to make it easier to navigate and find information."
+❌ BAD (Speculation presented as fact): "They wanted to make it easier to navigate and find information."
 
-✅ GOOD: "Cannot determine reasons from git data. Observable facts:
+✅ GOOD (Factual only): "Cannot determine reasons from git data. Observable facts:
 - 12 files were moved on 2026-03-22 in commit ghi789
 - Commit message: 'reorganize docs structure'
 - Files moved from docs/guides/* to docs/tutorials/*
@@ -254,17 +431,43 @@ File moves:
 - docs/guides/deploy.md → docs/tutorials/deployment.md
 [...]"
 
+✅ EXCELLENT (Factual + AI interpretation): "Observable facts:
+- 12 files were moved on 2026-03-22 in commit ghi789
+- Commit message: 'reorganize docs structure'
+- Files moved from docs/guides/* to docs/tutorials/*
+- _config.yml modified to update navigation structure (+15/-8 lines)
+- No explanation provided in commit message
+
+File moves:
+- docs/guides/setup.md → docs/tutorials/getting-started.md
+- docs/guides/deploy.md → docs/tutorials/deployment.md
+[...]
+
+💭 AI ASSESSMENT (based on the reorganization pattern):
+The commit message doesn't explain why, but examining the file moves reveals a pattern: content is being categorized more specifically. 'Guides' were general documentation, while the new 'tutorials' structure appears to focus on step-by-step instructional content. The navigation changes in _config.yml add new section headings that separate conceptual docs from hands-on tutorials, suggesting an effort to improve content discoverability by user intent (learning vs. reference)."
+
 **Question: "Is the documentation being actively maintained?"**
 
-❌ BAD: "Yes, it looks very active with regular updates."
+❌ BAD (Subjective judgment without data): "Yes, it looks very active with regular updates."
 
-✅ GOOD: "Cannot assess 'active maintenance' from git data. Observable facts:
+✅ GOOD (Factual only): "Cannot objectively assess 'active maintenance'. Observable facts:
 - Last commit: 2026-03-22 (1 day ago)
 - Commits in last 30 days: 8
 - Files modified in last 30 days: 23
 - Contributors in last 30 days: 4 (user1@example.com, user2@example.com, user3@example.com, user4@example.com)
 - Average lines changed per week (last 4 weeks): +245 / -67
 - New documentation files added in last 30 days: 3"
+
+✅ EXCELLENT (Factual + AI interpretation): "Observable facts:
+- Last commit: 2026-03-22 (1 day ago)
+- Commits in last 30 days: 8
+- Files modified in last 30 days: 23
+- Contributors in last 30 days: 4 (user1@example.com, user2@example.com, user3@example.com, user4@example.com)
+- Average lines changed per week (last 4 weeks): +245 / -67
+- New documentation files added in last 30 days: 3
+
+🤖 AI INTERPRETATION:
+Based on the metrics, the documentation appears to be actively maintained. Recent activity (commit 1 day ago) and consistent weekly changes (+245/-67 lines/week) suggest ongoing work. The presence of 4 different contributors indicates collaborative maintenance rather than a single maintainer. Three new files in 30 days shows the documentation is expanding to cover new topics. However, 8 commits over 30 days is moderate frequency - this could indicate either thoughtful, substantial updates or less frequent attention depending on project size and team capacity."
 
 ## Configuration File Format
 
@@ -359,11 +562,159 @@ When analyzing documentation repositories, report on:
 
 - **Build Changes:** Changes to build configuration may affect site generation
 
-**Do NOT speculate about:**
-- Quality of the documentation changes
-- Whether changes improve clarity or user experience
-- Completeness or accuracy of documentation
-- Why certain topics were added or removed
+**What Can Be Analyzed with AI Interpretation:**
+When properly labeled with 🤖, ⚠️, or 💭 prefixes, you MAY provide:
+- Quality assessment of documentation changes (clarity, organization, completeness)
+- Analysis of whether changes appear to improve user experience
+- Content coverage evaluation (what topics are/aren't documented)
+- Apparent intent based on content and commit patterns (not definitive reasons)
+- Code functionality interpretation based on actual source code
+
+**What Should NOT Be Done (Even with Labels):**
+- Predict future changes or roadmap items
+- Make definitive claims about developer motivations
+- Provide security assessments or vulnerability analysis (unless explicitly requested)
+- Compare projects to external standards without basis
+
+### When to Provide AI Interpretation
+
+**Automatically Include AI Interpretation When:**
+- User explicitly asks for interpretation, analysis, or assessment
+- User asks "why", "what does this do", "is this good", or similar qualitative questions
+- The factual data alone would not adequately answer the user's question
+- Additional context would be helpful for understanding significance
+
+**Examples:**
+- "What changed?" → Factual only (unless massive changes that need context)
+- "What does this code do?" → Factual + AI interpretation needed
+- "Why did they change this?" → Factual + AI interpretation of apparent intent
+- "Is the documentation complete?" → Factual stats + AI assessment
+- "How many commits?" → Factual only
+
+**Do NOT Include AI Interpretation When:**
+- User asks for simple factual queries (counts, dates, authors)
+- User explicitly requests "just the facts" or similar
+- Factual data fully answers the question
+
+### AI Interpretation Best Practices
+
+1. **Read the actual content** - Use `git show` or `git diff` to read actual file content before interpreting
+2. **Be specific** - Reference specific lines, sections, or patterns you observed
+3. **Acknowledge uncertainty** - Use phrases like "appears to", "likely", "seems to", "suggests"
+4. **Provide value** - Don't just restate what's obvious from the diff, add insight
+5. **Stay grounded** - Base interpretations on observable content, not speculation
+
+## Report Generation Functions
+
+### Daily Report Generation
+
+**Function:** `generateDailyReport(date)`
+
+**Process:**
+1. Determine the 24-hour period (from previous report to current time, or last 24 hours)
+2. For each tracked repository:
+   - Run `git log --since="24 hours ago" --name-status --numstat`
+   - Identify all new files with `--diff-filter=A`
+   - Identify deleted files with `--diff-filter=D`
+   - Identify renamed files with `--diff-filter=R`
+   - Calculate line changes per file
+   - Track commit messages and authors
+3. Generate report following the Daily Report Format template
+4. Save to `./reports/daily/YYYY-MM-DD.md`
+5. Return path to generated report
+
+**Trigger:**
+- Scheduled at configured time (default: 09:00 daily)
+- Can be manually triggered for any specific date
+- Only generates if there are changes OR if `generate_empty_reports` is true
+
+### Weekly Report Generation
+
+**Function:** `generateWeeklyReport(weekNumber, year)`
+
+**Process:**
+1. Determine the 7-day period (Monday to Sunday of the specified week)
+2. For each tracked repository:
+   - Aggregate all changes from the 7-day period
+   - Collect all new files added during the week
+   - Identify the top 10 most-changed files (by line count)
+   - Calculate contributor statistics (commits and lines per author)
+   - Track branch and release activity
+   - Count commits per day of week
+3. Generate summary statistics across all repositories
+4. Generate report following the Weekly Report Format template
+5. If `link_daily_reports_in_weekly` is true, include links to daily reports
+6. Save to `./reports/weekly/YYYY-Www.md` (ISO week format)
+7. Return path to generated report
+
+**Trigger:**
+- Scheduled weekly on configured day and time (default: Monday 09:00)
+- Can be manually triggered for any specific week
+- Only generates if there are changes OR if `generate_empty_reports` is true
+
+### Report Generation Rules
+
+**File Naming:**
+- Daily: `YYYY-MM-DD.md` (e.g., `2026-03-23.md`)
+- Weekly: `YYYY-Www.md` (e.g., `2026-W12.md` for week 12)
+
+**Directory Structure:**
+```
+reports/
+├── daily/
+│   ├── 2026-03-23.md
+│   ├── 2026-03-24.md
+│   └── ...
+└── weekly/
+    ├── 2026-W12.md
+    ├── 2026-W13.md
+    └── ...
+```
+
+**Empty Reports:**
+- If `generate_empty_reports: true`, create minimal report stating "No changes during this period"
+- If `generate_empty_reports: false`, skip report generation for periods with no activity
+
+**Report Overwriting:**
+- If a report already exists for a date/week, it will be overwritten
+- This allows re-running report generation to update or correct data
+
+**Git Commands Used:**
+```bash
+# For daily reports (last 24 hours)
+git log --since="24 hours ago" --name-status --numstat --all
+
+# For weekly reports (specific date range)
+git log --since="YYYY-MM-DD" --until="YYYY-MM-DD" --name-status --numstat --all
+
+# For new files
+git log --diff-filter=A --since="DATE" --name-status
+
+# For deleted files
+git log --diff-filter=D --since="DATE" --name-status
+
+# For renamed files
+git log --diff-filter=R --since="DATE" --name-status
+
+# For contributor stats
+git shortlog --since="DATE" --until="DATE" -sn
+```
+
+### Manual Report Generation
+
+Both daily and weekly reports can be generated manually for historical periods:
+
+**Daily Report for Specific Date:**
+```
+generateDailyReport("2026-03-15")
+```
+
+**Weekly Report for Specific Week:**
+```
+generateWeeklyReport(12, 2026)  // Week 12 of 2026
+```
+
+This allows retrospective analysis or regeneration of reports if needed.
 
 ## Implementation Notes
 
@@ -398,7 +749,8 @@ Directory structure:
 - Repositories are read-only from the tool's perspective
 - The tool will NEVER push changes or modify repository state
 - The tool will only run `git fetch` to retrieve new data from remotes
-- Local repository directories can be safely deleted; they will be re-cloned on next run
+- **The tool will NEVER delete downloaded git repositories unless explicitly prompted by the user**
+- Local repository directories can be safely deleted manually by the user; they will be re-cloned on next run
 
 ### Data Sources
 All data MUST come from:
@@ -418,11 +770,18 @@ All data MUST come from:
 - `git log --diff-filter=A --numstat [commit]` - Get line count for newly added files
 - `git diff --name-status --diff-filter=A [ref1]..[ref2]` - Compare file additions between refs
 
-### Forbidden Data Sources
+### Forbidden Data Sources and Operations
 - Do NOT use external APIs or services (except git clone/fetch from repository URLs)
-- Do NOT make assumptions based on file names or patterns
-- Do NOT use AI to interpret code semantics
+- Do NOT make assumptions based solely on file names or patterns (unless clearly labeled as AI interpretation)
 - Do NOT use GitHub API, issue trackers, or other external services
+- Do NOT delete repository directories (only clone or fetch, never remove)
+- Do NOT modify repository state (no commits, pushes, resets, or destructive operations)
+
+### Allowed When Properly Labeled
+- ✅ AI interpretation of code/documentation content (with 🤖 prefix)
+- ✅ Analysis of what code appears to do (based on actual content via `git show`)
+- ✅ Assessment of documentation quality/clarity (when clearly marked as interpretation)
+- ✅ Pattern recognition in file organization (labeled as AI observation)
 
 ### Update Frequency
 - Poll repositories every: [configurable, default: 1 hour]
@@ -434,11 +793,17 @@ All data MUST come from:
 
 When encountering issues:
 - If repository is not accessible: "Repository [name] is not accessible at [path]"
+- If repository does not exist locally: Clone it from the URL, do NOT delete or modify other repositories
 - If commit hash is invalid: "Commit [hash] not found in repository [name]"
 - If branch doesn't exist: "Branch [name] does not exist in repository [name]"
 - If date range has no commits: "No commits found between [date1] and [date2]"
 
 Never fail silently. Always report what went wrong with specific details.
+
+**IMPORTANT - Repository Deletion Policy:**
+- NEVER delete downloaded git repositories unless explicitly prompted by the user
+- Only clone or fetch repositories, never remove them automatically
+- If a repository needs to be removed, ask the user for confirmation first
 
 ## Future Considerations
 

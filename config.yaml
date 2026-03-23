@@ -55,6 +55,7 @@ repositories:
 daily_report:
   enabled: true
   time: "09:00"  # Time to generate daily report (24-hour format)
+  output_directory: "./reports/daily"  # Where to save daily reports
 
   # Thresholds for determining "big changes" (optimized for documentation repos)
   thresholds:
@@ -69,6 +70,28 @@ daily_report:
     - files_renamed          # Any renamed/moved files - indicates reorganization
     - critical_files_changed # Changes to navigation, config, or structure files
 
+# Weekly report configuration
+weekly_report:
+  enabled: true
+  day: "Monday"            # Day of week to generate report
+  time: "09:00"            # Time to generate weekly report (24-hour format)
+  output_directory: "./reports/weekly"  # Where to save weekly reports
+
+  # Weekly reports cover the previous 7 days
+  lookback_days: 7
+
+  # Show top N most active files
+  top_files_count: 10
+
+  # Include day-by-day breakdown with links to daily reports
+  include_daily_breakdown: true
+
+  # Weekly-specific content
+  include_contributor_stats: true     # Show contributor activity summary
+  include_commit_timeline: true       # Show commits by day of week
+  group_by_repository: true           # Organize by repository
+  show_most_active_files: true        # Highlight files with most changes
+
 # Update frequency
 polling:
   interval_minutes: 60  # Check repositories every 60 minutes
@@ -77,15 +100,23 @@ polling:
 # Output configuration
 output:
   format: "markdown"
-  output_directory: "./reports"  # Relative to this config file's directory
+  output_directory: "./reports"  # Root reports directory (contains daily/ and weekly/ subdirs)
   include_diffs: false      # Set to true to include full diffs in reports (can be verbose)
   max_commits_shown: 50     # Maximum number of commits to show in detail
   truncate_long_messages: true  # Truncate commit messages longer than 200 chars
 
+  # Report file naming
+  daily_filename_format: "YYYY-MM-DD.md"     # e.g., 2026-03-23.md
+  weekly_filename_format: "YYYY-Www.md"      # e.g., 2026-W12.md (ISO week number)
+
   # New file reporting (CRITICAL for documentation tracking)
   highlight_new_files: true  # Visually highlight new files in reports
   show_new_file_content_preview: false  # Set to true to include first few lines of new files
-  list_new_files_first: true  # Always list new files at top of daily reports
+  list_new_files_first: true  # Always list new files at top of reports
+
+  # Report generation options
+  generate_empty_reports: true   # Create "No changes" report if no activity
+  link_daily_reports_in_weekly: true  # Include links to daily reports in weekly summary
 
 # Reporting preferences (optimized for documentation tracking)
 reporting:
@@ -108,6 +139,16 @@ reporting:
   # Documentation-specific reporting
   highlight_new_content: true     # Emphasize new documentation added
   track_content_reorganization: true  # Note when files are moved/renamed
+
+  # AI Interpretation (NEW CAPABILITY)
+  enable_ai_interpretation: true  # Allow AI to interpret content when beneficial
+  ai_interpretation_in_reports: true  # Include AI interpretation in daily/weekly reports
+  ai_interpretation_prefix: "🤖 AI INTERPRETATION:"  # Prefix to clearly label AI analysis
+
+  # When to include AI interpretation in automated reports
+  auto_interpret_new_files: true      # Interpret what new documentation covers
+  auto_interpret_large_changes: true  # Interpret files with >200 line changes
+  auto_interpret_restructuring: true  # Interpret apparent purpose of reorganizations
 
 # Excluded files/patterns (don't report changes to these in daily reports)
 # These are still tracked but won't trigger "big change" alerts
@@ -138,11 +179,13 @@ storage:
 # 1. Create ./repos/ directory if it doesn't exist
 # 2. Clone repositories to ./repos/[repo-name]/ if not already present
 # 3. Run 'git fetch' on existing repositories to get updates
-# 4. Create ./reports/ directory for daily reports
+# 4. Create ./reports/daily/ and ./reports/weekly/ directories
+# 5. Generate daily reports at configured time (default: 09:00)
+# 6. Generate weekly reports on configured day (default: Monday 09:00)
 
 # Manual setup (optional - tool will do this automatically):
 # cd [directory-containing-this-file]
-# mkdir -p repos reports
+# mkdir -p repos reports/daily reports/weekly
 # cd repos
 # git clone https://github.com/FedRAMP/docs
 # git clone https://github.com/FedRAMP/roadmap
