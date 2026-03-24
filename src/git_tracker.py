@@ -469,10 +469,10 @@ class GitTracker:
             branch = self.primary_branch
 
         # Build git log command
-        cmd = ['git', 'log', f'origin/{branch}', '--author={contributor}', '--format=%H']
+        cmd = ['git', 'log', f'origin/{branch}', f'--author={contributor}', '--format=%H']
 
         if since:
-            since_str = since.strftime('%Y-%m-%d %H:%M:%S')
+            since_str = since.strftime('%Y-%m-%d')
             cmd.append(f'--since={since_str}')
 
         try:
@@ -481,8 +481,12 @@ class GitTracker:
                 cwd=self.path,
                 capture_output=True,
                 text=True,
-                check=True
+                check=False
             )
+
+            # Check for git errors
+            if result.returncode != 0 and result.stderr:
+                print(f"Git error for {contributor}: {result.stderr}")
 
             commit_hashes = [h for h in result.stdout.strip().split('\n') if h]
 
@@ -511,8 +515,8 @@ class GitTracker:
                 'files': list(files_modified)
             }
 
-        except subprocess.CalledProcessError as e:
-            print(f"Error getting contributor activity for {contributor}: {e.stderr}")
+        except Exception as e:
+            print(f"Error getting contributor activity for {contributor}: {e}")
             return {
                 'contributor': contributor,
                 'total_commits': 0,
