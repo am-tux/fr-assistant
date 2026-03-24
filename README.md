@@ -1,19 +1,21 @@
-# Git Repository Tracker
+# FedRAMP Git Repository Tracker
 
-A lightweight command-line tool for querying git repositories. Track file changes, commits, contributors, and file history across multiple repositories.
+A lightweight command-line tool for tracking FedRAMP public repositories. Monitor git commits, RFCs, discussions, and community activity all in one place.
 
-**📊 Track:** Git commits and file changes | **🔍 Query:** File history and contributors | **⚡ Simple:** Direct git data queries
+**📊 Track:** Git commits and RFCs | **🔍 Query:** File history and discussions | **⚡ Simple:** No API tokens required
 
 ---
 
 ## Features
 
+- **Track RFCs** - Monitor GitHub Discussions for RFCs and community proposals
+- **Latest activity** - Combined view of RFCs and git changes across all repos
 - **Query commits** - List recent commits with file changes
 - **Track new files** - Find newly added files in any time range
 - **File history** - View complete change history for any file
 - **Contributor activity** - See what contributors are working on
 - **Multi-repository** - Track multiple repositories simultaneously
-- **Zero dependencies** - Pure git queries, no external APIs
+- **No API tokens** - Web scraping for public data, no authentication required
 
 ## Quick Start
 
@@ -30,6 +32,12 @@ python3 main.py init
 ### Basic Usage
 
 ```bash
+# See all recent FedRAMP activity (RFCs + git changes)
+python3 main.py latest --days 7
+
+# Track GitHub Discussions RFCs
+python3 main.py rfcs --days 30
+
 # List commits from last 7 days
 python3 main.py commits --repo docs --days 7
 
@@ -48,6 +56,9 @@ python3 main.py contributor --repo docs --name "john@example.com" --days 30
 | Command | Description |
 |---------|-------------|
 | `init` | Clone/update all repositories |
+| `latest` | Show all recent FedRAMP activity (RFCs + git changes) |
+| `rfcs` | Show GitHub Discussions RFCs |
+| `blog` | Show note about FedRAMP blog (requires manual visit) |
 | `commits` | List recent commits with file stats |
 | `new-files` | List newly added files |
 | `file-history` | Show complete history of a file |
@@ -74,6 +85,30 @@ storage:
 ```
 
 ## Examples
+
+### Get Latest FedRAMP Activity
+
+```bash
+# See everything happening in FedRAMP
+python3 main.py latest --days 7
+
+# Output shows:
+# - RFCs from GitHub Discussions
+# - Git commits across all repos
+```
+
+### Track RFCs and Discussions
+
+```bash
+# See recent RFCs
+python3 main.py rfcs --days 30
+
+# Shows:
+# - RFC title
+# - Author
+# - Comment count
+# - Discussion URL
+```
 
 ### Track Documentation Changes
 
@@ -107,6 +142,7 @@ fr-git-tracker/
 ├── src/
 │   ├── config_loader.py  # Configuration parser
 │   ├── git_tracker.py    # Git operations
+│   ├── web_scraper.py    # Web scraping for RFCs and blogs
 │   └── functions.py      # High-level query functions
 └── repos/                # Cloned repositories (auto-created)
     ├── docs/
@@ -122,7 +158,9 @@ fr-git-tracker/
 
 ## How It Works
 
-The tracker is a pure git query tool:
+The tracker combines git queries with web scraping:
+
+**Git Operations:**
 - ✅ Clones repositories (if they don't exist)
 - ✅ Runs `git fetch` to get updates
 - ✅ Executes git commands to query data
@@ -130,11 +168,13 @@ The tracker is a pure git query tool:
 - ❌ **NEVER** pushes changes
 - ❌ **NEVER** makes commits
 
-All data comes directly from git:
-- `git log` - Commit history
-- `git diff` - File changes
+**Data Sources:**
+- `git log` - Commit history from local repos
+- `git diff` - File changes and stats
 - `git show` - Commit details
 - `git fetch` - Update from remote
+- Web scraping - GitHub Discussions (RFCs) from public pages
+- No API tokens required - all data from public sources
 
 ## Troubleshooting
 
@@ -178,6 +218,6 @@ Configuration for tracking FedRAMP public repositories. All tracked repositories
 
 ---
 
-**A simple git query tool for repository tracking.**
+**Track FedRAMP repositories, RFCs, and community activity.**
 
-**📊 Pure Git Data** | **🔍 Direct Queries** | **⚡ Zero Dependencies**
+**📊 Git + RFCs** | **🔍 Direct Queries** | **⚡ No API Tokens**

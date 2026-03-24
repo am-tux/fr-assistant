@@ -1,14 +1,16 @@
-# Git Repository Tracker Specification
+# FedRAMP Git Repository Tracker Specification
 
 ## Purpose
-A lightweight command-line tool for querying git repositories. Provides direct access to commit history, file changes, and contributor activity through simple commands.
+A lightweight command-line tool for tracking FedRAMP public repositories. Provides direct access to commit history, file changes, contributor activity, and GitHub Discussions (RFCs) through simple commands.
 
 ## Scope
 
-### Git Repository Queries
-**Primary Focus:** Direct git data retrieval through command-line queries.
+### Data Collection
+**Primary Focus:** Multi-source data retrieval for FedRAMP repository tracking.
 
 **Capabilities:**
+- Track GitHub Discussions RFCs
+- View combined latest activity (RFCs + git changes)
 - Query commits within date ranges
 - List new files added
 - View complete file history
@@ -16,10 +18,11 @@ A lightweight command-line tool for querying git repositories. Provides direct a
 - Multi-repository support
 
 **Data Sources:**
-- Git log commands
-- Git diff operations
+- Git log commands (local repository queries)
+- Git diff operations (file changes)
 - Git show for commit details
 - Git fetch for updates
+- Web scraping for GitHub Discussions (public pages, no API)
 
 ## Tracked Repositories
 
@@ -48,6 +51,62 @@ python3 main.py init
 - Clones repositories that don't exist locally
 - Runs `git fetch` on existing repositories
 - Creates `./repos/` directory if needed
+
+### latest
+Show all recent FedRAMP activity (RFCs + git changes).
+
+```bash
+python3 main.py latest --days N
+```
+
+**Parameters:**
+- `--days` (optional) - Days to look back (default: 7)
+
+**Output:**
+- RFCs from GitHub Discussions
+  - Title, author, comment count, URL
+- Git repository changes across all repos
+  - Recent commits by repository
+  - Grouped by repo name
+
+**Example:**
+```bash
+python3 main.py latest --days 7
+```
+
+### rfcs
+Show GitHub Discussions RFCs from FedRAMP/community.
+
+```bash
+python3 main.py rfcs --days N
+```
+
+**Parameters:**
+- `--days` (optional) - Days to look back (default: 30)
+
+**Output:**
+- RFC title
+- Author (if available)
+- Comment count
+- Discussion URL
+
+**Example:**
+```bash
+python3 main.py rfcs --days 30
+```
+
+### blog
+Show information about FedRAMP blog.
+
+```bash
+python3 main.py blog
+```
+
+**Output:**
+- Note about JavaScript-based site
+- Link to visit blog directly
+
+**Note:** FedRAMP.gov uses JavaScript rendering, so blog posts cannot be scraped with traditional tools. This command provides a helpful message and link.
 
 ### commits
 List commits within a date range.
@@ -173,7 +232,9 @@ storage:
 
 ## Data Collection
 
-All data comes from standard git commands:
+### Git Commands
+
+Standard git commands for local repository queries:
 
 ```bash
 # List commits
@@ -191,6 +252,21 @@ git log --author="NAME" --since="DATE" --numstat
 # Update from remote
 git fetch origin
 ```
+
+### Web Scraping
+
+Web scraping for public GitHub pages (no API authentication):
+
+**GitHub Discussions (RFCs):**
+- URL: `https://github.com/FedRAMP/community/discussions/categories/rfcs`
+- Method: HTML parsing with BeautifulSoup
+- Extracts: Title, author, date, comment count, discussion URL
+- Filters: Only links matching `/discussions/\d+` pattern
+
+**FedRAMP Blog:**
+- Note: FedRAMP.gov uses JavaScript/SvelteKit rendering
+- Traditional scraping not feasible without headless browser
+- Command provides link to visit manually
 
 ## Implementation Details
 
@@ -219,7 +295,9 @@ project-root/
 - Never delete repositories automatically
 - User can manually delete and re-clone
 
-### Git Commands Used
+### Commands Used
+
+**Git Commands:**
 
 **For commits:**
 ```bash
@@ -240,6 +318,16 @@ git log origin/BRANCH --follow --format="%H|%an|%ai|%s" --numstat -- FILE_PATH
 **For contributor:**
 ```bash
 git log origin/BRANCH --author="NAME" --since="DATE" --format="%H" --all
+```
+
+**Web Scraping:**
+
+**For RFCs:**
+```python
+# Using requests + BeautifulSoup
+response = requests.get('https://github.com/FedRAMP/community/discussions/categories/rfcs')
+soup = BeautifulSoup(response.text, 'html.parser')
+# Parse discussion links matching /discussions/\d+ pattern
 ```
 
 ## Error Handling
@@ -272,8 +360,11 @@ Invalid date format. Use YYYY-MM-DD
 ## Requirements
 
 - **Python 3.11+** with pip
-- **PyYAML** library
 - **Git** installed and in PATH
+- **Python Libraries:**
+  - PyYAML - Configuration parsing
+  - requests - HTTP requests for web scraping
+  - beautifulsoup4 - HTML parsing for web scraping
 
 ```bash
 pip3 install -r requirements.txt
@@ -296,10 +387,12 @@ The tool is fully portable:
 - Never modifies repository state
 - Never pushes changes
 - Never commits anything
+- Web scraping only accesses public pages
 
 **No Secrets Required:**
 - No API tokens needed
-- No authentication required (public repos only)
+- No GitHub authentication required
+- All data from public sources (git repos, public web pages)
 - No credentials stored
 
 ## Future Considerations
