@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""FedRAMP Git & Community Tracker - Main CLI Entry Point"""
+"""FedRAMP Git Repository Tracker - Main CLI Entry Point"""
 
 import sys
 import argparse
@@ -13,21 +13,12 @@ from src.functions import TrackerFunctions
 def main():
     """Main entry point for the tracker CLI"""
     parser = argparse.ArgumentParser(
-        description='FedRAMP Git Repository & Community Tracker',
+        description='FedRAMP Git Repository Tracker',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
   # Initialize and ensure all repositories are cloned/updated
   %(prog)s init
-
-  # Generate today's daily report
-  %(prog)s daily-report
-
-  # Generate daily report for a specific date
-  %(prog)s daily-report --date 2026-03-22
-
-  # Generate this week's weekly report
-  %(prog)s weekly-report
 
   # Get new files added in last 7 days
   %(prog)s new-files --repo docs --days 7
@@ -53,14 +44,6 @@ Examples:
 
     # Init command
     init_parser = subparsers.add_parser('init', help='Initialize repositories (clone/fetch)')
-
-    # Daily report command
-    daily_parser = subparsers.add_parser('daily-report', help='Generate daily git activity report')
-    daily_parser.add_argument('--date', help='Date for report (YYYY-MM-DD, defaults to today)')
-
-    # Weekly report command
-    weekly_parser = subparsers.add_parser('weekly-report', help='Generate weekly git activity report')
-    weekly_parser.add_argument('--date', help='Date within the week (YYYY-MM-DD, defaults to this week)')
 
     # New files command
     files_parser = subparsers.add_parser('new-files', help='List new files added')
@@ -97,12 +80,6 @@ Examples:
         # Execute command
         if args.command == 'init':
             return cmd_init(functions)
-
-        elif args.command == 'daily-report':
-            return cmd_daily_report(functions, args)
-
-        elif args.command == 'weekly-report':
-            return cmd_weekly_report(functions, args)
 
         elif args.command == 'new-files':
             return cmd_new_files(functions, args)
@@ -142,115 +119,6 @@ def cmd_init(functions: TrackerFunctions) -> int:
     else:
         print("\nSome repositories failed to initialize.")
         return 1
-
-
-def cmd_daily_report(functions: TrackerFunctions, args) -> int:
-    """Generate daily report"""
-    if args.date:
-        date = datetime.strptime(args.date, '%Y-%m-%d')
-    else:
-        date = datetime.now()
-
-    print(f"Generating daily git activity report for {date.strftime('%Y-%m-%d')}...")
-
-    # Ensure repos are up to date
-    functions.ensure_repositories()
-
-    # Generate report
-    report_path = functions.generate_daily_report(date)
-    print(f"\n✓ Report generated: {report_path}")
-
-    return 0
-
-
-def cmd_weekly_report(functions: TrackerFunctions, args) -> int:
-    """Generate weekly report"""
-    if args.date:
-        date = datetime.strptime(args.date, '%Y-%m-%d')
-    else:
-        date = datetime.now()
-
-    # Get week info
-    start_date = date - timedelta(days=date.weekday())
-    week_num = start_date.isocalendar()[1]
-    year = start_date.year
-
-    print(f"Generating weekly git activity report for Week {week_num}, {year}...")
-
-    # Ensure repos are up to date
-    functions.ensure_repositories()
-
-    # Generate report
-    report_path = functions.generate_weekly_report(date)
-    print(f"\n✓ Report generated: {report_path}")
-
-    return 0
-
-
-def cmd_rfcs(functions: TrackerFunctions, args) -> int:
-    """List open RFCs"""
-    print(f"Fetching {args.status} RFCs from {args.repo}...")
-
-    rfcs = functions.get_open_rfcs(args.repo, args.status, args.sort)
-
-    # Filter by topic if specified
-    if args.topic:
-        rfcs = [rfc for rfc in rfcs if rfc.get('topic') == args.topic]
-
-    if not rfcs:
-        print(f"No {args.status} RFCs found.")
-        return 0
-
-    # Group by topic for display
-    topics = {'Rev5': [], '20x': [], 'General': []}
-    for rfc in rfcs:
-        topic = rfc.get('topic', 'General')
-        topics[topic].append(rfc)
-
-    # Display
-    print(f"\nFound {len(rfcs)} RFCs:")
-    print()
-
-    for topic in ['Rev5', '20x', 'General']:
-        topic_rfcs = topics[topic]
-        if topic_rfcs:
-            print(f"## {topic} RFCs ({len(topic_rfcs)})")
-            print()
-            for rfc in topic_rfcs:
-                status = "Answered" if rfc['is_answered'] else "Open"
-                print(f"- [{status}] {rfc['title']}")
-                print(f"  Topic: {rfc.get('topic', 'N/A')} | Comments: {rfc['comment_count']} | Reactions: {rfc['reaction_count']}")
-                print(f"  Created: {rfc['created_at'].strftime('%Y-%m-%d')} by {rfc['author']}")
-                print(f"  URL: {rfc['url']}")
-                print()
-
-    return 0
-
-
-def cmd_top_discussions(functions: TrackerFunctions, args) -> int:
-    """Get most responded discussions"""
-    print(f"Fetching top {args.limit} discussions from {args.repo} ({args.channel}, {args.timeframe})...")
-
-    discussions = functions.get_most_responded_discussions(
-        args.repo, args.timeframe, args.channel, args.limit
-    )
-
-    if not discussions:
-        print("No discussions found.")
-        return 0
-
-    print(f"\nTop {len(discussions)} discussions by response count:")
-    print()
-
-    for idx, disc in enumerate(discussions, 1):
-        status = "Answered" if disc['is_answered'] else "Open"
-        print(f"{idx}. [{status}] {disc['title']}")
-        print(f"   Channel: {disc['channel']} | Comments: {disc['comment_count']} | Reactions: {disc['reaction_count']}")
-        print(f"   Created: {disc['created_at'].strftime('%Y-%m-%d')} by {disc['author']}")
-        print(f"   URL: {disc['url']}")
-        print()
-
-    return 0
 
 
 def cmd_new_files(functions: TrackerFunctions, args) -> int:
