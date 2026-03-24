@@ -287,33 +287,15 @@ No commits found in the last N days
 Invalid date format. Use YYYY-MM-DD
 ```
 
-## Execution Modes
+## Requirements
 
-### Native Python
-- Direct Python execution
-- Requirements: Python 3.11+, PyYAML
-- Fast startup (~100ms)
+- **Python 3.11+** with pip
+- **PyYAML** library
+- **Git** installed and in PATH
 
 ```bash
 pip3 install -r requirements.txt
 python3 main.py COMMAND
-```
-
-### Container
-- Isolated execution environment
-- Requirements: Podman or Docker
-- Startup time ~1s
-
-```bash
-./tracker.sh --build
-./tracker.sh COMMAND
-```
-
-### Universal Wrapper
-Auto-detects and uses best available method:
-
-```bash
-./tracker.sh COMMAND
 ```
 
 ## Example Usage Scenarios

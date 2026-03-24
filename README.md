@@ -19,24 +19,17 @@ A lightweight command-line tool for querying git repositories. Track file change
 
 ### Installation
 
-**Option 1: Native Python** (faster)
 ```bash
+# Install Python dependencies
 pip3 install -r requirements.txt
-python3 main.py init
-```
 
-**Option 2: Container** (isolated)
-```bash
-./tracker.sh --build
-./tracker.sh init
+# Initialize repositories (clone/fetch)
+python3 main.py init
 ```
 
 ### Basic Usage
 
 ```bash
-# Initialize repositories (clone/fetch)
-python3 main.py init
-
 # List commits from last 7 days
 python3 main.py commits --repo docs --days 7
 
@@ -105,49 +98,12 @@ python3 main.py contributor --repo docs --name "pete@fedramp.gov" --days 30
 python3 main.py commits --repo community --days 14
 ```
 
-### Using the Wrapper Script
-
-The `tracker.sh` script auto-detects the best execution method:
-
-```bash
-# First run - choose your mode
-./tracker.sh init
-
-# Use saved preference
-./tracker.sh commits --repo docs --days 7
-
-# Force a specific mode
-./tracker.sh --mode native new-files --repo docs --days 14
-./tracker.sh --mode container file-history --repo docs --file README.md
-```
-
-## Running Modes
-
-### Native Python
-- Direct Python execution
-- Faster startup (~100ms)
-- Easier debugging
-- **Requires:** Python 3.11+
-
-### Container
-- Isolated environment
-- Reproducible builds
-- No Python install needed
-- **Requires:** Podman or Docker
-
-Choose your preferred mode on first run, or manually:
-```bash
-./tracker.sh --reset-config  # Choose again
-./tracker.sh --show-config   # Show current mode
-```
-
 ## Directory Structure
 
 ```
 fr-git-tracker/
 ├── main.py                # CLI entry point
 ├── config.yaml           # Repository configuration
-├── tracker.sh            # Universal wrapper script
 ├── src/
 │   ├── config_loader.py  # Configuration parser
 │   ├── git_tracker.py    # Git operations
@@ -161,8 +117,8 @@ fr-git-tracker/
 ## Prerequisites
 
 - **Git** installed and in PATH
-- **For Native Mode:** Python 3.11+ with pip
-- **For Container Mode:** Podman or Docker
+- **Python 3.11+** with pip
+- Network access to clone public repositories
 
 ## How It Works
 
@@ -196,21 +152,16 @@ python3 main.py init
 # Names from config.yaml: docs, roadmap, community
 ```
 
-**Container issues?**
+**Python dependencies missing?**
 ```bash
-# Rebuild the image
-./tracker.sh --build
-
-# Or use native mode
-./tracker.sh --mode native [command]
+pip3 install -r requirements.txt
 ```
 
 ## Documentation
 
 - **USAGE.md** - Detailed command reference
-- **RUNNING.md** - Running modes guide
 - **SPEC.md** - Technical specification
-- **config.yaml** - Configuration with comments
+- **config.yaml** - Configuration with examples
 
 ## Portability
 

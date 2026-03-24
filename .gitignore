@@ -1,8 +1,5 @@
 # FedRAMP Git Tracker - Git Ignore
 
-# User preferences
-.tracker-config
-
 # Downloaded repositories (cloned from GitHub)
 repos/
 

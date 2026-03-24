@@ -2,32 +2,6 @@
 
 ## Quick Start
 
-### First Run
-
-On your first run, the tracker will prompt you to choose how to run it:
-
-```bash
-./tracker.sh init
-
-# You'll be prompted to choose:
-# 1) Native Python - Fast, direct execution
-# 2) Container - Isolated, reproducible environment
-```
-
-Your choice is saved for future runs.
-
-**Change your preference:**
-```bash
-./tracker.sh --reset-config  # Choose again
-./tracker.sh --show-config   # Show current mode
-```
-
----
-
-## Installation
-
-### Native Python Setup
-
 ```bash
 # Install dependencies
 pip3 install -r requirements.txt
@@ -36,23 +10,9 @@ pip3 install -r requirements.txt
 python3 main.py init
 ```
 
-### Container Setup
-
-```bash
-# Build container image (one-time)
-./tracker.sh --build
-
-# Initialize repositories
-./tracker.sh init
-```
-
 ---
 
 ## Command Reference
-
-All commands work with either execution mode:
-- `python3 main.py [command]` (native)
-- `./tracker.sh [command]` (auto-detect/container)
 
 ### init
 
@@ -98,9 +58,6 @@ python3 main.py commits --repo docs --days 7
 
 # Last 30 days
 python3 main.py commits --repo roadmap --days 30
-
-# Using wrapper script
-./tracker.sh commits --repo community --days 14
 ```
 
 **Output:**
@@ -139,9 +96,6 @@ python3 main.py new-files --repo docs --days 7
 
 # New files in last month
 python3 main.py new-files --repo docs --days 30
-
-# Using wrapper script
-./tracker.sh new-files --repo roadmap --days 14
 ```
 
 **Output:**
@@ -180,9 +134,6 @@ python3 main.py file-history --repo docs --file README.md
 
 # History of nested file
 python3 main.py file-history --repo docs --file tools/site/content/index.md
-
-# Using wrapper script
-./tracker.sh file-history --repo community --file CONTRIBUTING.md
 ```
 
 **Output:**
@@ -222,9 +173,6 @@ python3 main.py contributor --repo docs --name "pete@fedramp.gov" --days 30
 
 # Activity by name
 python3 main.py contributor --repo docs --name "Pete Waterman" --days 60
-
-# Using wrapper script
-./tracker.sh contributor --repo community --name "developer@example.com" --days 14
 ```
 
 **Output:**
@@ -247,41 +195,6 @@ Looking back 30 days...
 ## Recent Commits (5)
 - adf8891 on 2026-03-17 10:17:06 -0400
   CCM-AGM-SSR fixes Low and Moderate rules (#58)
-```
-
----
-
-## Running Modes
-
-### Native Python
-- Direct execution
-- Faster startup (~100ms)
-- Easy debugging
-- **Requires:** Python 3.11+, git
-
-### Container
-- Isolated environment
-- Reproducible builds
-- No Python needed on host
-- **Requires:** Podman or Docker
-
-### Using the Wrapper Script
-
-The `tracker.sh` script auto-detects the best method:
-
-```bash
-# Auto-detect mode
-./tracker.sh commits --repo docs --days 7
-
-# Force native mode
-./tracker.sh --mode native commits --repo docs --days 7
-
-# Force container mode
-./tracker.sh --mode container commits --repo docs --days 7
-
-# Set default via environment variable
-export TRACKER_MODE=native
-./tracker.sh commits --repo docs --days 7
 ```
 
 ---
@@ -371,51 +284,18 @@ python3 main.py init
 python3 main.py commits --repo docs --days 60
 ```
 
-### Container Permission Errors
-```bash
-# The wrapper script handles permissions automatically
-# If running podman directly, use:
---user=$(id -u):$(id -g)
-```
-
 ### Python Dependencies Missing
 ```bash
-# Native mode
 pip3 install -r requirements.txt
-
-# Container mode (rebuild)
-./tracker.sh --build
 ```
 
 ---
 
-## Advanced Usage
-
-### Direct Container Commands
-
-If not using the wrapper script:
-
-```bash
-# Build image
-podman build -t fedramp-tracker .
-
-# Run a command
-podman run --rm \
-  --user=$(id -u):$(id -g) \
-  -v ./config.yaml:/data/config.yaml:ro \
-  -v ./repos:/data/repos \
-  fedramp-tracker commits --repo docs --days 7
-```
-
-### Automation
+## Automation
 
 **Daily query via cron:**
 ```bash
-# Native mode
 0 9 * * * cd /path/to/tracker && python3 main.py commits --repo docs --days 1
-
-# Container mode
-0 9 * * * cd /path/to/tracker && ./tracker.sh --mode container commits --repo docs --days 1
 ```
 
 ---
@@ -426,7 +306,6 @@ podman run --rm \
 2. **Use longer `--days`** if you don't see expected results
 3. **File paths** are relative to repository root
 4. **Contributor names** can be name or email from git log
-5. **Wrapper script** remembers your mode preference
 
 ---
 
@@ -439,7 +318,4 @@ python3 main.py --help
 # Show command-specific help
 python3 main.py commits --help
 python3 main.py contributor --help
-
-# Wrapper script help
-./tracker.sh --help
 ```
