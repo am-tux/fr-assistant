@@ -21,24 +21,6 @@ A lightweight command-line tool for querying git repositories. Provides direct a
 - Git show for commit details
 - Git fetch for updates
 
-## Core Principles
-
-### FACTUAL DATA ONLY
-
-- All data comes directly from git commands
-- No interpretation or analysis
-- Observable facts: commits, diffs, file changes, timestamps, authors
-- If information is not available, state clearly
-
-### READ-ONLY OPERATIONS
-
-- Clone repositories if they don't exist
-- Run `git fetch` to get updates
-- Query git history and data
-- **NEVER** modify repository state
-- **NEVER** push changes
-- **NEVER** make commits
-
 ## Tracked Repositories
 
 Repositories are stored in `./repos/` relative to the configuration file:
@@ -296,43 +278,6 @@ Invalid date format. Use YYYY-MM-DD
 ```bash
 pip3 install -r requirements.txt
 python3 main.py COMMAND
-```
-
-## Example Usage Scenarios
-
-### Track Documentation Changes
-
-```bash
-# Initialize repos
-python3 main.py init
-
-# See recent commits
-python3 main.py commits --repo docs --days 7
-
-# Find new files
-python3 main.py new-files --repo docs --days 30
-
-# Track specific file
-python3 main.py file-history --repo docs --file guides/setup.md
-```
-
-### Monitor Contributor Activity
-
-```bash
-# See what someone has been working on
-python3 main.py contributor --repo docs --name "developer@example.com" --days 30
-
-# Check recent activity
-python3 main.py commits --repo docs --days 14
-```
-
-### Multi-Repository Queries
-
-```bash
-# Query each repository
-python3 main.py commits --repo docs --days 7
-python3 main.py commits --repo roadmap --days 7
-python3 main.py commits --repo community --days 7
 ```
 
 ## Portability

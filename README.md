@@ -162,6 +162,7 @@ pip3 install -r requirements.txt
 - **USAGE.md** - Detailed command reference
 - **SPEC.md** - Technical specification
 - **config.yaml** - Configuration with examples
+- **CLAUDE.md** / **.cursorrules** - AI assistant context (must stay in sync)
 
 ## Portability
 
