@@ -135,6 +135,121 @@ python3 main.py commits --repo roadmap --days 7
 python3 main.py commits --repo community --days 7
 ```
 
+## Automatic Behaviors
+
+### When User Asks "What's the Latest?" or "What's New?"
+
+**Trigger phrases:**
+- "what's the latest on FedRAMP?"
+- "what's new?"
+- "any updates?"
+- "show me recent activity"
+- "what happened this week?"
+
+**Action:**
+1. Automatically run: `python3 main.py latest --days 7`
+2. Summarize results in conversational format:
+   - Group RFCs by theme (Rev5, pilots, general)
+   - Summarize git commits by repository
+   - Highlight important changes (new files, policy updates, security)
+3. Offer relevant follow-ups
+
+**Example response format:**
+```
+Here's what's happening in FedRAMP this week:
+
+🗣️ RFCs & Discussions (X active):
+- [Brief description of key discussions]
+- [Mention comment activity if significant]
+
+📝 Repository Updates:
+- docs: X commits - [brief theme]
+- roadmap: X commits - [brief theme]
+- community: X commits - [brief theme]
+
+🔥 Highlights:
+- [Call out important changes]
+- [New files, breaking changes, etc.]
+
+Want details on any of these?
+```
+
+### When User Asks About RFCs or Discussions
+
+**Trigger phrases:**
+- "show me RFCs"
+- "what discussions are happening?"
+- "any new proposals?"
+
+**Action:**
+1. Run: `python3 main.py rfcs --days 30`
+2. Group by status/theme
+3. Explain what each RFC is about based on title
+
+### When User Asks About Specific Repository
+
+**Trigger phrases:**
+- "what's happening in docs?"
+- "show me roadmap updates"
+- "community changes"
+
+**Action:**
+1. Run: `python3 main.py commits --repo [REPO] --days 7`
+2. Summarize commit themes
+3. Highlight new files or significant changes
+
+### When User Asks About a Contributor
+
+**Trigger phrases:**
+- "what is [name] working on?"
+- "show me [name]'s activity"
+
+**Action:**
+1. Run: `python3 main.py contributor --repo [REPO] --name "[name]" --days 30`
+2. Summarize their focus areas
+3. Mention key files they're modifying
+
+### Daily/Weekly Time Frames
+
+**Time-based queries:**
+- "today" → `--days 1`
+- "this week" → `--days 7`
+- "this month" → `--days 30`
+- "last 2 weeks" → `--days 14`
+
+### Proactive Suggestions
+
+After showing results, offer helpful follow-ups:
+- "Want details on any specific RFC?"
+- "Should I check what [active contributor] has been working on?"
+- "Need the full history of any changed files?"
+- "Want to see new files added?"
+
+## Response Formatting Guidelines
+
+### Summarizing Output
+
+When presenting results:
+1. **Lead with the most interesting information**
+2. **Use emojis sparingly** for visual grouping (🗣️ 📝 🔥)
+3. **Be concise** - summarize themes, don't list everything
+4. **Highlight patterns** - "mostly marketplace updates" vs listing each commit
+5. **Flag important items** - Rev5, security, policy changes, new RFCs
+
+### When Results are Empty
+
+Instead of just saying "no results", provide context:
+- "No new RFCs in the last 7 days. Last activity was [X days ago]"
+- "Docs repo has been quiet this week - last commit was [date]"
+- "Want me to expand the time range?"
+
+### Handling Errors
+
+If a command fails:
+- Don't just show the error
+- Explain what might be wrong
+- Suggest fixes: "Repositories might need updating. Run `python3 main.py init`"
+
 ## Configuration
 
 All tracked repositories are defined in `config.yaml`. The tool is read-only and never modifies repository content.
