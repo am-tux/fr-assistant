@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from .config_loader import Config
 from .git_tracker import GitTracker
+from .web_scraper import WebScraper
 
 
 class TrackerFunctions:
@@ -17,6 +18,7 @@ class TrackerFunctions:
         """
         self.config = config
         self.git_trackers = {}
+        self.web_scraper = WebScraper()
 
         # Initialize git trackers for each repository
         for repo_config in config.get_repositories():
@@ -107,3 +109,25 @@ class TrackerFunctions:
 
         tracker = self.git_trackers[repository]
         return tracker.get_contributor_activity(contributor, since, branch)
+
+    def get_github_rfcs(self, since: Optional[datetime] = None) -> List[Dict[str, Any]]:
+        """Get GitHub Discussions RFCs from FedRAMP/community
+
+        Args:
+            since: Get RFCs after this datetime
+
+        Returns:
+            List of RFC dictionaries
+        """
+        return self.web_scraper.get_github_rfcs(since)
+
+    def get_fedramp_blog_posts(self, since: Optional[datetime] = None) -> List[Dict[str, Any]]:
+        """Get FedRAMP.gov blog posts
+
+        Args:
+            since: Get posts after this datetime
+
+        Returns:
+            List of blog post dictionaries
+        """
+        return self.web_scraper.get_fedramp_blog_posts(since)

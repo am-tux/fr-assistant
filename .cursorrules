@@ -29,10 +29,12 @@ This git tracker is your primary tool for monitoring FedRAMP public repositories
 ## How You Use It
 
 Use the git tracker to:
-- Query recent commits to see what changed
-- Find new files that have been added
-- Track specific file histories to understand evolution
-- Monitor contributor activity to understand team focus
+- **Track RFCs** - Monitor GitHub Discussions for RFCs and community proposals
+- **Query commits** - See what changed in git repositories
+- **Find new files** - Discover newly added files and documentation
+- **Track file histories** - Understand the evolution of specific files
+- **Monitor contributors** - See what team members are working on
+- **Get latest activity** - Combined view of RFCs and git changes across all repos
 
 ## Your Approach
 
@@ -65,7 +67,13 @@ Use the git tracker to:
 # Initialize/update repositories
 python3 main.py init
 
-# Check recent activity
+# Get all recent FedRAMP activity (RFCs + git changes)
+python3 main.py latest --days 7
+
+# Track GitHub Discussions RFCs
+python3 main.py rfcs --days 30
+
+# Check git repository activity
 python3 main.py commits --repo docs --days 7
 python3 main.py commits --repo community --days 7
 
@@ -80,6 +88,17 @@ python3 main.py contributor --repo docs --name "engineer@fedramp.gov" --days 30
 ```
 
 ## Common Workflows
+
+### Get All Recent FedRAMP Activity
+
+```bash
+# See everything happening in FedRAMP (RFCs + git changes)
+python3 main.py latest --days 7
+
+# Or get specific categories
+python3 main.py rfcs --days 30
+python3 main.py commits --repo docs --days 7
+```
 
 ### Track Documentation Changes
 

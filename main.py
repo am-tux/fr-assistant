@@ -20,6 +20,15 @@ Examples:
   # Initialize and ensure all repositories are cloned/updated
   %(prog)s init
 
+  # Show all recent FedRAMP activity
+  %(prog)s latest --days 7
+
+  # Show GitHub RFCs
+  %(prog)s rfcs --days 30
+
+  # Show FedRAMP blog posts
+  %(prog)s blog --days 30
+
   # Get new files added in last 7 days
   %(prog)s new-files --repo docs --days 7
 
@@ -66,6 +75,18 @@ Examples:
     contributor_parser.add_argument('--name', required=True, help='Contributor name or email')
     contributor_parser.add_argument('--days', type=int, default=30, help='Days to look back (default: 30)')
 
+    # RFCs command
+    rfcs_parser = subparsers.add_parser('rfcs', help='Show GitHub Discussions RFCs')
+    rfcs_parser.add_argument('--days', type=int, default=30, help='Days to look back (default: 30)')
+
+    # Blog command
+    blog_parser = subparsers.add_parser('blog', help='Show FedRAMP blog posts')
+    blog_parser.add_argument('--days', type=int, default=30, help='Days to look back (default: 30)')
+
+    # Latest command (everything)
+    latest_parser = subparsers.add_parser('latest', help='Show all recent FedRAMP activity')
+    latest_parser.add_argument('--days', type=int, default=7, help='Days to look back (default: 7)')
+
     args = parser.parse_args()
 
     if not args.command:
@@ -92,6 +113,15 @@ Examples:
 
         elif args.command == 'contributor':
             return cmd_contributor(functions, args)
+
+        elif args.command == 'rfcs':
+            return cmd_rfcs(functions, args)
+
+        elif args.command == 'blog':
+            return cmd_blog(functions, args)
+
+        elif args.command == 'latest':
+            return cmd_latest(functions, args)
 
         else:
             print(f"Unknown command: {args.command}")
@@ -242,6 +272,105 @@ def cmd_contributor(functions: TrackerFunctions, args) -> int:
     if len(activity['commits']) > 10:
         print(f"... and {len(activity['commits']) - 10} more commits")
     print()
+
+    return 0
+
+
+def cmd_rfcs(functions: TrackerFunctions, args) -> int:
+    """Show GitHub Discussions RFCs"""
+    since = datetime.now() - timedelta(days=args.days)
+
+    print(f"Fetching RFCs from GitHub Discussions (last {args.days} days)...")
+    print()
+
+    rfcs = functions.get_github_rfcs(since)
+
+    if not rfcs:
+        print(f"No RFCs found in the last {args.days} days.")
+        return 0
+
+    print(f"Found {len(rfcs)} RFCs:")
+    print()
+
+    for rfc in rfcs:
+        print(f"- {rfc['title']}")
+        print(f"  By: {rfc['author']} | Comments: {rfc['comments']}")
+        print(f"  {rfc['url']}")
+        print()
+
+    return 0
+
+
+def cmd_blog(functions: TrackerFunctions, args) -> int:
+    """Show FedRAMP blog posts"""
+    print("FedRAMP Blog Post Tracking")
+    print()
+    print("Note: FedRAMP.gov is a JavaScript-based site that cannot be scraped")
+    print("with traditional tools. Blog posts require a headless browser to access.")
+    print()
+    print("To view FedRAMP blog posts, visit:")
+    print("https://www.fedramp.gov/blog/")
+    print()
+    return 0
+
+
+def cmd_latest(functions: TrackerFunctions, args) -> int:
+    """Show all recent FedRAMP activity"""
+    since = datetime.now() - timedelta(days=args.days)
+
+    print(f"Fetching all FedRAMP activity (last {args.days} days)...")
+    print()
+
+    # Update repositories first
+    functions.ensure_repositories()
+
+    # Get RFCs
+    print("## RFCs (GitHub Discussions)")
+    print()
+    rfcs = functions.get_github_rfcs(since)
+    if rfcs:
+        for rfc in rfcs[:5]:  # Show first 5
+            print(f"- {rfc['title']}")
+            print(f"  By: {rfc['author']} | Comments: {rfc['comments']}")
+            print(f"  {rfc['url']}")
+            print()
+        if len(rfcs) > 5:
+            print(f"... and {len(rfcs) - 5} more RFCs")
+            print()
+    else:
+        print("No recent RFCs")
+        print()
+
+    # Blog posts - currently not available via scraping
+    # (FedRAMP.gov requires JavaScript rendering)
+    print("## Blog Posts")
+    print()
+    print("(Blog scraping not available - visit https://www.fedramp.gov/blog/)")
+    print()
+
+    # Get git repository changes
+    print("## Git Repository Changes")
+    print()
+
+    repo_configs = functions.config.get_repositories()
+    total_commits = 0
+
+    for repo_config in repo_configs:
+        repo_name = repo_config['name']
+        commits = functions.get_commits_since(repo_name, since)
+
+        if commits:
+            print(f"### {repo_name}")
+            for commit in commits[:3]:  # Show first 3
+                print(f"- {commit['hash'][:7]}: {commit['subject']}")
+            if len(commits) > 3:
+                print(f"  ... and {len(commits) - 3} more commits")
+            print()
+            total_commits += len(commits)
+
+    if total_commits == 0:
+        print("No recent commits")
+        print()
 
     return 0
 
