@@ -209,11 +209,53 @@ Want details on any of these?
 - "show me RFCs"
 - "what discussions are happening?"
 - "any new proposals?"
+- "what's active?"
+- "which RFCs are being discussed?"
 
 **Action:**
-1. Run: `python3 main.py rfcs --days 30`
-2. Group by status/theme
+1. Run: `python3 main.py rfcs --days 90` (wider timeframe to see all RFCs)
+2. Group by theme and likely activity level
 3. Explain what each RFC is about based on title
+
+**When asked "what's active?" specifically:**
+1. Group RFCs by current initiatives:
+   - **Rev5 related** (Rev5, 2026, updates, improvements)
+   - **20x Pilot related** (pilot, Phase 2)
+   - **Specific RFC numbers** (RFC-0025, RFC-0026, etc.)
+   - **General discussions**
+
+2. Provide context about likely activity:
+   - "Based on the title, this appears to be about [topic]"
+   - "Rev5 is a major initiative, so these discussions are likely very active"
+   - "This is a consolidated Q&A thread - probably ongoing"
+
+3. Be honest about limitations:
+   - Note: "I can't see comment counts via scraping, but you can click the links to see activity"
+   - Provide clickable URLs for each discussion
+   - Suggest: "Click through to see which have recent comments"
+
+4. Make smart inferences:
+   - Highlight discussions with current year (2026) as likely active
+   - Flag Q&A or "General discussion" threads as ongoing
+   - Note when multiple RFCs are grouped together (0026-0030)
+
+**Example response format:**
+```
+Here are the FedRAMP discussions. I can't track comment counts via scraping, but I can group them by topic:
+
+🔄 Rev5 Initiatives (Likely Very Active):
+- Rev5 improvements for 2026
+- RFCs 0026-0030 bundle (Rev5 updates)
+
+🚀 20x Pilot Program:
+- Phase 2 pilot Q&A (consolidated thread)
+
+📋 Specific RFCs:
+- RFC-0025 discussion
+
+Click any link to see current comment activity:
+[provide URLs]
+```
 
 ### When User Asks About Specific Repository
 
