@@ -1,54 +1,47 @@
 # Git Repository Tracker Specification
 
 ## Purpose
-A lightweight tool that monitors **git repositories** for documentation-focused projects, providing detailed tracking of file changes, commit history, and contributor activity.
+A lightweight command-line tool for querying git repositories. Provides direct access to commit history, file changes, and contributor activity through simple commands.
 
 ## Scope
 
-### Git Repository Tracking
-**Primary Focus:** Documentation repositories where content changes matter more than commit volume.
+### Git Repository Queries
+**Primary Focus:** Direct git data retrieval through command-line queries.
 
-**Tracks:**
-- New, modified, and deleted documentation files
-- Line-by-line changes in specific files
-- File reorganizations and structure changes
-- Commit history, authors, and timestamps
-- Branch activity and releases
-- Configuration and build file changes
+**Capabilities:**
+- Query commits within date ranges
+- List new files added
+- View complete file history
+- Track contributor activity
+- Multi-repository support
 
-**Optimized For:**
-- Documentation-heavy repositories (Markdown, MDX, etc.)
-- Identifying new content additions
-- Understanding documentation evolution
-- Tracking contributor activity
+**Data Sources:**
+- Git log commands
+- Git diff operations
+- Git show for commit details
+- Git fetch for updates
 
 ## Core Principles
 
 ### FACTUAL DATA ONLY
 
-**Primary Rule: Factual Reporting**
-- The tool MUST ALWAYS provide factual information derived directly from git data
-- Observable facts are the foundation: commits, diffs, file changes, timestamps, authors, branches, tags
-- If information is not available or unclear, explicitly state "Information not available" or "Cannot be determined from git data"
+- All data comes directly from git commands
+- No interpretation or analysis
+- Observable facts: commits, diffs, file changes, timestamps, authors
+- If information is not available, state clearly
 
-**What the Tool Reports:**
-- Exact commit messages and hashes
-- Precise timestamps and dates
-- Line counts and file statistics
-- File names and paths
-- Author names and emails
-- Branch and tag names
-- Diff output from git
+### READ-ONLY OPERATIONS
 
-**What the Tool Does NOT Do:**
-- Interpret why changes were made (unless obvious from commit message)
-- Predict future changes
-- Make subjective assessments
-- Speculate about developer motivations
+- Clone repositories if they don't exist
+- Run `git fetch` to get updates
+- Query git history and data
+- **NEVER** modify repository state
+- **NEVER** push changes
+- **NEVER** make commits
 
 ## Tracked Repositories
 
-All repositories will be stored in the `./repos/` subdirectory relative to this specification file.
+Repositories are stored in `./repos/` relative to the configuration file:
 
 ```yaml
 repositories:
@@ -56,661 +49,337 @@ repositories:
     url: "https://github.com/user/repo"
     path: "./repos/project-name"
     primary_branch: "main"
-    critical_files:
-      - "**/*.md"
-      - "README.md"
-      - "**/*.mdx"
 ```
 
-**Note:** The tool will automatically clone repositories from their URLs if they don't exist locally.
+The tool automatically clones repositories from URLs if they don't exist locally.
 
-## Report Generation
+## Available Commands
 
-The tool generates two types of automated reports:
-1. **Daily Reports** - Changes in the last 24 hours
-2. **Weekly Reports** - Aggregated changes over the last 7 days
+### init
+Initialize repositories by cloning or fetching updates.
 
-Both reports focus on factual data from git history and prioritize file-level changes for documentation repositories.
-
-### Report Storage and Naming
-
-Reports are stored in the `./reports/` directory:
-```
-reports/
-├── daily/
-│   ├── 2026-03-23.md
-│   ├── 2026-03-24.md
-│   └── ...
-└── weekly/
-    ├── 2026-W12.md      # Week 12 of 2026
-    ├── 2026-W13.md
-    └── ...
+```bash
+python3 main.py init
 ```
 
-### Report Generation Schedule
+**What it does:**
+- Clones repositories that don't exist locally
+- Runs `git fetch` on existing repositories
+- Creates `./repos/` directory if needed
 
-- **Daily Reports:** Generated at 09:00 (configurable) covering previous 24 hours
-- **Weekly Reports:** Generated on Monday at 09:00 (configurable) covering previous 7 days
-- Reports are only generated if there are changes to report
-- Empty periods are noted with a brief "No changes" report
+### commits
+List commits within a date range.
 
-## Daily Change Reporting
-
-### What Constitutes "Big Changes"
-For documentation repositories, the focus is on **content changes** rather than commit volume. Report changes that meet ANY of the following criteria:
-
-1. **Content Volume Thresholds**
-   - **ANY new files added** (ALWAYS report - indicates new documentation topics)
-   - More than 100 lines changed in a single file
-   - More than 5 files modified (documentation typically has fewer but larger changes)
-   - Files deleted or renamed (indicates content removal or reorganization)
-   - More than 3 commits in a single day (documentation repos typically have fewer commits)
-
-2. **Documentation Structure Changes**
-   - New documentation files created
-   - Documentation files deleted or moved
-   - Changes to navigation/TOC files (SUMMARY.md, _sidebar.md, nav.yml, etc.)
-   - Changes to documentation configuration (mkdocs.yml, docusaurus.config.js, _config.yml, etc.)
-   - New branches created or merged
-   - New tags/releases created
-
-3. **Critical Files Modified**
-   - README.md or index files
-   - CHANGELOG.md or release notes
-   - Navigation/structure files
-   - Build/deployment configuration (package.json, Gemfile, requirements.txt)
-   - CI/CD files (.github/workflows/*, .gitlab-ci.yml, etc.)
-   - Site configuration files (*.config.js, *.yml, *.toml)
-
-### Daily Report Format
-
-For documentation repositories, emphasize **what changed** over commit count.
-
-```markdown
-# Daily Git Activity Report - [DATE]
-
-## [Repository Name]
-
-### Summary
-- Files modified: X
-- Files added: X
-- Files deleted: X
-- Total lines changed: +X / -X
-- Total commits: X
-- Contributors: [list of author names]
-
-### File Changes (Primary Focus)
-
-#### 🆕 New Files Added (ALWAYS REPORT)
-New files indicate new documentation topics or features being documented.
-
-- [filename] by [author] in [commit hash] at [time]
-  - Commit message: [message]
-  - File size: +X lines
-  - File path: [full path to show location in docs structure]
-
-#### Modified Files
-- [filename]: +X / -X lines by [author] in [commit hash]
-  - [commit message]
-  - Notable: [if file is critical or has large changes]
-
-#### Deleted/Renamed Files
-- [old-filename] → [new-filename] by [author] in [commit hash]
-- [deleted-filename] deleted by [author] in [commit hash]
-
-### Commits (if relevant)
-- [hash] by [author] at [time]: [commit message]
-  - Files affected: X
-  - Total changes: +X / -X lines
-
-### Branch/Release Activity
-- Branches created: [branch names]
-- Branches merged: [branch names with source→target]
-- Tags/Releases: [tag names with associated commit]
-
-### Documentation Structure Changes
-- New documentation sections added
-- Navigation/TOC files modified
-- Configuration changes affecting site structure
+```bash
+python3 main.py commits --repo REPO_NAME --days N
 ```
 
-## Weekly Change Reporting
+**Parameters:**
+- `--repo` (required) - Repository name from config
+- `--days` (optional) - Days to look back (default: 7)
 
-Weekly reports provide an aggregated view of the past 7 days, useful for understanding broader documentation evolution patterns.
+**Output:**
+- Commit hash (short)
+- Author name and email
+- Commit date
+- Commit message
+- Files changed count
+- Lines added/deleted
 
-### Weekly Report Format
-
-```markdown
-# Weekly Git Activity Report - Week [WEEK_NUMBER], [YEAR]
-**Period:** [START_DATE] to [END_DATE]
-
-## Summary Across All Repositories
-
-- Total repositories with changes: X
-- Total files added: X
-- Total files modified: X
-- Total files deleted: X
-- Total commits: X
-- Total lines changed: +X / -X
-- Active contributors: X
-
-## [Repository Name]
-
-### Week Summary
-- Files added: X
-- Files modified: X
-- Files deleted: X
-- Total commits: X
-- Total lines changed: +X / -X
-- Contributors: [list of author names with commit counts]
-
-### 🆕 New Documentation Added This Week
-List all new files added during the week:
-
-- [filename] - Added on [date] by [author]
-  - Size: +X lines
-  - Commit: [hash] - [message]
-
-### Most Active Files (by line changes)
-Top 10 files with most changes:
-
-1. [filename]: +X / -X lines (Y commits)
-   - Contributors: [author list]
-   - Last modified: [date]
-
-2. [filename]: +X / -X lines (Y commits)
-   - Contributors: [author list]
-   - Last modified: [date]
-
-[...]
-
-### Files Deleted or Renamed
-- [old-filename] → [new-filename] on [date] by [author]
-- [deleted-filename] deleted on [date] by [author]
-
-### Commits by Day
-- Monday ([date]): X commits
-- Tuesday ([date]): X commits
-- Wednesday ([date]): X commits
-- Thursday ([date]): X commits
-- Friday ([date]): X commits
-- Saturday ([date]): X commits
-- Sunday ([date]): X commits
-
-### Contributor Activity
-- [author1]: X commits, +Y / -Z lines across N files
-- [author2]: X commits, +Y / -Z lines across N files
-
-### Branch/Release Activity
-- Branches created: [list with dates]
-- Branches merged: [list with source→target and dates]
-- Tags/Releases: [list with dates and commit hashes]
-
-### Critical File Changes
-Documentation structure or configuration changes:
-- [filename] modified on [date]: [brief summary of what changed]
-
-### Day-by-Day Breakdown
-For reference, link to daily reports:
-- [Monday date] - [Link to daily report] - X commits, Y files changed
-- [Tuesday date] - [Link to daily report] - X commits, Y files changed
-[...]
+**Example:**
+```bash
+python3 main.py commits --repo docs --days 30
 ```
 
-### Weekly Report Analysis Rules
+### new-files
+List files added within a date range.
 
-**MUST Include (Factual Data):**
-- Exact counts of files added, modified, deleted
-- Precise line change counts
-- List of all new files (critical for documentation tracking)
-- Contributor names with their commit/line counts
-- Chronological listing of structural changes
+```bash
+python3 main.py new-files --repo REPO_NAME --days N
+```
 
-**MUST NOT Include (Speculation):**
-- Interpretation of why changes were made
-- Assessment of documentation quality or completeness
-- Predictions about future changes
-- Assumptions about project health or activity
-- Comparative judgments (e.g., "better than last week")
+**Parameters:**
+- `--repo` (required) - Repository name from config
+- `--days` (optional) - Days to look back (default: 7)
 
-## Question Answering Capabilities
+**Output:**
+- File path
+- Date added
+- Author
+- Commit hash
+- Commit message
 
-### Documentation-Specific Questions
-For documentation repositories, the most valuable questions are:
+**Example:**
+```bash
+python3 main.py new-files --repo docs --days 14
+```
 
-**Content Changes (Prioritize NEW FILES):**
-- **What new documentation files were added?** (HIGHEST PRIORITY - indicates new features/topics)
-- What documentation files were modified or deleted recently?
-- How much content changed in specific documentation files?
-- What new documentation topics were added?
-- Which documentation files have had the most changes?
-- What files were reorganized or renamed?
-- When was [specific file] first added to the repository?
+### file-history
+Show complete change history for a specific file.
 
-**Documentation Structure:**
-- What is the current documentation structure (file tree)?
-- How has the documentation organization changed over time?
-- What navigation or configuration files were modified?
+```bash
+python3 main.py file-history --repo REPO_NAME --file FILE_PATH
+```
 
-**Content Authoring:**
-- Who has contributed to specific documentation files?
-- What documentation has a specific author written or updated?
-- Which files are most actively maintained?
+**Parameters:**
+- `--repo` (required) - Repository name from config
+- `--file` (required) - Path to file (relative to repo root)
 
-### General Questions
-The tool must be able to answer questions about:
+**Output:**
+- All commits that modified the file
+- Commit hash, author, date
+- Lines added/deleted per commit
+- Commit message
 
-### Repository Metadata
-- Current branch structure
-- List of all branches and their last commit date
-- List of all tags and releases
-- Total commit count (overall and by date range)
-- Repository size and file count
+**Example:**
+```bash
+python3 main.py file-history --repo docs --file README.md
+```
 
-### Commit History
-- Who committed what and when
-- What files were changed in specific commits
-- Line-by-line diff of any commit
-- Commit message history
-- Commits by specific author
-- Commits in specific date ranges
+### contributor
+Show activity for a specific contributor.
 
-### File History
-- When was a specific file last modified
-- Who has modified a specific file
-- Complete change history of a file
-- Current file content at specific commit or branch
+```bash
+python3 main.py contributor --repo REPO_NAME --name NAME_OR_EMAIL --days N
+```
 
-### Branch Information
-- What commits are on branch A but not on branch B
-- When was a branch created
-- Who has committed to a specific branch
-- Branch divergence information
+**Parameters:**
+- `--repo` (required) - Repository name from config
+- `--name` (required) - Contributor name or email address
+- `--days` (optional) - Days to look back (default: 30)
 
-### Author/Contributor Analysis
-- List of all contributors
-- Commit count by author
-- Lines changed by author
-- Active time periods for each contributor
+**Output:**
+- Total commits
+- Files modified count
+- Lines added/deleted
+- List of files modified
+- Recent commits with details
 
-### Comparison Queries
-- Diff between two commits
-- Diff between two branches
-- Changes between two dates
-- Files that changed between versions
-
-## Data Collection Requirements
-
-The tool must collect and maintain:
-
-1. **Git Log Data**
-   - Full commit history with: hash, author, date, message, parent commits
-   - For each commit: list of files changed with line count (+/-)
-   - **File status for each change:** Added (A), Modified (M), Deleted (D), Renamed (R)
-   - For new files (A): full file path and initial line count
-   - For deleted files (D): file path that was deleted
-   - For renamed files (R): old path → new path
-
-2. **File Tree Data**
-   - Current file structure for each tracked branch
-   - File size and type information
-
-3. **Branch/Tag Data**
-   - All branches with HEAD commit and creation date
-   - All tags with associated commit and creation date
-
-4. **Diff Data**
-   - Ability to retrieve full diff for any commit
-   - Ability to compute diff between any two commits
-
-5. **Author Data**
-   - Author name and email from git log
-   - Commit timestamps for author activity patterns
-
-6. **File Content Data**
-   - Ability to read file content at any commit using `git show [commit]:[file]`
-   - Access to full diffs with content using `git diff` or `git show`
-   - File content at HEAD for current state analysis
-
-## Response Guidelines
-
-### When Answering Questions
-
-**MUST ALWAYS DO (Factual Data):**
-- Quote exact commit messages
-- Provide exact timestamps
-- Give precise line counts
-- List specific file names
-- Show actual diff output when relevant
-- Cite commit hashes for any claims
-- **Lead with factual data first, always**
-
-**Example Responses:**
-
-**Question: "What changed in the authentication documentation?"**
-
-✅ GOOD (Factual only): "docs/authentication.md was modified in 2 commits:
-- abc123 by user@example.com on 2026-03-20: 'update auth examples' (+45/-12 lines)
-- def456 by user@example.com on 2026-03-21: 'add OAuth2 section' (+78/-0 lines)
-
-Total changes: +123 / -12 lines
-New content added: OAuth2 section (78 lines)
-To see exact changes, use: git show [hash]"
-
-**Question: "Why was the documentation reorganized?"**
-
-✅ GOOD (Factual only): "Cannot determine reasons from git data. Observable facts:
-- 12 files were moved on 2026-03-22 in commit ghi789
-- Commit message: 'reorganize docs structure'
-- Files moved from docs/guides/* to docs/tutorials/*
-- _config.yml modified to update navigation structure (+15/-8 lines)
-- No explanation provided in commit message
-
-File moves:
-- docs/guides/setup.md → docs/tutorials/getting-started.md
-- docs/guides/deploy.md → docs/tutorials/deployment.md
-[...]"
-
-**Question: "Is the documentation being actively maintained?"**
-
-✅ GOOD (Factual only): "Cannot objectively assess 'active maintenance'. Observable facts:
-- Last commit: 2026-03-22 (1 day ago)
-- Commits in last 30 days: 8
-- Files modified in last 30 days: 23
-- Contributors in last 30 days: 4 (user1@example.com, user2@example.com, user3@example.com, user4@example.com)
-- Average lines changed per week (last 4 weeks): +245 / -67
-- New documentation files added in last 30 days: 3"
+**Example:**
+```bash
+python3 main.py contributor --repo docs --name "john@example.com" --days 30
+```
 
 ## Configuration File Format
 
 ```yaml
-# config.yaml
-
 repositories:
-  - name: "my-docs-project"
-    url: "https://github.com/user/my-docs-project"
-    # Path is optional - defaults to ./repos/[name] relative to spec file directory
-    # Use relative paths (starting with ./) for portability across systems/users
-    path: "./repos/my-docs-project"
+  - name: "docs"
+    url: "https://github.com/org/docs"
+    path: "./repos/docs"
     primary_branch: "main"
-    critical_files:
-      - "README.md"
-      - "**/*.md"              # All markdown documentation
-      - "_config.yml"          # Documentation site configuration
-      - "mkdocs.yml"
-      - ".github/workflows/*"  # Documentation build/deploy
 
-daily_report:
-  enabled: true
-  time: "09:00"  # Time to generate report
-  # Thresholds optimized for documentation repositories
-  thresholds:
-    min_commits: 3           # Docs typically have fewer commits
-    min_lines_changed: 100   # Per file threshold
-    min_files_changed: 5     # Fewer files changed per update
+  - name: "roadmap"
+    url: "https://github.com/org/roadmap"
+    path: "./repos/roadmap"
+    primary_branch: "main"
 
-  always_report:
-    - new_files_added        # Any new documentation
-    - files_deleted
-    - critical_files_changed
-
-output:
-  format: "markdown"
-  # Output directory relative to spec file directory
-  output_directory: "./reports"
-  include_diffs: false  # Set to true to include full diffs in reports
-  max_commits_shown: 50
-
-reporting:
-  prioritize_file_changes: true  # Focus on what files changed
-  group_by_file: true            # Rather than by commit/author
-
-# Repository storage location (relative to spec file directory)
 storage:
-  repos_directory: "./repos"  # Where to clone/store repositories
+  repos_directory: "./repos"
 ```
 
-## Documentation Repository Tracking
+**Configuration Options:**
 
-### Key Differences from Code Repositories
+- `repositories` - List of repositories to track
+  - `name` - Internal name for the repository
+  - `url` - GitHub URL (https, public repos)
+  - `path` - Local path (relative to config file)
+  - `primary_branch` - Main branch to track (usually "main")
 
-Documentation repositories have different change patterns than code repositories:
+- `storage` - Storage configuration
+  - `repos_directory` - Where to clone repositories
 
-1. **Commit Frequency:** Documentation typically has fewer, but more substantial commits
-   - A single documentation update might add/modify entire sections (100+ lines)
-   - Updates are often batched together rather than incremental
+## Data Collection
 
-2. **Meaningful Metrics:**
-   - **High Priority:** File additions, deletions, renames, and line count changes per file
-   - **Medium Priority:** Number of files changed, branch merges, releases
-   - **Low Priority:** Total commit count (less indicative of documentation activity)
+All data comes from standard git commands:
 
-3. **Critical Changes:**
-   - New documentation files (new topics/features being documented)
-   - Deleted files (deprecated features or reorganization)
-   - Changes to navigation/structure files (content reorganization)
-   - Large content changes (>100 lines in a file = substantial content update)
-
-4. **Reporting Focus:**
-   - What content was added or changed (file-centric view)
-   - Documentation structure evolution (new sections, reorganization)
-   - Content completeness (tracking new files vs deleted files)
-
-### Documentation-Specific Analysis
-
-When analyzing documentation repositories, report on:
-
-- **Content Additions (HIGHEST PRIORITY):**
-  - **ANY new files** (.md, .mdx, or other documentation files) - ALWAYS report these
-  - New files indicate new documentation topics, features, or content areas
-  - Include full file path to show where in documentation structure
-  - Report file size (line count) to indicate content volume
-
-- **Content Updates:** Large line changes (>100 lines) indicate substantial content rewrites
-
-- **Structure Changes:** File moves/renames indicate reorganization
-
-- **Navigation Changes:** TOC/config file changes affect user experience
-
-- **Build Changes:** Changes to build configuration may affect site generation
-
-## Report Generation Functions
-
-### Daily Report Generation
-
-**Function:** `generateDailyReport(date)`
-
-**Process:**
-1. Determine the 24-hour period (from previous report to current time, or last 24 hours)
-2. For each tracked repository:
-   - Run `git log --since="24 hours ago" --name-status --numstat`
-   - Identify all new files with `--diff-filter=A`
-   - Identify deleted files with `--diff-filter=D`
-   - Identify renamed files with `--diff-filter=R`
-   - Calculate line changes per file
-   - Track commit messages and authors
-3. Generate report following the Daily Report Format template
-4. Save to `./reports/daily/YYYY-MM-DD.md`
-5. Return path to generated report
-
-**Trigger:**
-- Scheduled at configured time (default: 09:00 daily)
-- Can be manually triggered for any specific date
-- Only generates if there are changes OR if `generate_empty_reports` is true
-
-### Weekly Report Generation
-
-**Function:** `generateWeeklyReport(weekNumber, year)`
-
-**Process:**
-1. Determine the 7-day period (Monday to Sunday of the specified week)
-2. For each tracked repository:
-   - Aggregate all changes from the 7-day period
-   - Collect all new files added during the week
-   - Identify the top 10 most-changed files (by line count)
-   - Calculate contributor statistics (commits and lines per author)
-   - Track branch and release activity
-   - Count commits per day of week
-3. Generate summary statistics across all repositories
-4. Generate report following the Weekly Report Format template
-5. If `link_daily_reports_in_weekly` is true, include links to daily reports
-6. Save to `./reports/weekly/YYYY-Www.md` (ISO week format)
-7. Return path to generated report
-
-**Trigger:**
-- Scheduled weekly on configured day and time (default: Monday 09:00)
-- Can be manually triggered for any specific week
-- Only generates if there are changes OR if `generate_empty_reports` is true
-
-### Report Generation Rules
-
-**File Naming:**
-- Daily: `YYYY-MM-DD.md` (e.g., `2026-03-23.md`)
-- Weekly: `YYYY-Www.md` (e.g., `2026-W12.md` for week 12)
-
-**Directory Structure:**
-```
-reports/
-├── daily/
-│   ├── 2026-03-23.md
-│   ├── 2026-03-24.md
-│   └── ...
-└── weekly/
-    ├── 2026-W12.md
-    ├── 2026-W13.md
-    └── ...
-```
-
-**Empty Reports:**
-- If `generate_empty_reports: true`, create minimal report stating "No changes during this period"
-- If `generate_empty_reports: false`, skip report generation for periods with no activity
-
-**Report Overwriting:**
-- If a report already exists for a date/week, it will be overwritten
-- This allows re-running report generation to update or correct data
-
-**Git Commands Used:**
 ```bash
-# For daily reports (last 24 hours)
-git log --since="24 hours ago" --name-status --numstat --all
+# List commits
+git log --since="DATE" --format="%H|%an|%ae|%ai|%s"
 
-# For weekly reports (specific date range)
-git log --since="YYYY-MM-DD" --until="YYYY-MM-DD" --name-status --numstat --all
-
-# For new files
+# Find new files
 git log --diff-filter=A --since="DATE" --name-status
 
-# For deleted files
-git log --diff-filter=D --since="DATE" --name-status
+# Get file history
+git log --follow --format="%H|%an|%ai|%s" -- FILE_PATH
 
-# For renamed files
-git log --diff-filter=R --since="DATE" --name-status
+# Contributor activity
+git log --author="NAME" --since="DATE" --numstat
 
-# For contributor stats
-git shortlog --since="DATE" --until="DATE" -sn
+# Update from remote
+git fetch origin
 ```
 
-### Manual Report Generation
+## Implementation Details
 
-Both daily and weekly reports can be generated manually for historical periods:
+### Repository Storage
 
-**Daily Report for Specific Date:**
+All repositories are cloned to `./repos/` subdirectory:
+
 ```
-generateDailyReport("2026-03-15")
-```
-
-**Weekly Report for Specific Week:**
-```
-generateWeeklyReport(12, 2026)  // Week 12 of 2026
-```
-
-This allows retrospective analysis or regeneration of reports if needed.
-
-## Implementation Notes
-
-### Repository Storage Structure
-
-**IMPORTANT:** All tracked repositories will be cloned and stored in subdirectories under the directory containing this specification file. All paths are relative to the spec file location, making this setup portable across different systems and users.
-
-Directory structure:
-```
-[spec-file-directory]/
-├── SPEC.md                    # This specification file
-├── config.yaml                # Configuration file
-├── repos/                     # All tracked repositories stored here
-│   ├── [repo-name-1]/        # First repository
-│   ├── [repo-name-2]/        # Second repository
-│   └── [repo-name-n]/        # Nth repository
-└── reports/                   # Reports output directory
-    ├── daily/
-    │   └── YYYY-MM-DD.md
-    └── weekly/
-        └── YYYY-Www.md
+project-root/
+├── config.yaml
+├── main.py
+├── src/
+└── repos/
+    ├── docs/
+    ├── roadmap/
+    └── community/
 ```
 
-**Initialization Process:**
-1. On first run, the tool will check if repositories exist in the `repos/` subdirectory
-2. If a repository does not exist locally, it will be cloned from the URL specified in config.yaml
-3. If a repository already exists, the tool will run `git fetch` to update it
-4. Repository paths in config.yaml should be specified relative to the spec file directory OR will be automatically set to `./repos/[repo-name]`
+**Initialization:**
+1. Check if repository exists in `./repos/[name]/`
+2. If not, clone from URL
+3. If exists, run `git fetch origin`
 
 **Repository Management:**
-- Repositories are read-only from the tool's perspective
-- The tool will NEVER push changes or modify repository state
-- The tool will only run `git fetch` to retrieve new data from remotes
-- **The tool will NEVER delete downloaded git repositories unless explicitly prompted by the user**
-- Local repository directories can be safely deleted manually by the user; they will be re-cloned on next run
+- Read-only operations
+- Never delete repositories automatically
+- User can manually delete and re-clone
 
-### Data Sources
-All data MUST come from:
-- `git log` with various flags (especially `--name-status` and `--diff-filter=A` for new files)
-- `git log --diff-filter=A` to identify newly added files
-- `git log --diff-filter=D` to identify deleted files
-- `git log --diff-filter=R` to identify renamed/moved files
-- `git diff` between commits/branches with `--name-status` to see file changes
-- `git show` for specific commits
-- `git branch` and `git tag` for listings
-- `git ls-tree` for file listings
-- `git fetch` to retrieve remote changes
-- Direct file reads from git objects when needed
+### Git Commands Used
 
-**Key commands for tracking new files:**
-- `git log --diff-filter=A --name-status --since="1 day ago"` - Find all files added in last day
-- `git log --diff-filter=A --numstat [commit]` - Get line count for newly added files
-- `git diff --name-status --diff-filter=A [ref1]..[ref2]` - Compare file additions between refs
+**For commits:**
+```bash
+git log origin/BRANCH --since="DATE" --format="%H" --all
+git show HASH --format="%H|%an|%ae|%ai|%s" --numstat
+```
 
-### Forbidden Data Sources and Operations
-- Do NOT use external APIs or services
-- Do NOT make assumptions based solely on file names or patterns
-- Do NOT delete repository directories (only clone or fetch, never remove)
-- Do NOT modify repository state (no commits, pushes, resets, or destructive operations)
+**For new files:**
+```bash
+git log origin/BRANCH --diff-filter=A --since="DATE" --name-status --format="%H|%an|%ai|%s"
+```
 
-### Update Frequency
-- Poll repositories every: [configurable, default: 1 hour]
-- Generate daily reports at: [configurable, default: 9 AM]
-- Run `git fetch` on each poll to get latest remote changes
-- Cache git data in memory between polls to minimize disk access
+**For file history:**
+```bash
+git log origin/BRANCH --follow --format="%H|%an|%ai|%s" --numstat -- FILE_PATH
+```
+
+**For contributor:**
+```bash
+git log origin/BRANCH --author="NAME" --since="DATE" --format="%H" --all
+```
 
 ## Error Handling
 
-When encountering issues:
-- If repository is not accessible: "Repository [name] is not accessible at [path]"
-- If repository does not exist locally: Clone it from the URL, do NOT delete or modify other repositories
-- If commit hash is invalid: "Commit [hash] not found in repository [name]"
-- If branch doesn't exist: "Branch [name] does not exist in repository [name]"
-- If date range has no commits: "No commits found between [date1] and [date2]"
+**Repository not found:**
+```
+Repository 'NAME' not found in configuration
+```
 
-Never fail silently. Always report what went wrong with specific details.
+**Repository not accessible:**
+```
+Repository 'NAME' is not accessible at PATH
+```
 
-**IMPORTANT - Repository Deletion Policy:**
-- NEVER delete downloaded git repositories unless explicitly prompted by the user
-- Only clone or fetch repositories, never remove them automatically
-- If a repository needs to be removed, ask the user for confirmation first
+**File doesn't exist:**
+```
+No history found for FILE (file may not exist)
+```
+
+**No commits found:**
+```
+No commits found in the last N days
+```
+
+**Invalid date:**
+```
+Invalid date format. Use YYYY-MM-DD
+```
+
+## Execution Modes
+
+### Native Python
+- Direct Python execution
+- Requirements: Python 3.11+, PyYAML
+- Fast startup (~100ms)
+
+```bash
+pip3 install -r requirements.txt
+python3 main.py COMMAND
+```
+
+### Container
+- Isolated execution environment
+- Requirements: Podman or Docker
+- Startup time ~1s
+
+```bash
+./tracker.sh --build
+./tracker.sh COMMAND
+```
+
+### Universal Wrapper
+Auto-detects and uses best available method:
+
+```bash
+./tracker.sh COMMAND
+```
+
+## Example Usage Scenarios
+
+### Track Documentation Changes
+
+```bash
+# Initialize repos
+python3 main.py init
+
+# See recent commits
+python3 main.py commits --repo docs --days 7
+
+# Find new files
+python3 main.py new-files --repo docs --days 30
+
+# Track specific file
+python3 main.py file-history --repo docs --file guides/setup.md
+```
+
+### Monitor Contributor Activity
+
+```bash
+# See what someone has been working on
+python3 main.py contributor --repo docs --name "developer@example.com" --days 30
+
+# Check recent activity
+python3 main.py commits --repo docs --days 14
+```
+
+### Multi-Repository Queries
+
+```bash
+# Query each repository
+python3 main.py commits --repo docs --days 7
+python3 main.py commits --repo roadmap --days 7
+python3 main.py commits --repo community --days 7
+```
+
+## Portability
+
+The tool is fully portable:
+- All paths relative to config file location
+- No hardcoded user paths
+- Can be moved anywhere on any system
+- Can be shared between users
+- Works on Linux, macOS, Windows (with git)
+
+## Security
+
+**Read-Only Operations:**
+- Only clones and fetches from public repositories
+- Never modifies repository state
+- Never pushes changes
+- Never commits anything
+
+**No Secrets Required:**
+- No API tokens needed
+- No authentication required (public repos only)
+- No credentials stored
 
 ## Future Considerations
 
-Potential enhancements (NOT in initial scope):
-- File size trends over time
-- Automated alerts for specific patterns
-- Integration with CI/CD systems for automated reporting
-- Export reports to different formats (HTML, PDF, etc.)
+Potential enhancements (not in current scope):
+- Private repository support (requires auth)
+- Branch comparison queries
+- Tag/release tracking
+- Commit diff viewing
+- Statistics aggregation

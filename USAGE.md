@@ -1,49 +1,25 @@
-# FedRAMP Git Tracker - Usage Guide
+# Git Repository Tracker - Usage Guide
 
-## First Run Setup
+## Quick Start
 
-**On your first run**, the tracker will interactively prompt you to choose your preferred method:
+### First Run
+
+On your first run, the tracker will prompt you to choose how to run it:
 
 ```bash
 ./tracker.sh init
+
+# You'll be prompted to choose:
+# 1) Native Python - Fast, direct execution
+# 2) Container - Isolated, reproducible environment
 ```
 
-You'll see a menu asking you to choose between:
-1. **Native Python** - Direct execution, faster startup
-2. **Container** - Isolated environment via Podman/Docker
+Your choice is saved for future runs.
 
-The tracker will:
-- Detect what's available on your system
-- Recommend the best option
-- Save your choice for future runs
-- Allow you to change it anytime with `--reset-config`
-
----
-
-## Choose Your Method
-
-You can run the tracker in **two ways**:
-
-### Option 1: Native Python (Recommended for development)
-- Direct Python execution
-- Faster startup (~100ms)
-- Easier debugging
-- **Requirements:** Python 3.11+, Git
-
-### Option 2: Container (Recommended for production/isolation)
-- Runs in Podman/Docker container
-- Isolated environment (~1s startup)
-- No Python installation needed on host
-- **Requirements:** Podman or Docker
-
-### Change Your Preference
-
+**Change your preference:**
 ```bash
-# Reset and be prompted again
-./tracker.sh --reset-config
-
-# View current preference
-./tracker.sh --show-config
+./tracker.sh --reset-config  # Choose again
+./tracker.sh --show-config   # Show current mode
 ```
 
 ---
@@ -52,332 +28,372 @@ You can run the tracker in **two ways**:
 
 ### Native Python Setup
 
-1. **Install Python dependencies:**
-   ```bash
-   pip3 install -r requirements.txt
-   ```
+```bash
+# Install dependencies
+pip3 install -r requirements.txt
 
-2. **Initialize repositories:**
-   ```bash
-   python3 main.py init
-   ```
+# Initialize repositories
+python3 main.py init
+```
 
 ### Container Setup
 
-1. **Build the container image (one-time):**
-   ```bash
-   ./tracker.sh --build
-   ```
-   Or manually:
-   ```bash
-   podman build -t fedramp-tracker .
-   # OR
-   docker build -t fedramp-tracker .
-   ```
+```bash
+# Build container image (one-time)
+./tracker.sh --build
 
-2. **Initialize repositories:**
-   ```bash
-   ./tracker.sh init
-   ```
+# Initialize repositories
+./tracker.sh init
+```
 
 ---
-
-## Universal Wrapper Script
-
-The `tracker.sh` script **auto-detects** the best method and runs the tracker:
-
-```bash
-# Auto-detect and run
-./tracker.sh daily-report
-
-# Force native mode
-./tracker.sh --mode native daily-report
-
-# Force container mode
-./tracker.sh --mode container daily-report
-
-# Set default mode via environment variable
-export TRACKER_MODE=container
-./tracker.sh daily-report
-```
-
-**Note:** All examples below work with either:
-- `python3 main.py [command]` (native)
-- `./tracker.sh [command]` (auto-detect/container)
-- Direct podman/docker run (see Advanced Usage)
-
----
-
-## Quick Start
-
-### Generate Reports
-
-**Daily Report:**
-```bash
-python3 main.py daily-report
-# Or with wrapper
-./tracker.sh daily-report
-```
-
-**Daily Report (specific date):**
-```bash
-python3 main.py daily-report --date 2026-03-22
-```
-
-**Weekly Report:**
-```bash
-python3 main.py weekly-report
-# Or with wrapper
-./tracker.sh weekly-report
-```
-
-Reports are saved to:
-- Daily: `./reports/daily/YYYY-MM-DD.md`
-- Weekly: `./reports/weekly/YYYY-Www.md`
-
-### Query Git Data
-
-**Recent commits:**
-```bash
-python3 main.py commits --repo docs --days 7
-```
-
-**New files added:**
-```bash
-python3 main.py new-files --repo docs --days 30
-```
-
-**File history:**
-```bash
-# See all commits that modified a file
-python3 main.py file-history --repo docs --file README.md
-python3 main.py file-history --repo docs --file authentication.md
-```
-
-**Contributor activity:**
-```bash
-# See what a contributor has been working on
-python3 main.py contributor --repo docs --name "john@example.com" --days 30
-python3 main.py contributor --repo docs --name "Jane Smith"
-```
-
-## Available Commands
-
-### Core Reports
-| Command | Description |
-|---------|-------------|
-| `init` | Clone/update all repositories |
-| `daily-report` | Generate daily activity report |
-| `weekly-report` | Generate weekly activity report |
-
-### Git Repository Queries
-| Command | Description |
-|---------|-------------|
-| `commits` | List recent commits |
-| `new-files` | List newly added files |
-| `file-history` | Show complete history of a specific file |
-| `contributor` | Show contributor activity and statistics |
 
 ## Command Reference
 
+All commands work with either execution mode:
+- `python3 main.py [command]` (native)
+- `./tracker.sh [command]` (auto-detect/container)
+
 ### init
 
-Clone or update all configured repositories.
+Initialize all repositories (clone or fetch updates).
 
 ```bash
-./tracker.sh init
 python3 main.py init
 ```
 
 **What it does:**
 - Clones repositories that don't exist locally
 - Runs `git fetch` on existing repositories
-- Creates necessary directories (`repos/`, `reports/`)
+- Creates necessary directories
 
-### daily-report
+**Example output:**
+```
+Initializing repositories...
+  ✓ docs
+  ✓ roadmap
+  ✓ community
 
-Generate a daily activity report for the last 24 hours.
-
-```bash
-./tracker.sh daily-report
-./tracker.sh daily-report --date 2026-03-20
+All repositories ready!
 ```
 
-**Options:**
-- `--date YYYY-MM-DD` - Generate report for specific date
-
-**Output:**
-- Saved to `./reports/daily/YYYY-MM-DD.md`
-- Includes: new files, modified files, commits, contributors
-
-### weekly-report
-
-Generate a weekly summary report.
-
-```bash
-./tracker.sh weekly-report
-./tracker.sh weekly-report --week 12 --year 2026
-```
-
-**Options:**
-- `--week N` - Specific ISO week number
-- `--year YYYY` - Specific year
-
-**Output:**
-- Saved to `./reports/weekly/YYYY-Www.md`
-- Includes: summary statistics, top files, contributor activity
+---
 
 ### commits
 
-List recent commits for a repository.
+List commits within a date range.
 
 ```bash
-./tracker.sh commits --repo docs --days 7
-./tracker.sh commits --repo community --days 30
+python3 main.py commits --repo REPO_NAME --days N
 ```
 
 **Options:**
-- `--repo NAME` - Repository name (required)
-- `--days N` - Number of days to look back (default: 7)
+- `--repo NAME` (required) - Repository name
+- `--days N` (optional) - Days to look back (default: 7)
+
+**Examples:**
+```bash
+# Last 7 days of commits
+python3 main.py commits --repo docs --days 7
+
+# Last 30 days
+python3 main.py commits --repo roadmap --days 30
+
+# Using wrapper script
+./tracker.sh commits --repo community --days 14
+```
 
 **Output:**
-- List of commits with hash, author, date, message
-- File changes per commit
+```
+Fetching commits from docs (last 7 days)...
+
+Found 3 commits:
+
+- adf8891 by Pete Waterman on 2026-03-17 10:17:06 -0400
+  CCM-AGM-SSR fixes Low and Moderate rules (#58)
+  Files: 1, +9/-5 lines
+
+- 09bbb67 by pete-gov on 2026-03-11 15:33:36 -0400
+  fix marketplace link typos
+  Files: 6, +6/-6 lines
+```
+
+---
 
 ### new-files
 
-List newly added files in a repository.
+List files added within a date range.
 
 ```bash
-./tracker.sh new-files --repo docs --days 7
-./tracker.sh new-files --repo roadmap --days 30
+python3 main.py new-files --repo REPO_NAME --days N
 ```
 
 **Options:**
-- `--repo NAME` - Repository name (required)
-- `--days N` - Number of days to look back (default: 7)
+- `--repo NAME` (required) - Repository name
+- `--days N` (optional) - Days to look back (default: 7)
+
+**Examples:**
+```bash
+# New files in last 7 days
+python3 main.py new-files --repo docs --days 7
+
+# New files in last month
+python3 main.py new-files --repo docs --days 30
+
+# Using wrapper script
+./tracker.sh new-files --repo roadmap --days 14
+```
 
 **Output:**
-- List of new files with creation date, author, size
-- Helps identify new documentation topics
+```
+Fetching new files from docs (last 7 days)...
+
+Found 2 new files:
+
+- tools/new-script.py
+  Added: 2026-03-15 by developer@example.com
+  Commit: abc1234 - Add automation script
+
+- docs/new-guide.md
+  Added: 2026-03-16 by writer@example.com
+  Commit: def5678 - Add setup guide
+```
+
+---
 
 ### file-history
 
 Show complete change history for a specific file.
 
 ```bash
-./tracker.sh file-history --repo docs --file README.md
-./tracker.sh file-history --repo docs --file tools/site/content/index.md
+python3 main.py file-history --repo REPO_NAME --file FILE_PATH
 ```
 
 **Options:**
-- `--repo NAME` - Repository name (required)
-- `--file PATH` - File path relative to repo root (required)
+- `--repo NAME` (required) - Repository name
+- `--file PATH` (required) - File path (relative to repo root)
+
+**Examples:**
+```bash
+# History of README
+python3 main.py file-history --repo docs --file README.md
+
+# History of nested file
+python3 main.py file-history --repo docs --file tools/site/content/index.md
+
+# Using wrapper script
+./tracker.sh file-history --repo community --file CONTRIBUTING.md
+```
 
 **Output:**
-- All commits that modified the file
-- Line changes per commit
-- Complete timeline of file evolution
+```
+Fetching history for README.md in docs...
+
+Found 29 commits that modified README.md:
+
+- 41dc1c0 by Pete Waterman on 2026-02-04 16:53:47 -0500
+  Release v0.9.0 (#47)
+  Changes: +11/-53 lines
+
+- 0143678 by Pete Waterman on 2025-12-15 12:56:50 -0500
+  refactor zensical (#42)
+  Changes: +23/-17 lines
+```
+
+---
 
 ### contributor
 
-Show activity and statistics for a specific contributor.
+Show activity for a specific contributor.
 
 ```bash
-./tracker.sh contributor --repo docs --name "john@example.com"
-./tracker.sh contributor --repo docs --name "John Smith" --days 30
+python3 main.py contributor --repo REPO_NAME --name NAME_OR_EMAIL --days N
 ```
 
 **Options:**
-- `--repo NAME` - Repository name (required)
-- `--name NAME` - Contributor name or email (required)
-- `--days N` - Number of days to look back (default: 30)
+- `--repo NAME` (required) - Repository name
+- `--name NAME` (required) - Contributor name or email
+- `--days N` (optional) - Days to look back (default: 30)
+
+**Examples:**
+```bash
+# Activity by email
+python3 main.py contributor --repo docs --name "pete@fedramp.gov" --days 30
+
+# Activity by name
+python3 main.py contributor --repo docs --name "Pete Waterman" --days 60
+
+# Using wrapper script
+./tracker.sh contributor --repo community --name "developer@example.com" --days 14
+```
 
 **Output:**
-- Commit count and timeline
-- Files modified
-- Line changes (+/-)
-- Activity summary
+```
+Fetching activity for pete@fedramp.gov in docs...
+Looking back 30 days...
+
+## Activity Summary
+- Total commits: 5
+- Files modified: 12
+- Lines added: +89
+- Lines deleted: -31
+
+## Files Modified (12)
+- README.md
+- tools/script.py
+- docs/guide.md
+... and 9 more
+
+## Recent Commits (5)
+- adf8891 on 2026-03-17 10:17:06 -0400
+  CCM-AGM-SSR fixes Low and Moderate rules (#58)
+```
+
+---
+
+## Running Modes
+
+### Native Python
+- Direct execution
+- Faster startup (~100ms)
+- Easy debugging
+- **Requires:** Python 3.11+, git
+
+### Container
+- Isolated environment
+- Reproducible builds
+- No Python needed on host
+- **Requires:** Podman or Docker
+
+### Using the Wrapper Script
+
+The `tracker.sh` script auto-detects the best method:
+
+```bash
+# Auto-detect mode
+./tracker.sh commits --repo docs --days 7
+
+# Force native mode
+./tracker.sh --mode native commits --repo docs --days 7
+
+# Force container mode
+./tracker.sh --mode container commits --repo docs --days 7
+
+# Set default via environment variable
+export TRACKER_MODE=native
+./tracker.sh commits --repo docs --days 7
+```
+
+---
 
 ## Configuration
 
-Edit `config.yaml` to:
-- Add/remove repositories to track
-- Set report thresholds and preferences
-- Adjust polling intervals
+Edit `config.yaml` to configure repositories:
 
-## Directory Structure
+```yaml
+repositories:
+  - name: "docs"
+    url: "https://github.com/FedRAMP/docs"
+    path: "./repos/docs"
+    primary_branch: "main"
 
+  - name: "roadmap"
+    url: "https://github.com/FedRAMP/roadmap"
+    path: "./repos/roadmap"
+    primary_branch: "main"
+
+  - name: "community"
+    url: "https://github.com/FedRAMP/community"
+    path: "./repos/community"
+    primary_branch: "main"
+
+storage:
+  repos_directory: "./repos"
 ```
-fr-git-tracker/
-├── main.py                 # CLI entry point
-├── src/                    # Source code
-│   ├── config_loader.py   # Configuration parser
-│   ├── git_tracker.py     # Git operations
-│   ├── report_generator.py     # Report generation
-│   └── functions.py       # High-level query functions
-├── config.yaml            # Configuration file
-├── repos/                 # Cloned repositories (auto-created)
-├── reports/               # Generated reports (auto-created)
-│   ├── daily/
-│   └── weekly/
-└── requirements.txt       # Python dependencies
-```
 
-## Examples
+**Adding a new repository:**
+1. Add entry to `repositories` list in config.yaml
+2. Run `python3 main.py init` to clone it
 
-**Track FedRAMP documentation changes:**
+---
+
+## Common Workflows
+
+### Track Recent Activity
+
 ```bash
 # Initialize repos
 python3 main.py init
 
-# See what changed this week
+# See recent commits across repos
 python3 main.py commits --repo docs --days 7
-
-# Generate weekly report
-python3 main.py weekly-report
+python3 main.py commits --repo roadmap --days 7
+python3 main.py commits --repo community --days 7
 ```
 
-**Monitor specific files:**
+### Monitor Specific Files
+
 ```bash
-# Track changes to README
-./tracker.sh file-history --repo docs --file README.md
-
-# See new files added
-./tracker.sh new-files --repo docs --days 30
+# Track changes to important files
+python3 main.py file-history --repo docs --file README.md
+python3 main.py file-history --repo docs --file config.yaml
 ```
 
-**Automated reporting workflow:**
+### Contributor Analysis
+
 ```bash
-# Daily: Run every morning to get yesterday's activity
-python3 main.py daily-report
+# See what a contributor is working on
+python3 main.py contributor --repo docs --name "developer@example.com" --days 30
 
-# Weekly: Run every Monday for the week summary
-python3 main.py weekly-report
+# Find new files they added
+python3 main.py new-files --repo docs --days 30 | grep "developer@example.com"
 ```
+
+---
 
 ## Troubleshooting
 
-**"Repository not found" error:**
-- Run `python3 main.py init` first to clone repositories
-- Check that repository name matches config.yaml
+### "Repository not found"
+```bash
+# Run init to clone repositories
+python3 main.py init
 
-**No data in reports:**
-- Make sure repositories are up to date: `python3 main.py init`
-- Check date range - may be no activity in the selected timeframe
+# Check repository name matches config.yaml
+# Valid names: docs, roadmap, community
+```
 
-**Container-specific issues:**
-- **Permission errors:** Container creates files as container user
-  - The wrapper script runs as your user to avoid this
-  - Or manually: `podman run --user $(id -u):$(id -g) ...`
-- **Image not found:** Build it first: `./tracker.sh --build`
-- **Volume mount errors:** Check that config.yaml exists in current directory
+### "No commits found"
+```bash
+# Ensure repos are up to date
+python3 main.py init
 
-## Advanced Container Usage
+# Try a longer time range
+python3 main.py commits --repo docs --days 60
+```
 
-### Direct Podman/Docker Commands
+### Container Permission Errors
+```bash
+# The wrapper script handles permissions automatically
+# If running podman directly, use:
+--user=$(id -u):$(id -g)
+```
 
-If you prefer not to use the wrapper script:
+### Python Dependencies Missing
+```bash
+# Native mode
+pip3 install -r requirements.txt
+
+# Container mode (rebuild)
+./tracker.sh --build
+```
+
+---
+
+## Advanced Usage
+
+### Direct Container Commands
+
+If not using the wrapper script:
 
 ```bash
 # Build image
@@ -388,87 +404,42 @@ podman run --rm \
   --user=$(id -u):$(id -g) \
   -v ./config.yaml:/data/config.yaml:ro \
   -v ./repos:/data/repos \
-  -v ./reports:/data/reports \
-  fedramp-tracker daily-report
-
-# Initialize repos
-podman run --rm \
-  --user=$(id -u):$(id -g) \
-  -v ./config.yaml:/data/config.yaml:ro \
-  -v ./repos:/data/repos \
-  -v ./reports:/data/reports \
-  fedramp-tracker init
+  fedramp-tracker commits --repo docs --days 7
 ```
 
-Replace `podman` with `docker` if using Docker.
+### Automation
 
-### Container Image Details
-
-- **Base:** python:3.11-slim
-- **Size:** ~200MB
-- **Includes:** Python, Git, PyYAML
-- **User:** Runs as your UID/GID to avoid permission issues
-- **Volumes:**
-  - `/data/config.yaml` - Configuration (read-only)
-  - `/data/repos` - Git repositories (read-write)
-  - `/data/reports` - Generated reports (read-write)
-
-### When to Use Container vs Native
-
-**Use Container when:**
-- ✅ You want isolation from host system
-- ✅ You're deploying to production/server
-- ✅ You don't want to install Python locally
-- ✅ You're running in CI/CD pipelines
-- ✅ You want reproducible environments
-
-**Use Native when:**
-- ✅ You're actively developing/debugging
-- ✅ You want faster startup times
-- ✅ You're comfortable with Python environments
-- ✅ You want direct access to git operations
-
-## Automation Examples
-
-### Cron Jobs (Native)
+**Daily query via cron:**
 ```bash
-# Daily report at 9 AM
-0 9 * * * cd /path/to/fr-git-tracker && python3 main.py daily-report
+# Native mode
+0 9 * * * cd /path/to/tracker && python3 main.py commits --repo docs --days 1
 
-# Weekly report on Monday at 9 AM
-0 9 * * 1 cd /path/to/fr-git-tracker && python3 main.py weekly-report
+# Container mode
+0 9 * * * cd /path/to/tracker && ./tracker.sh --mode container commits --repo docs --days 1
 ```
 
-### Cron Jobs (Container)
+---
+
+## Tips
+
+1. **Run `init` regularly** to keep repos updated
+2. **Use longer `--days`** if you don't see expected results
+3. **File paths** are relative to repository root
+4. **Contributor names** can be name or email from git log
+5. **Wrapper script** remembers your mode preference
+
+---
+
+## Getting Help
+
 ```bash
-# Daily report at 9 AM
-0 9 * * * cd /path/to/fr-git-tracker && ./tracker.sh --mode container daily-report
+# Show all commands
+python3 main.py --help
 
-# Weekly report on Monday at 9 AM
-0 9 * * 1 cd /path/to/fr-git-tracker && ./tracker.sh --mode container weekly-report
-```
+# Show command-specific help
+python3 main.py commits --help
+python3 main.py contributor --help
 
-### Systemd Timer (Container)
-```ini
-# /etc/systemd/system/fedramp-tracker-daily.service
-[Unit]
-Description=FedRAMP Tracker Daily Report
-
-[Service]
-Type=oneshot
-WorkingDirectory=/opt/fr-git-tracker
-ExecStart=/opt/fr-git-tracker/tracker.sh --mode container daily-report
-User=tracker
-Group=tracker
-
-# /etc/systemd/system/fedramp-tracker-daily.timer
-[Unit]
-Description=FedRAMP Tracker Daily Report Timer
-
-[Timer]
-OnCalendar=daily
-Persistent=true
-
-[Install]
-WantedBy=timers.target
+# Wrapper script help
+./tracker.sh --help
 ```
