@@ -1,7 +1,7 @@
-# FedRAMP Git Repository Tracker Specification
+# FedRAMP Compliance Engineer Assistant Specification
 
 ## Purpose
-A lightweight command-line tool for tracking FedRAMP public repositories. Provides direct access to commit history, file changes, contributor activity, and GitHub Discussions (RFCs) through simple commands.
+An intelligent assistant tool for FedRAMP compliance engineers. Monitors FedRAMP public repositories and provides expert guidance on what matters for authorization work. Combines direct access to commit history, file changes, contributor activity, and GitHub Discussions (RFCs) with compliance-focused recommendations.
 
 ## Scope
 

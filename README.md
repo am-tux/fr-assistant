@@ -1,8 +1,8 @@
-# FedRAMP Git Repository Tracker
+# FedRAMP Compliance Engineer Assistant
 
-A lightweight command-line tool for tracking FedRAMP public repositories. Monitor git commits, RFCs, discussions, and community activity all in one place.
+An intelligent tool for FedRAMP compliance engineers. Track repositories, monitor RFCs, and get expert recommendations on what matters for your authorization work.
 
-**📊 Track:** Git commits and RFCs | **🔍 Query:** File history and discussions | **⚡ Simple:** No API tokens required
+**🎯 Expert Guidance:** Compliance-focused insights | **📊 Monitor:** Git commits and RFCs | **⚡ Simple:** No API tokens required
 
 ---
 
@@ -218,6 +218,6 @@ Configuration for tracking FedRAMP public repositories. All tracked repositories
 
 ---
 
-**Track FedRAMP repositories, RFCs, and community activity.**
+**Your expert assistant for FedRAMP compliance engineering.**
 
-**📊 Git + RFCs** | **🔍 Direct Queries** | **⚡ No API Tokens**
+**🎯 Expert Guidance** | **📊 Monitor Changes** | **⚡ No API Tokens**
