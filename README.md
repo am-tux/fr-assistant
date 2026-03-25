@@ -201,8 +201,28 @@ pip3 install -r requirements.txt
 
 - **USAGE.md** - Detailed command reference
 - **SPEC.md** - Technical specification
+- **INTEGRATION.md** - How to access this assistant from other projects
 - **config.yaml** - Configuration with examples
 - **CLAUDE.md** / **.cursorrules** - AI assistant context (must stay in sync)
+
+## Integration with Other Projects
+
+This FedRAMP assistant can be accessed from any other project! See **INTEGRATION.md** for details.
+
+**Quick setup:**
+```bash
+# Set environment variable (recommended)
+export FEDRAMP_ASSISTANT_PATH="/path/to/fr-git-tracker"
+
+# Add to other project's CLAUDE.md
+# (See INTEGRATION.md for template)
+```
+
+Any AI assistant in another project can then ask the FedRAMP expert for:
+- Latest FedRAMP updates
+- RFC analysis
+- Compliance recommendations
+- Context-aware prioritization
 
 ## Portability
 
