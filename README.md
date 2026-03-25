@@ -13,6 +13,7 @@ Staying current with FedRAMP is challenging. Changes happen across multiple repo
 **This tool keeps you comprehensively informed about everything FedRAMP:**
 
 - **📋 GitHub Discussions & RFCs** - Track community proposals, RFCs, and Q&A discussions as they happen
+- **📅 Upcoming Events** - Links to FedRAMP meetings, webinars, and community events
 - **📂 Repository Changes** - Monitor all commits, new files, and updates across FedRAMP/docs, FedRAMP/roadmap, and FedRAMP/community
 - **🎯 Expert Analysis** - Get compliance-focused recommendations on what matters for your authorization work
 - **⚖️ Fact vs Inference** - Clear labeling distinguishes verified facts (✅) from expert recommendations (🤔)
@@ -25,7 +26,8 @@ Instead of manually checking multiple sources, you get a unified view of all Fed
 ## Features
 
 - **Track RFCs** - Monitor GitHub Discussions for RFCs and community proposals
-- **Latest activity** - Combined view of RFCs and git changes across all repos
+- **Monitor events** - Get links to upcoming FedRAMP meetings and events
+- **Latest activity** - Combined view of RFCs, events, and git changes across all repos
 - **Query commits** - List recent commits with file changes
 - **Track new files** - Find newly added files in any time range
 - **File history** - View complete change history for any file
@@ -54,6 +56,9 @@ python3 main.py latest --days 7
 # Track GitHub Discussions RFCs
 python3 main.py rfcs --days 30
 
+# View upcoming FedRAMP events
+python3 main.py events --days 7
+
 # List commits from last 7 days
 python3 main.py commits --repo docs --days 7
 
@@ -72,8 +77,9 @@ python3 main.py contributor --repo docs --name "john@example.com" --days 30
 | Command | Description |
 |---------|-------------|
 | `init` | Clone/update all repositories |
-| `latest` | Show all recent FedRAMP activity (RFCs + git changes) |
+| `latest` | Show all recent FedRAMP activity (RFCs + events + git changes) |
 | `rfcs` | Show GitHub Discussions RFCs |
+| `events` | Show link to upcoming FedRAMP events (requires manual visit) |
 | `blog` | Show note about FedRAMP blog (requires manual visit) |
 | `commits` | List recent commits with file stats |
 | `new-files` | List newly added files |

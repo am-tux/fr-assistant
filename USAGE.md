@@ -39,6 +39,145 @@ All repositories ready!
 
 ---
 
+### latest
+
+Show all recent FedRAMP activity (RFCs + events + git changes).
+
+```bash
+python3 main.py latest --days N
+```
+
+**Options:**
+- `--days N` (optional) - Days to look back (default: 7)
+
+**Examples:**
+```bash
+# Last week's activity
+python3 main.py latest --days 7
+
+# Last 30 days
+python3 main.py latest --days 30
+```
+
+**Output:**
+```
+Fetching all FedRAMP activity (last 7 days)...
+
+## RFCs (GitHub Discussions)
+
+- Consolidated 20x Phase 2 pilot Q&A / discussion
+  By: Unknown | Comments: 0
+  https://github.com/FedRAMP/community/discussions/101
+
+## Upcoming Events
+
+(Event scraping not available - visit https://www.fedramp.gov/events/?view=cards)
+
+## Blog Posts
+
+(Blog scraping not available - visit https://www.fedramp.gov/blog/)
+
+## Git Repository Changes
+
+### docs
+- abc1234: Update SSP template
+- def5678: Fix typos
+  ... and 3 more commits
+```
+
+---
+
+### rfcs
+
+Show GitHub Discussions RFCs from FedRAMP/community.
+
+```bash
+python3 main.py rfcs --days N
+```
+
+**Options:**
+- `--days N` (optional) - Days to look back (default: 30)
+
+**Examples:**
+```bash
+# Last 30 days of RFCs
+python3 main.py rfcs --days 30
+
+# Last 90 days
+python3 main.py rfcs --days 90
+```
+
+**Output:**
+```
+Fetching RFCs from GitHub Discussions (last 30 days)...
+
+Found 4 RFCs:
+
+- Consolidated 20x Phase 2 pilot Q&A / discussion
+  By: Unknown | Comments: 0
+  https://github.com/FedRAMP/community/discussions/101
+
+- General discussion and Q&A for RFC-0025!
+  By: Unknown | Comments: 0
+  https://github.com/FedRAMP/community/discussions/127
+```
+
+---
+
+### events
+
+Show link to upcoming FedRAMP events and meetings.
+
+```bash
+python3 main.py events --days N
+```
+
+**Options:**
+- `--days N` (optional) - Days ahead to look (default: 7)
+
+**Examples:**
+```bash
+# Next week's events
+python3 main.py events --days 7
+
+# Next 30 days
+python3 main.py events --days 30
+```
+
+**Output:**
+```
+Upcoming FedRAMP Events (next 7 days)
+
+Note: FedRAMP.gov is a JavaScript-based site that cannot be scraped
+with traditional tools. Events require a headless browser to access.
+
+To view upcoming FedRAMP events, visit:
+https://www.fedramp.gov/events/?view=cards
+```
+
+---
+
+### blog
+
+Show link to FedRAMP blog.
+
+```bash
+python3 main.py blog
+```
+
+**Output:**
+```
+FedRAMP Blog Post Tracking
+
+Note: FedRAMP.gov is a JavaScript-based site that cannot be scraped
+with traditional tools. Blog posts require a headless browser to access.
+
+To view FedRAMP blog posts, visit:
+https://www.fedramp.gov/blog/
+```
+
+---
+
 ### commits
 
 List commits within a date range.
@@ -232,7 +371,30 @@ storage:
 
 ## Common Workflows
 
-### Track Recent Activity
+### Get All FedRAMP Updates
+
+```bash
+# Initialize repos first
+python3 main.py init
+
+# See everything: RFCs, events, and git changes
+python3 main.py latest --days 7
+```
+
+### Track RFCs and Events
+
+```bash
+# See recent RFCs
+python3 main.py rfcs --days 30
+
+# Check upcoming events
+python3 main.py events --days 7
+
+# View blog
+python3 main.py blog
+```
+
+### Track Recent Git Activity
 
 ```bash
 # Initialize repos

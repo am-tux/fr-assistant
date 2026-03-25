@@ -53,7 +53,7 @@ python3 main.py init
 - Creates `./repos/` directory if needed
 
 ### latest
-Show all recent FedRAMP activity (RFCs + git changes).
+Show all recent FedRAMP activity (RFCs + events + git changes).
 
 ```bash
 python3 main.py latest --days N
@@ -65,6 +65,10 @@ python3 main.py latest --days N
 **Output:**
 - RFCs from GitHub Discussions
   - Title, author, comment count, URL
+- Upcoming events
+  - Link to events page
+- Blog posts
+  - Link to blog page
 - Git repository changes across all repos
   - Recent commits by repository
   - Grouped by repo name
@@ -107,6 +111,27 @@ python3 main.py blog
 - Link to visit blog directly
 
 **Note:** FedRAMP.gov uses JavaScript rendering, so blog posts cannot be scraped with traditional tools. This command provides a helpful message and link.
+
+### events
+Show information about upcoming FedRAMP events.
+
+```bash
+python3 main.py events --days N
+```
+
+**Parameters:**
+- `--days` (optional) - Days ahead to look (default: 7)
+
+**Output:**
+- Note about JavaScript-based site
+- Link to visit events page directly
+
+**Example:**
+```bash
+python3 main.py events --days 7
+```
+
+**Note:** FedRAMP.gov uses JavaScript rendering, so events cannot be scraped with traditional tools. This command provides a helpful message and link to the events calendar.
 
 ### commits
 List commits within a date range.
