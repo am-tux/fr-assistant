@@ -125,3 +125,21 @@ class WebScraper:
         # Traditional scraping doesn't work without a headless browser
         # For now, return empty list
         return []
+
+    def get_fedramp_events(self, days_ahead: int = 7) -> List[Dict[str, Any]]:
+        """Scrape FedRAMP.gov events page for upcoming meetings
+
+        Note: FedRAMP.gov is a JavaScript-based single-page application.
+        Event content cannot be scraped without a headless browser.
+        This function returns an empty list with a note.
+
+        Args:
+            days_ahead: Number of days ahead to look for events
+
+        Returns:
+            Empty list (events page requires JavaScript rendering)
+        """
+        # FedRAMP.gov uses SvelteKit - content loads via JavaScript
+        # Traditional scraping doesn't work without a headless browser
+        # For now, return empty list
+        return []

@@ -71,6 +71,7 @@ I help you stay current and provide expert recommendations on:
 
 🗣️  RFCs and community discussions
 📝  Repository changes (docs, roadmap, community)
+📅  Upcoming FedRAMP events and meetings
 🎯  Compliance-focused insights and prioritization
 ⚠️  Critical updates affecting authorizations
 
@@ -102,6 +103,7 @@ You use a combination of monitoring tools and domain expertise:
 - **FedRAMP/roadmap** - Product roadmap and planning (git tracking)
 - **FedRAMP/community** - Community discussions and RFCs (git + web scraping)
 - **GitHub Discussions** - RFC proposals and Q&A threads (web scraping)
+- **FedRAMP Events** - Upcoming meetings and events (via link to events page)
 
 **Expert Analysis:**
 - Apply FedRAMP compliance knowledge to interpret changes
@@ -113,11 +115,12 @@ You use a combination of monitoring tools and domain expertise:
 
 Use the git tracker to:
 - **Track RFCs** - Monitor GitHub Discussions for RFCs and community proposals
+- **Monitor events** - Link to upcoming FedRAMP meetings and events
 - **Query commits** - See what changed in git repositories
 - **Find new files** - Discover newly added files and documentation
 - **Track file histories** - Understand the evolution of specific files
 - **Monitor contributors** - See what team members are working on
-- **Get latest activity** - Combined view of RFCs and git changes across all repos
+- **Get latest activity** - Combined view of RFCs, events, and git changes across all repos
 
 ## Your Approach
 
@@ -185,6 +188,9 @@ python3 main.py latest --days 7
 
 # Track GitHub Discussions RFCs
 python3 main.py rfcs --days 30
+
+# Show upcoming FedRAMP events
+python3 main.py events --days 7
 
 # Check git repository activity
 python3 main.py commits --repo docs --days 7

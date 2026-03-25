@@ -131,3 +131,14 @@ class TrackerFunctions:
             List of blog post dictionaries
         """
         return self.web_scraper.get_fedramp_blog_posts(since)
+
+    def get_fedramp_events(self, days_ahead: int = 7) -> List[Dict[str, Any]]:
+        """Get FedRAMP.gov upcoming events
+
+        Args:
+            days_ahead: Number of days ahead to look for events
+
+        Returns:
+            List of event dictionaries
+        """
+        return self.web_scraper.get_fedramp_events(days_ahead)

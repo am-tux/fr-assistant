@@ -29,6 +29,9 @@ Examples:
   # Show FedRAMP blog posts
   %(prog)s blog --days 30
 
+  # Show upcoming FedRAMP events
+  %(prog)s events --days 7
+
   # Get new files added in last 7 days
   %(prog)s new-files --repo docs --days 7
 
@@ -83,6 +86,10 @@ Examples:
     blog_parser = subparsers.add_parser('blog', help='Show FedRAMP blog posts')
     blog_parser.add_argument('--days', type=int, default=30, help='Days to look back (default: 30)')
 
+    # Events command
+    events_parser = subparsers.add_parser('events', help='Show upcoming FedRAMP events')
+    events_parser.add_argument('--days', type=int, default=7, help='Days ahead to look (default: 7)')
+
     # Latest command (everything)
     latest_parser = subparsers.add_parser('latest', help='Show all recent FedRAMP activity')
     latest_parser.add_argument('--days', type=int, default=7, help='Days to look back (default: 7)')
@@ -119,6 +126,9 @@ Examples:
 
         elif args.command == 'blog':
             return cmd_blog(functions, args)
+
+        elif args.command == 'events':
+            return cmd_events(functions, args)
 
         elif args.command == 'latest':
             return cmd_latest(functions, args)
@@ -314,6 +324,19 @@ def cmd_blog(functions: TrackerFunctions, args) -> int:
     return 0
 
 
+def cmd_events(functions: TrackerFunctions, args) -> int:
+    """Show upcoming FedRAMP events"""
+    print(f"Upcoming FedRAMP Events (next {args.days} days)")
+    print()
+    print("Note: FedRAMP.gov is a JavaScript-based site that cannot be scraped")
+    print("with traditional tools. Events require a headless browser to access.")
+    print()
+    print("To view upcoming FedRAMP events, visit:")
+    print("https://www.fedramp.gov/events/?view=cards")
+    print()
+    return 0
+
+
 def cmd_latest(functions: TrackerFunctions, args) -> int:
     """Show all recent FedRAMP activity"""
     since = datetime.now() - timedelta(days=args.days)
@@ -340,6 +363,13 @@ def cmd_latest(functions: TrackerFunctions, args) -> int:
     else:
         print("No recent RFCs")
         print()
+
+    # Events - currently not available via scraping
+    # (FedRAMP.gov requires JavaScript rendering)
+    print("## Upcoming Events")
+    print()
+    print("(Event scraping not available - visit https://www.fedramp.gov/events/?view=cards)")
+    print()
 
     # Blog posts - currently not available via scraping
     # (FedRAMP.gov requires JavaScript rendering)
