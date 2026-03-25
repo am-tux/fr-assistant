@@ -6,6 +6,22 @@ An intelligent tool for FedRAMP compliance engineers. Track repositories, monito
 
 ---
 
+## Why This Exists
+
+Staying current with FedRAMP is challenging. Changes happen across multiple repositories, RFCs emerge in GitHub Discussions, and understanding what matters for your specific authorization work requires expertise.
+
+**This tool keeps you comprehensively informed about everything FedRAMP:**
+
+- **📋 GitHub Discussions & RFCs** - Track community proposals, RFCs, and Q&A discussions as they happen
+- **📂 Repository Changes** - Monitor all commits, new files, and updates across FedRAMP/docs, FedRAMP/roadmap, and FedRAMP/community
+- **🎯 Expert Analysis** - Get compliance-focused recommendations on what matters for your authorization work
+- **⚖️ Fact vs Inference** - Clear labeling distinguishes verified facts (✅) from expert recommendations (🤔)
+- **🔍 Context-Aware** - Prioritizes updates based on your specific systems (High/Moderate, Rev4/Rev5, 20x pilot)
+
+Instead of manually checking multiple sources, you get a unified view of all FedRAMP activity with expert guidance on what requires your attention.
+
+---
+
 ## Features
 
 - **Track RFCs** - Monitor GitHub Discussions for RFCs and community proposals
