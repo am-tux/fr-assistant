@@ -1,8 +1,8 @@
 # FedRAMP Compliance Engineer Assistant
 
-An intelligent tool for FedRAMP compliance engineers. Track repositories, monitor RFCs, and get expert recommendations on what matters for your authorization work.
+An intelligent assistant for FedRAMP compliance engineers. Just ask "what's the latest?" and get expert-prioritized updates on RFCs, repository changes, and what matters for your authorization work.
 
-**🎯 Expert Guidance:** Compliance-focused insights | **📊 Monitor:** Git commits and RFCs | **⚡ Simple:** No API tokens required
+**💬 Natural Language:** Ask questions conversationally | **🎯 Expert Guidance:** Compliance-focused insights | **📊 Comprehensive:** RFCs + Git + Events | **⚡ Simple:** No API tokens
 
 ---
 
@@ -25,15 +25,15 @@ Instead of manually checking multiple sources, you get a unified view of all Fed
 
 ## Features
 
-- **Track RFCs** - Monitor GitHub Discussions for RFCs and community proposals
-- **Monitor events** - Get links to upcoming FedRAMP meetings and events
-- **Latest activity** - Combined view of RFCs, events, and git changes across all repos
-- **Query commits** - List recent commits with file changes
-- **Track new files** - Find newly added files in any time range
-- **File history** - View complete change history for any file
-- **Contributor activity** - See what contributors are working on
-- **Multi-repository** - Track multiple repositories simultaneously
-- **No API tokens** - Web scraping for public data, no authentication required
+- **💬 Natural Language Interface** - Ask questions like "what's the latest?" or "what's important for compliance?"
+- **🎯 Context-Aware Prioritization** - Automatically prioritizes updates based on your specific systems (High/Moderate, Rev5, 20x pilot)
+- **⚖️ Expert Analysis** - Clear distinction between factual data (✅) and compliance expert recommendations (🤔)
+- **🗣️ Track RFCs** - Monitor GitHub Discussions for RFCs and community proposals
+- **📅 Monitor Events** - Get links to upcoming FedRAMP meetings and events
+- **📊 Latest Activity** - Combined view of RFCs, events, and git changes across all repos
+- **📝 Repository Tracking** - Query commits, new files, file history, and contributor activity
+- **🔄 Multi-Repository** - Track FedRAMP/docs, FedRAMP/roadmap, and FedRAMP/community simultaneously
+- **⚡ No API Tokens** - Web scraping for public data, no authentication required
 
 ## Quick Start
 
@@ -47,44 +47,64 @@ pip3 install -r requirements.txt
 python3 main.py init
 ```
 
-### Basic Usage
+### How to Use
 
-```bash
-# See all recent FedRAMP activity (RFCs + git changes)
-python3 main.py latest --days 7
+**The assistant responds to natural language!** No need to memorize commands or syntax.
 
-# Track GitHub Discussions RFCs
-python3 main.py rfcs --days 30
+Open this directory in Claude Code and simply ask:
 
-# View upcoming FedRAMP events
-python3 main.py events --days 7
+**Getting Updates:**
+- "what's the latest?" - Shows all recent FedRAMP activity (RFCs + git changes)
+- "what's new this week?" - Weekly summary of changes
+- "show me today's updates" - Just today's activity
+- "what's important for compliance?" - Expert-prioritized updates
 
-# List commits from last 7 days
-python3 main.py commits --repo docs --days 7
+**Tracking RFCs:**
+- "show me RFCs" - Active GitHub Discussions and proposals
+- "what discussions are happening?" - Community discussions
+- "what's active?" - Group RFCs by initiative and activity
 
-# Find new files added in last 30 days
-python3 main.py new-files --repo docs --days 30
+**Specific Queries:**
+- "what changed in the docs repo?" - Recent documentation changes
+- "what is [name] working on?" - Contributor activity
+- "show me the history of [filename]" - Complete file change history
+- "what new files were added?" - Recently added documentation
 
-# View complete history of a file
-python3 main.py file-history --repo docs --file README.md
+**Context-Aware:**
+The assistant automatically prioritizes based on your systems:
+- 🚨 Critical updates for your High Rev5 system
+- 📌 High priority for your planned 20x Moderate system
+- ⚙️ General updates and changes
 
-# See contributor activity
-python3 main.py contributor --repo docs --name "john@example.com" --days 30
+**Examples:**
+```
+You: what's the latest?
+Assistant: [Shows RFCs, git changes, prioritized by your context]
+
+You: show me RFCs
+Assistant: [Groups by Rev5, 20x pilot, with activity assessment]
+
+You: what's important for compliance?
+Assistant: [Expert recommendations on what to focus on]
 ```
 
-## Available Commands
+## Underlying Python Commands
+
+The assistant uses these Python commands behind the scenes. You can also run them directly if needed:
 
 | Command | Description |
 |---------|-------------|
 | `init` | Clone/update all repositories |
-| `latest` | Show all recent FedRAMP activity (RFCs + events + git changes) |
-| `rfcs` | Show GitHub Discussions RFCs |
-| `events` | Show link to upcoming FedRAMP events (requires manual visit) |
+| `latest --days N` | Show all recent FedRAMP activity (RFCs + events + git changes) |
+| `rfcs --days N` | Show GitHub Discussions RFCs |
+| `events --days N` | Show link to upcoming FedRAMP events (requires manual visit) |
 | `blog` | Show note about FedRAMP blog (requires manual visit) |
-| `commits` | List recent commits with file stats |
-| `new-files` | List newly added files |
-| `file-history` | Show complete history of a file |
-| `contributor` | Show contributor activity and stats |
+| `commits --repo NAME --days N` | List recent commits with file stats |
+| `new-files --repo NAME --days N` | List newly added files |
+| `file-history --repo NAME --file PATH` | Show complete history of a file |
+| `contributor --repo NAME --name EMAIL --days N` | Show contributor activity and stats |
+
+**Note:** Most users won't need to run these directly - just ask the assistant in natural language!
 
 ## Configuration
 
@@ -106,53 +126,59 @@ storage:
   repos_directory: "./repos"
 ```
 
-## Examples
+## Example Interactions
 
-### Get Latest FedRAMP Activity
+### Natural Language (Recommended)
+
+**Weekly Check-In:**
+```
+You: what's the latest?
+Assistant: [Shows RFCs, git changes, upcoming events - prioritized for your systems]
+
+You: what's important for compliance?
+Assistant: [Expert analysis with Critical/High/Medium priority updates]
+```
+
+**Tracking RFCs:**
+```
+You: show me RFCs
+Assistant: [Groups by Rev5, 20x pilot, specific RFCs with URLs]
+
+You: what discussions are happening?
+Assistant: [Active community discussions and Q&A threads]
+```
+
+**Specific Queries:**
+```
+You: what changed in the docs repo?
+Assistant: [Recent commits, new files, contributor activity]
+
+You: what is john@fedramp.gov working on?
+Assistant: [Contributor's recent commits and focus areas]
+```
+
+### Direct Python Commands (Optional)
+
+If you prefer to run commands directly:
 
 ```bash
 # See everything happening in FedRAMP
 python3 main.py latest --days 7
 
-# Output shows:
-# - RFCs from GitHub Discussions
-# - Git commits across all repos
-```
-
-### Track RFCs and Discussions
-
-```bash
-# See recent RFCs
+# Track RFCs
 python3 main.py rfcs --days 30
 
-# Shows:
-# - RFC title
-# - Author
-# - Comment count
-# - Discussion URL
-```
-
-### Track Documentation Changes
-
-```bash
-# See what changed this week
+# Check specific repo
 python3 main.py commits --repo docs --days 7
 
-# Find new documentation added
+# Find new files
 python3 main.py new-files --repo docs --days 30
 
-# Track changes to specific file
+# Track file history
 python3 main.py file-history --repo docs --file authentication.md
-```
 
-### Monitor Contributors
-
-```bash
-# See what a contributor has been working on
+# Monitor contributor
 python3 main.py contributor --repo docs --name "pete@fedramp.gov" --days 30
-
-# Check recent activity
-python3 main.py commits --repo community --days 14
 ```
 
 ## Directory Structure
@@ -254,6 +280,27 @@ This directory is fully portable:
 - Can be moved anywhere
 - Can be shared between users
 
+## Using the Assistant
+
+### Recommended Approach: Natural Language
+
+The FedRAMP Compliance Engineer Assistant is designed for conversational interaction:
+
+1. **Open the directory** in Claude Code or your AI assistant
+2. **Ask questions naturally**: "what's the latest?", "show me RFCs", "what's important?"
+3. **Get expert analysis**: Prioritized updates with compliance-focused recommendations
+4. **Drill deeper**: Ask follow-up questions about specific RFCs, contributors, or files
+
+### Alternative: Direct Commands
+
+You can also run Python commands directly if you prefer:
+```bash
+python3 main.py latest --days 7
+python3 main.py rfcs --days 30
+```
+
+But most users find the natural language interface more intuitive and helpful!
+
 ## License
 
 Configuration for tracking FedRAMP public repositories. All tracked repositories maintain their original licenses.
@@ -262,4 +309,4 @@ Configuration for tracking FedRAMP public repositories. All tracked repositories
 
 **Your expert assistant for FedRAMP compliance engineering.**
 
-**🎯 Expert Guidance** | **📊 Monitor Changes** | **⚡ No API Tokens**
+**💬 Ask Questions Naturally** | **🎯 Get Expert Guidance** | **📊 Stay Informed** | **⚡ No API Tokens**
