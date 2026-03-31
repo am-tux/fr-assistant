@@ -121,6 +121,106 @@ Use the git tracker to:
 - **Track file histories** - Understand the evolution of specific files
 - **Monitor contributors** - See what team members are working on
 - **Get latest activity** - Combined view of RFCs, events, and git changes across all repos
+- **Personalized tracking** - Track specific discussions and keywords for customized monitoring
+
+## Personalized Tracking
+
+The user can track specific discussions and keywords for personalized monitoring. When tracking is enabled, these items are automatically prioritized in all outputs.
+
+### Tracking Features
+
+**Track Discussions:**
+- Monitor specific GitHub Discussion threads for new activity
+- Get comment counts and last activity timestamps
+- Set priority levels (critical, high, medium, low)
+- Add notes on why tracking each discussion
+
+**Track Keywords:**
+- Search for specific terms across all discussions and commits
+- Set priority levels for each keyword
+- Add context notes for why keywords matter
+- Case-insensitive search by default
+
+**Natural Language Triggers:**
+```
+User: "track the Rev5 discussion for me"
+→ Add discussion to tracking.yaml
+
+User: "watch for mentions of High baseline"
+→ Add keyword to tracking.yaml
+
+User: "what's new in my tracked discussions?"
+→ Run track check command
+
+User: "stop tracking the 20x discussion"
+→ Remove from tracking.yaml
+
+User: "show me what I'm tracking"
+→ Display tracking.yaml contents
+```
+
+**Direct Commands:**
+```bash
+# Add tracking
+python3 main.py track add-discussion --url "URL" --title "Title" --reason "Why" --priority critical
+python3 main.py track add-keyword --term "High baseline" --context "Why" --priority critical
+
+# Remove tracking
+python3 main.py track remove-discussion --url "URL"
+python3 main.py track remove-keyword --term "High baseline"
+
+# List tracked items
+python3 main.py track list
+
+# Check tracked items for updates
+python3 main.py track check --days 7
+```
+
+### How Tracking Affects Output
+
+When the user has tracked items in `tracking.yaml`:
+
+**`latest` command automatically:**
+1. Shows tracked discussions with activity updates FIRST
+2. Highlights keyword matches across discussions and commits
+3. Uses priority levels to sort (critical → high → medium → low)
+4. Then shows general activity below
+
+**Example output structure:**
+```
+⭐ TRACKED ITEMS - NEW ACTIVITY:
+
+🚨 Rev5 improvements for 2026 (Discussion #137)
+   📊 15 comments | Last: 2026-03-29
+   Why: Affects our High Rev5 system
+   https://github.com/FedRAMP/community/discussions/137
+
+🔍 KEYWORD ALERTS:
+
+🚨 "High baseline" found in 3 places
+   • [docs] a7b3c2f: update High baseline controls
+   • [Discussion] Rev5 Updates (RFCs 0026-0030)
+
+---
+
+## RFCs (GitHub Discussions)
+[Standard output continues...]
+```
+
+### When to Use Tracking
+
+Recommend tracking when the user:
+- Mentions following a specific discussion repeatedly
+- Asks about the same topic multiple times
+- Wants alerts for specific keywords
+- Needs to monitor particular RFC threads
+- Wants personalized compliance updates
+
+**Suggest tracking proactively:**
+```
+"You've asked about Rev5 several times. Want me to track the Rev5 discussion
+for you? I'll automatically highlight new activity each time you check."
+```
 
 ## Your Approach
 

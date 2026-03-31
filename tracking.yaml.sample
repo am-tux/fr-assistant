@@ -1,0 +1,79 @@
+# FedRAMP Tracking Configuration
+#
+# This file defines discussions and keywords you want to track.
+# Copy this to 'tracking.yaml' and customize for your needs.
+#
+# Usage:
+#   cp tracking.yaml.sample tracking.yaml
+#   # Edit tracking.yaml with your tracked items
+#
+# Note: tracking.yaml is gitignored (personal preferences)
+
+# GitHub Discussions to track for new activity
+tracked_discussions:
+  # Example: Track Rev5 improvements discussion
+  - url: "https://github.com/FedRAMP/community/discussions/137"
+    title: "General discussion / Q&A on Rev5 improvements and changes in 2026"
+    reason: "Affects our High Rev5 system - need to track changes"
+    priority: "critical"  # critical, high, medium, low
+    added: "2026-03-30"
+
+  # Example: Track 20x pilot discussion
+  - url: "https://github.com/FedRAMP/community/discussions/101"
+    title: "Consolidated 20x Phase 2 pilot Q&A / discussion"
+    reason: "Planning Moderate system via 20x pilot path"
+    priority: "high"
+    added: "2026-03-30"
+
+  # Example: Track specific RFC
+  # - url: "https://github.com/FedRAMP/community/discussions/129"
+  #   title: "General discussion and Q&A for RFCs related to Rev5 Updates"
+  #   reason: "Multiple Rev5 RFCs in one thread"
+  #   priority: "critical"
+  #   added: "2026-03-30"
+
+# Keywords to track across all discussions and commits
+tracked_keywords:
+  # Example: Track High baseline changes
+  - term: "High baseline"
+    context: "Controls for our active High Rev5 system"
+    priority: "critical"
+    added: "2026-03-30"
+
+  # Example: Track significant change criteria
+  - term: "significant change"
+    context: "Triggers re-authorization requirements"
+    priority: "critical"
+    added: "2026-03-30"
+
+  # Example: Track continuous monitoring
+  - term: "continuous monitoring"
+    context: "Active system obligation and requirements"
+    priority: "high"
+    added: "2026-03-30"
+
+  # Example: Track 20x pilot
+  - term: "20x pilot"
+    context: "Expedited authorization path for planned Moderate system"
+    priority: "high"
+    added: "2026-03-30"
+
+  # Example: Track SSP template changes
+  # - term: "SSP template"
+  #   context: "Documentation requirements for both systems"
+  #   priority: "medium"
+  #   added: "2026-03-30"
+
+# Settings for tracking behavior
+settings:
+  # How many days back to check for discussion activity
+  check_days_back: 7
+
+  # Include case-insensitive keyword matching
+  case_insensitive_keywords: true
+
+  # Search commit messages for keywords
+  search_commits: true
+
+  # Search discussion titles and content for keywords
+  search_discussions: true

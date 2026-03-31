@@ -6,6 +6,9 @@ repos/
 # Generated reports
 reports/
 
+# User tracking preferences (personal, not committed)
+tracking.yaml
+
 # Python
 __pycache__/
 *.py[cod]

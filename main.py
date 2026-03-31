@@ -8,6 +8,7 @@ from pathlib import Path
 
 from src.config_loader import Config
 from src.functions import TrackerFunctions
+from src.tracker import TrackingManager
 
 
 def main():
@@ -43,6 +44,18 @@ Examples:
 
   # Show contributor activity
   %(prog)s contributor --repo docs --name "john@example.com" --days 30
+
+  # Track a discussion
+  %(prog)s track add-discussion --url "https://github.com/..." --title "Title" --reason "Why" --priority critical
+
+  # Track a keyword
+  %(prog)s track add-keyword --term "High baseline" --context "Why tracking" --priority critical
+
+  # List tracked items
+  %(prog)s track list
+
+  # Check tracked items for updates
+  %(prog)s track check --days 7
         '''
     )
 
@@ -94,6 +107,42 @@ Examples:
     latest_parser = subparsers.add_parser('latest', help='Show all recent FedRAMP activity')
     latest_parser.add_argument('--days', type=int, default=7, help='Days to look back (default: 7)')
 
+    # Track command (tracking management)
+    track_parser = subparsers.add_parser('track', help='Manage tracked discussions and keywords')
+    track_subparsers = track_parser.add_subparsers(dest='track_command', help='Tracking command')
+
+    # track add-discussion
+    track_add_disc = track_subparsers.add_parser('add-discussion', help='Add discussion to tracking')
+    track_add_disc.add_argument('--url', required=True, help='GitHub discussion URL')
+    track_add_disc.add_argument('--title', default='', help='Discussion title (optional)')
+    track_add_disc.add_argument('--reason', default='', help='Why tracking this (optional)')
+    track_add_disc.add_argument('--priority', default='medium',
+                                choices=['critical', 'high', 'medium', 'low'],
+                                help='Priority level (default: medium)')
+
+    # track remove-discussion
+    track_rem_disc = track_subparsers.add_parser('remove-discussion', help='Remove discussion from tracking')
+    track_rem_disc.add_argument('--url', required=True, help='GitHub discussion URL to remove')
+
+    # track add-keyword
+    track_add_kw = track_subparsers.add_parser('add-keyword', help='Add keyword to tracking')
+    track_add_kw.add_argument('--term', required=True, help='Keyword to track')
+    track_add_kw.add_argument('--context', default='', help='Context/reason (optional)')
+    track_add_kw.add_argument('--priority', default='medium',
+                             choices=['critical', 'high', 'medium', 'low'],
+                             help='Priority level (default: medium)')
+
+    # track remove-keyword
+    track_rem_kw = track_subparsers.add_parser('remove-keyword', help='Remove keyword from tracking')
+    track_rem_kw.add_argument('--term', required=True, help='Keyword to remove')
+
+    # track list
+    track_list = track_subparsers.add_parser('list', help='List all tracked items')
+
+    # track check
+    track_check = track_subparsers.add_parser('check', help='Check tracked items for updates')
+    track_check.add_argument('--days', type=int, default=7, help='Days to look back (default: 7)')
+
     args = parser.parse_args()
 
     if not args.command:
@@ -132,6 +181,9 @@ Examples:
 
         elif args.command == 'latest':
             return cmd_latest(functions, args)
+
+        elif args.command == 'track':
+            return cmd_track(functions, args)
 
         else:
             print(f"Unknown command: {args.command}")
@@ -339,6 +391,9 @@ def cmd_events(functions: TrackerFunctions, args) -> int:
 
 def cmd_latest(functions: TrackerFunctions, args) -> int:
     """Show all recent FedRAMP activity"""
+    from src.tracker import TrackingManager, search_keywords_in_commits, search_keywords_in_discussions
+    from src.web_scraper import WebScraper
+
     since = datetime.now() - timedelta(days=args.days)
 
     print(f"Fetching all FedRAMP activity (last {args.days} days)...")
@@ -347,10 +402,109 @@ def cmd_latest(functions: TrackerFunctions, args) -> int:
     # Update repositories first
     functions.ensure_repositories()
 
+    # Load tracking to see if we should prioritize items
+    tracker = TrackingManager()
+    tracked_discussions = tracker.get_tracked_discussions()
+    tracked_keywords = tracker.get_tracked_keywords()
+    has_tracking = tracker.has_tracked_items()
+
+    # Get all data
+    rfcs = functions.get_github_rfcs(since)
+
+    # Get git repository changes
+    repo_configs = functions.config.get_repositories()
+    all_commits = []
+    for repo_config in repo_configs:
+        repo_name = repo_config['name']
+        commits = functions.get_commits_since(repo_name, since)
+        for commit in commits:
+            commit['repository'] = repo_name
+        all_commits.extend(commits)
+
+    # If tracking is enabled, show tracked items first
+    if has_tracking:
+        print("⭐ TRACKED ITEMS - NEW ACTIVITY:")
+        print()
+
+        tracked_shown = False
+
+        # Check tracked discussions
+        if tracked_discussions:
+            scraper = WebScraper()
+            for disc in tracked_discussions:
+                priority_emoji = {
+                    'critical': '🚨',
+                    'high': '📌',
+                    'medium': '⚙️',
+                    'low': 'ℹ️'
+                }.get(disc.get('priority', 'medium'), '⚙️')
+
+                print(f"{priority_emoji} {disc.get('title', 'Untitled')}")
+
+                # Get discussion activity
+                activity = scraper.get_discussion_activity(disc['url'])
+                if activity:
+                    print(f"   📊 {activity['comment_count']} comments | Last: {activity['last_activity']}")
+
+                if disc.get('reason'):
+                    print(f"   Why: {disc['reason']}")
+                print(f"   {disc['url']}")
+                print()
+                tracked_shown = True
+
+        # Search for tracked keywords
+        if tracked_keywords:
+            settings = tracker.get_settings()
+            keyword_matches = []
+
+            if settings.get('search_commits', True):
+                keyword_matches.extend(search_keywords_in_commits(all_commits, tracked_keywords))
+
+            if settings.get('search_discussions', True):
+                keyword_matches.extend(search_keywords_in_discussions(rfcs, tracked_keywords))
+
+            if keyword_matches:
+                # Group by keyword
+                by_keyword = {}
+                for match in keyword_matches:
+                    keyword = match['keyword']
+                    if keyword not in by_keyword:
+                        by_keyword[keyword] = []
+                    by_keyword[keyword].append(match)
+
+                print("🔍 KEYWORD ALERTS:")
+                print()
+
+                for keyword, matches in by_keyword.items():
+                    keyword_info = matches[0]['keyword_info']
+                    priority_emoji = {
+                        'critical': '🚨',
+                        'high': '📌',
+                        'medium': '⚙️',
+                        'low': 'ℹ️'
+                    }.get(keyword_info.get('priority', 'medium'), '⚙️')
+
+                    print(f"{priority_emoji} \"{keyword}\" found in {len(matches)} places")
+                    for match in matches[:3]:  # Show first 3
+                        if match['match_type'] == 'commit_message':
+                            commit = match['commit']
+                            print(f"   • [{match['repository']}] {commit['hash'][:7]}: {commit['subject']}")
+                        elif match['match_type'] == 'discussion_title':
+                            disc = match['discussion']
+                            print(f"   • [Discussion] {disc['title']}")
+                    if len(matches) > 3:
+                        print(f"   ... and {len(matches) - 3} more")
+                    print()
+
+                tracked_shown = True
+
+        if tracked_shown:
+            print("---")
+            print()
+
     # Get RFCs
     print("## RFCs (GitHub Discussions)")
     print()
-    rfcs = functions.get_github_rfcs(since)
     if rfcs:
         for rfc in rfcs[:5]:  # Show first 5
             print(f"- {rfc['title']}")
@@ -382,25 +536,246 @@ def cmd_latest(functions: TrackerFunctions, args) -> int:
     print("## Git Repository Changes")
     print()
 
-    repo_configs = functions.config.get_repositories()
     total_commits = 0
 
     for repo_config in repo_configs:
         repo_name = repo_config['name']
-        commits = functions.get_commits_since(repo_name, since)
+        repo_commits = [c for c in all_commits if c.get('repository') == repo_name]
 
-        if commits:
+        if repo_commits:
             print(f"### {repo_name}")
-            for commit in commits[:3]:  # Show first 3
+            for commit in repo_commits[:3]:  # Show first 3
                 print(f"- {commit['hash'][:7]}: {commit['subject']}")
-            if len(commits) > 3:
-                print(f"  ... and {len(commits) - 3} more commits")
+            if len(repo_commits) > 3:
+                print(f"  ... and {len(repo_commits) - 3} more commits")
             print()
-            total_commits += len(commits)
+            total_commits += len(repo_commits)
 
     if total_commits == 0:
         print("No recent commits")
         print()
+
+    return 0
+
+
+def cmd_track(functions: TrackerFunctions, args) -> int:
+    """Manage tracked discussions and keywords"""
+    tracker = TrackingManager()
+
+    if not args.track_command:
+        print("Track command requires a subcommand.")
+        print("Use: track {add-discussion|remove-discussion|add-keyword|remove-keyword|list|check}")
+        return 1
+
+    if args.track_command == 'add-discussion':
+        return cmd_track_add_discussion(tracker, args)
+
+    elif args.track_command == 'remove-discussion':
+        return cmd_track_remove_discussion(tracker, args)
+
+    elif args.track_command == 'add-keyword':
+        return cmd_track_add_keyword(tracker, args)
+
+    elif args.track_command == 'remove-keyword':
+        return cmd_track_remove_keyword(tracker, args)
+
+    elif args.track_command == 'list':
+        return cmd_track_list(tracker, args)
+
+    elif args.track_command == 'check':
+        return cmd_track_check(tracker, functions, args)
+
+    else:
+        print(f"Unknown track command: {args.track_command}")
+        return 1
+
+
+def cmd_track_add_discussion(tracker: TrackingManager, args) -> int:
+    """Add discussion to tracking"""
+    print(f"Adding discussion to tracking: {args.url}")
+
+    success = tracker.add_discussion(
+        url=args.url,
+        title=args.title,
+        reason=args.reason,
+        priority=args.priority
+    )
+
+    if success:
+        print("✓ Discussion added to tracking")
+        return 0
+    else:
+        print("✗ Failed to add discussion (may already be tracked)")
+        return 1
+
+
+def cmd_track_remove_discussion(tracker: TrackingManager, args) -> int:
+    """Remove discussion from tracking"""
+    print(f"Removing discussion from tracking: {args.url}")
+
+    success = tracker.remove_discussion(args.url)
+
+    if success:
+        print("✓ Discussion removed from tracking")
+        return 0
+    else:
+        print("✗ Discussion not found in tracking")
+        return 1
+
+
+def cmd_track_add_keyword(tracker: TrackingManager, args) -> int:
+    """Add keyword to tracking"""
+    print(f"Adding keyword to tracking: \"{args.term}\"")
+
+    success = tracker.add_keyword(
+        term=args.term,
+        context=args.context,
+        priority=args.priority
+    )
+
+    if success:
+        print("✓ Keyword added to tracking")
+        return 0
+    else:
+        print("✗ Failed to add keyword (may already be tracked)")
+        return 1
+
+
+def cmd_track_remove_keyword(tracker: TrackingManager, args) -> int:
+    """Remove keyword from tracking"""
+    print(f"Removing keyword from tracking: \"{args.term}\"")
+
+    success = tracker.remove_keyword(args.term)
+
+    if success:
+        print("✓ Keyword removed from tracking")
+        return 0
+    else:
+        print("✗ Keyword not found in tracking")
+        return 1
+
+
+def cmd_track_list(tracker: TrackingManager, args) -> int:
+    """List all tracked items"""
+    print(tracker.list_all())
+    return 0
+
+
+def cmd_track_check(tracker: TrackingManager, functions: TrackerFunctions, args) -> int:
+    """Check tracked items for updates"""
+    from src.tracker import search_keywords_in_commits, search_keywords_in_discussions
+    from src.web_scraper import WebScraper
+
+    since = datetime.now() - timedelta(days=args.days)
+
+    print(f"Checking tracked items for updates (last {args.days} days)...")
+    print()
+
+    if not tracker.has_tracked_items():
+        print("No tracked items. Add some with:")
+        print("  python3 main.py track add-discussion --url <URL>")
+        print("  python3 main.py track add-keyword --term <TERM>")
+        return 0
+
+    # Update repositories
+    functions.ensure_repositories()
+
+    # Get tracked items
+    tracked_discussions = tracker.get_tracked_discussions()
+    tracked_keywords = tracker.get_tracked_keywords()
+    settings = tracker.get_settings()
+
+    # Check tracked discussions for activity
+    if tracked_discussions:
+        print("⭐ TRACKED DISCUSSIONS - ACTIVITY CHECK:")
+        print()
+
+        scraper = WebScraper()
+
+        for disc in tracked_discussions:
+            print(f"🔔 {disc.get('title', 'Untitled')}")
+            print(f"   URL: {disc['url']}")
+            print(f"   Priority: {disc.get('priority', 'medium')} | Reason: {disc.get('reason', 'N/A')}")
+
+            # Get discussion activity
+            activity = scraper.get_discussion_activity(disc['url'])
+
+            if activity:
+                print(f"   📊 Comments: {activity['comment_count']}")
+                print(f"   📅 Last activity: {activity['last_activity']}")
+                print(f"   👥 Participants: {activity['participant_count']}")
+            else:
+                print(f"   ⚠️  Could not fetch activity details")
+
+            print()
+
+    # Search for tracked keywords
+    if tracked_keywords and (settings.get('search_commits', True) or settings.get('search_discussions', True)):
+        print("⭐ KEYWORD ALERTS:")
+        print()
+
+        all_matches = []
+
+        # Search in commits
+        if settings.get('search_commits', True):
+            for repo_config in functions.config.get_repositories():
+                repo_name = repo_config['name']
+                commits = functions.get_commits_since(repo_name, since)
+
+                if commits:
+                    # Add repository info to commits
+                    for commit in commits:
+                        commit['repository'] = repo_name
+
+                    matches = search_keywords_in_commits(commits, tracked_keywords)
+                    all_matches.extend(matches)
+
+        # Search in discussions
+        if settings.get('search_discussions', True):
+            rfcs = functions.get_github_rfcs(since)
+            if rfcs:
+                matches = search_keywords_in_discussions(rfcs, tracked_keywords)
+                all_matches.extend(matches)
+
+        # Display matches
+        if all_matches:
+            # Group by keyword
+            by_keyword = {}
+            for match in all_matches:
+                keyword = match['keyword']
+                if keyword not in by_keyword:
+                    by_keyword[keyword] = []
+                by_keyword[keyword].append(match)
+
+            for keyword, matches in by_keyword.items():
+                keyword_info = matches[0]['keyword_info']
+                priority_emoji = {
+                    'critical': '🚨',
+                    'high': '📌',
+                    'medium': '⚙️',
+                    'low': 'ℹ️'
+                }.get(keyword_info.get('priority', 'medium'), '⚙️')
+
+                print(f"{priority_emoji} \"{keyword}\" found in {len(matches)} places:")
+                if keyword_info.get('context'):
+                    print(f"   Context: {keyword_info['context']}")
+
+                for match in matches[:5]:  # Show first 5 matches per keyword
+                    if match['match_type'] == 'commit_message':
+                        commit = match['commit']
+                        print(f"   • [{match['repository']}] {commit['hash'][:7]}: {commit['subject']}")
+                    elif match['match_type'] == 'discussion_title':
+                        disc = match['discussion']
+                        print(f"   • [Discussion] {disc['title']}")
+                        print(f"     {disc['url']}")
+
+                if len(matches) > 5:
+                    print(f"   ... and {len(matches) - 5} more matches")
+
+                print()
+        else:
+            print("No keyword matches found in the specified time range.")
+            print()
 
     return 0
 

@@ -143,3 +143,91 @@ class WebScraper:
         # Traditional scraping doesn't work without a headless browser
         # For now, return empty list
         return []
+
+    def get_discussion_activity(self, discussion_url: str) -> Optional[Dict[str, Any]]:
+        """Get detailed activity information for a specific discussion
+
+        Args:
+            discussion_url: Full URL to GitHub discussion
+
+        Returns:
+            Dictionary with comment_count, last_activity, participants, or None if error
+        """
+        try:
+            response = requests.get(discussion_url, headers=self.headers, timeout=10)
+            response.raise_for_status()
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Find comment count
+            comment_count = 0
+
+            # Try to find comment count in various places
+            # Look for elements like "5 comments" or discussion metadata
+            timeline = soup.find('div', class_='js-discussion')
+            if timeline:
+                # Count all comment divs
+                comments = timeline.find_all('div', class_='timeline-comment')
+                comment_count = len(comments)
+
+            # Alternative: look for comment counter in sidebar
+            comment_label = soup.find('span', string=re.compile(r'\d+\s+comments?', re.IGNORECASE))
+            if comment_label:
+                match = re.search(r'(\d+)', comment_label.get_text())
+                if match:
+                    comment_count = int(match.group(1))
+
+            # Find last activity timestamp
+            last_activity = None
+            last_activity_str = "Unknown"
+
+            # Look for relative-time elements
+            time_elements = soup.find_all('relative-time')
+            if time_elements:
+                # Get the most recent timestamp
+                timestamps = []
+                for elem in time_elements:
+                    datetime_str = elem.get('datetime', '')
+                    if datetime_str:
+                        try:
+                            dt = datetime.fromisoformat(datetime_str.replace('Z', '+00:00'))
+                            timestamps.append(dt)
+                        except:
+                            pass
+
+                if timestamps:
+                    last_activity = max(timestamps)
+                    last_activity_str = last_activity.strftime('%Y-%m-%d %H:%M:%S UTC')
+
+            # Find participants
+            participants = []
+            author_links = soup.find_all('a', class_='author')
+            seen = set()
+            for link in author_links:
+                username = link.get_text(strip=True)
+                if username and username not in seen:
+                    participants.append(username)
+                    seen.add(username)
+
+            # Get discussion title
+            title = "Unknown"
+            title_elem = soup.find('h1', class_='gh-header-title')
+            if title_elem:
+                title = title_elem.get_text(strip=True)
+
+            return {
+                'url': discussion_url,
+                'title': title,
+                'comment_count': comment_count,
+                'last_activity': last_activity_str,
+                'last_activity_datetime': last_activity,
+                'participants': participants,
+                'participant_count': len(participants)
+            }
+
+        except requests.RequestException as e:
+            print(f"Error fetching discussion activity: {e}")
+            return None
+        except Exception as e:
+            print(f"Error parsing discussion: {e}")
+            return None
