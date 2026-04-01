@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 import re
+import feedparser
 
 
 class WebScraper:
@@ -231,3 +232,78 @@ class WebScraper:
         except Exception as e:
             print(f"Error parsing discussion: {e}")
             return None
+
+    def get_fedramp_notices(self, since: Optional[datetime] = None) -> List[Dict[str, Any]]:
+        """Get FedRAMP notices from RSS feed
+
+        Args:
+            since: Get notices after this datetime
+
+        Returns:
+            List of notice dictionaries with title, link, date, description, content
+        """
+        rss_url = "https://www.fedramp.gov/notices/rss.xml"
+
+        try:
+            # Fetch RSS content using requests (handles SSL better)
+            response = requests.get(rss_url, headers=self.headers, timeout=10)
+            response.raise_for_status()
+
+            # Parse RSS feed from content
+            feed = feedparser.parse(response.content)
+
+            if feed.bozo:
+                # Feed parsing error
+                print(f"Error parsing RSS feed: {feed.bozo_exception}")
+                return []
+
+            notices = []
+
+            for entry in feed.entries:
+                try:
+                    # Extract fields
+                    title = entry.get('title', 'Untitled')
+                    link = entry.get('link', '')
+                    description = entry.get('description', '')
+
+                    # Get full content if available
+                    content = ''
+                    if 'content' in entry and entry.content:
+                        content = entry.content[0].get('value', '')
+                    elif 'summary' in entry:
+                        content = entry.summary
+
+                    # Parse date
+                    published_date = None
+                    date_str = "Unknown"
+
+                    if 'published_parsed' in entry and entry.published_parsed:
+                        from time import mktime
+                        published_date = datetime.fromtimestamp(mktime(entry.published_parsed))
+                        date_str = published_date.strftime('%Y-%m-%d')
+                    elif 'published' in entry:
+                        date_str = entry.published
+
+                    # Filter by date if specified
+                    if since and published_date and published_date < since:
+                        continue
+
+                    notices.append({
+                        'title': title,
+                        'link': link,
+                        'date': date_str,
+                        'date_obj': published_date,
+                        'description': description,
+                        'content': content
+                    })
+
+                except Exception as e:
+                    # Skip individual entry parsing errors
+                    print(f"Error parsing notice entry: {e}")
+                    continue
+
+            return notices
+
+        except Exception as e:
+            print(f"Error fetching FedRAMP notices RSS: {e}")
+            return []

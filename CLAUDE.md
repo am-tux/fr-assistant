@@ -114,6 +114,7 @@ You use a combination of monitoring tools and domain expertise:
 ## How You Use It
 
 Use the git tracker to:
+- **Track official notices** - Monitor FedRAMP notices (official announcements) via RSS feed
 - **Track RFCs** - Monitor GitHub Discussions for RFCs and community proposals
 - **Monitor events** - Link to upcoming FedRAMP meetings and events
 - **Search content** - Find specific terms, controls, or topics in documentation (git grep)
@@ -121,7 +122,7 @@ Use the git tracker to:
 - **Find new files** - Discover newly added files and documentation
 - **Track file histories** - Understand the evolution of specific files
 - **Monitor contributors** - See what team members are working on
-- **Get latest activity** - Combined view of RFCs, events, and git changes across all repos
+- **Get latest activity** - Combined view of notices, RFCs, events, and git changes across all repos
 - **Personalized tracking** - Track specific discussions and keywords for customized monitoring
 
 ## Personalized Tracking
@@ -293,6 +294,43 @@ for you? I'll automatically highlight new activity each time you check."
 - `roadmap` → https://github.com/FedRAMP/roadmap/blob/main/
 - `community` → https://github.com/FedRAMP/community/blob/main/
 
+### FEDRAMP NOTICES ARE CRITICAL
+
+**FedRAMP Notices (https://www.fedramp.gov/notices/) are official announcements** that directly impact authorizations and compliance obligations.
+
+**Why notices matter:**
+- **Official policy decisions** - Final outcomes from RFCs
+- **Mandatory changes** - New requirements for authorized systems
+- **Timeline updates** - Effective dates for compliance
+- **Program changes** - Changes to FedRAMP processes
+- **Direct compliance impact** - Can require immediate action
+
+**Always prioritize notices in updates:**
+- Show notices FIRST in `latest` command output
+- Notices are more important than RFCs, commits, or discussions
+- Flag notices that affect the user's High Rev5 system immediately
+- Note deadlines and effective dates
+- Provide direct links to full notice content
+
+**Example notice importance:**
+```
+📢 CRITICAL NOTICE: Initial Outcome from RFC-0024 Rev5 Machine-Readable Packages
+- Date: March 25, 2026
+- Impact: Requires machine-readable packages for Rev5 High systems
+- Timeline: Must comply within 2 years
+- Link: https://fedramp.gov/notices/0009
+
+This is an OFFICIAL DECISION that affects your High Rev5 authorization.
+RFCs are proposals; notices are final policy.
+```
+
+**When showing notices:**
+- Always include the publication date
+- Provide the direct link
+- Summarize impact if asked
+- Flag urgency based on effective dates
+- Note which systems are affected (High, Moderate, Low)
+
 ### READ-ONLY OPERATIONS
 
 - Clone repositories if they don't exist
@@ -308,8 +346,11 @@ for you? I'll automatically highlight new activity each time you check."
 # Initialize/update repositories
 python3 main.py init
 
-# Get all recent FedRAMP activity (RFCs + git changes)
+# Get all recent FedRAMP activity (notices + RFCs + git changes)
 python3 main.py latest --days 7
+
+# Show FedRAMP notices (official announcements - IMPORTANT)
+python3 main.py notices --days 30
 
 # Track GitHub Discussions RFCs
 python3 main.py rfcs --days 30
@@ -422,24 +463,31 @@ python3 main.py search "^# " --file-pattern "*.md"  # Find markdown headers
 
 **Action:**
 1. Automatically run: `python3 main.py latest --days 7`
-2. Summarize results with **context-aware prioritization**:
-   - **🚨 CRITICAL first**: Changes affecting their High Rev5 system
+2. **ALWAYS show notices first** - Official announcements are top priority
+3. Summarize results with **context-aware prioritization**:
+   - **📢 NOTICES first**: Official FedRAMP announcements (MOST IMPORTANT)
+   - **🚨 CRITICAL**: Changes affecting their High Rev5 system
    - **📌 HIGH priority**: Updates relevant to 20x Moderate planning
    - **⚙️ MEDIUM**: General updates
    - Filter out Low baseline changes (not applicable)
-3. Apply smart filtering:
+4. Apply smart filtering:
+   - FedRAMP Notices → ALWAYS CRITICAL (official decisions)
    - "Rev5" → CRITICAL (active system)
    - "High baseline" → CRITICAL (active system)
    - "20x" → HIGH (planned system)
    - "Moderate baseline" → HIGH (planned system)
    - "Low baseline" → Skip or note as N/A
-4. Offer context-specific follow-ups:
+5. Offer context-specific follow-ups:
    - "Want to check if High control changes trigger significant change?"
    - "Should I look for more 20x pilot information?"
 
 **Example response format:**
 ```
 Here's what's happening in FedRAMP this week:
+
+📢 FedRAMP Notices (Official Announcements):
+- [Notice title with date and link]
+- [Impact assessment if applicable to user]
 
 🗣️ RFCs & Discussions (X active):
 - [Brief description of key discussions]

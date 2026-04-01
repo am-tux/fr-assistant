@@ -33,6 +33,9 @@ Examples:
   # Show upcoming FedRAMP events
   %(prog)s events --days 7
 
+  # Show FedRAMP notices (official announcements)
+  %(prog)s notices --days 30
+
   # Get new files added in last 7 days
   %(prog)s new-files --repo docs --days 7
 
@@ -117,6 +120,10 @@ Examples:
     events_parser = subparsers.add_parser('events', help='Show upcoming FedRAMP events')
     events_parser.add_argument('--days', type=int, default=7, help='Days ahead to look (default: 7)')
 
+    # Notices command
+    notices_parser = subparsers.add_parser('notices', help='Show FedRAMP notices')
+    notices_parser.add_argument('--days', type=int, default=30, help='Days to look back (default: 30)')
+
     # Latest command (everything)
     latest_parser = subparsers.add_parser('latest', help='Show all recent FedRAMP activity')
     latest_parser.add_argument('--days', type=int, default=7, help='Days to look back (default: 7)')
@@ -195,6 +202,9 @@ Examples:
 
         elif args.command == 'events':
             return cmd_events(functions, args)
+
+        elif args.command == 'notices':
+            return cmd_notices(functions, args)
 
         elif args.command == 'latest':
             return cmd_latest(functions, args)
@@ -469,6 +479,40 @@ def cmd_events(functions: TrackerFunctions, args) -> int:
     return 0
 
 
+def cmd_notices(functions: TrackerFunctions, args) -> int:
+    """Show FedRAMP notices from RSS feed"""
+    since = datetime.now() - timedelta(days=args.days)
+
+    print(f"Fetching FedRAMP notices (last {args.days} days)...")
+    print()
+
+    notices = functions.get_fedramp_notices(since)
+
+    if not notices:
+        print(f"No notices found in the last {args.days} days.")
+        print()
+        print("To view all FedRAMP notices, visit:")
+        print("https://www.fedramp.gov/notices/")
+        return 0
+
+    print(f"Found {len(notices)} notices:")
+    print()
+
+    for notice in notices:
+        print(f"📢 {notice['title']}")
+        print(f"   Date: {notice['date']}")
+        print(f"   {notice['link']}")
+        if notice.get('description'):
+            # Truncate long descriptions
+            desc = notice['description']
+            if len(desc) > 200:
+                desc = desc[:200] + "..."
+            print(f"   {desc}")
+        print()
+
+    return 0
+
+
 def cmd_latest(functions: TrackerFunctions, args) -> int:
     """Show all recent FedRAMP activity"""
     from src.tracker import TrackingManager, search_keywords_in_commits, search_keywords_in_discussions
@@ -581,6 +625,23 @@ def cmd_latest(functions: TrackerFunctions, args) -> int:
         if tracked_shown:
             print("---")
             print()
+
+    # Get FedRAMP Notices (IMPORTANT - official announcements)
+    notices = functions.get_fedramp_notices(since)
+    print("## 📢 FedRAMP Notices (Official Announcements)")
+    print()
+    if notices:
+        for notice in notices[:5]:  # Show first 5
+            print(f"- {notice['title']}")
+            print(f"  Date: {notice['date']}")
+            print(f"  {notice['link']}")
+            print()
+        if len(notices) > 5:
+            print(f"... and {len(notices) - 5} more notices")
+            print()
+    else:
+        print("No recent notices")
+        print()
 
     # Get RFCs
     print("## RFCs (GitHub Discussions)")

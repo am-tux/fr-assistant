@@ -143,6 +143,17 @@ class TrackerFunctions:
         """
         return self.web_scraper.get_fedramp_events(days_ahead)
 
+    def get_fedramp_notices(self, since: Optional[datetime] = None) -> List[Dict[str, Any]]:
+        """Get FedRAMP notices from RSS feed
+
+        Args:
+            since: Get notices after this datetime
+
+        Returns:
+            List of notice dictionaries
+        """
+        return self.web_scraper.get_fedramp_notices(since)
+
     def search_content(self, pattern: str, repository: Optional[str] = None,
                        case_sensitive: bool = False, context_lines: int = 0,
                        file_pattern: Optional[str] = None,
