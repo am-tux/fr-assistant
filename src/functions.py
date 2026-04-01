@@ -142,3 +142,50 @@ class TrackerFunctions:
             List of event dictionaries
         """
         return self.web_scraper.get_fedramp_events(days_ahead)
+
+    def search_content(self, pattern: str, repository: Optional[str] = None,
+                       case_sensitive: bool = False, context_lines: int = 0,
+                       file_pattern: Optional[str] = None,
+                       branch: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Search for a pattern in repository content
+
+        Args:
+            pattern: Search pattern (regex supported)
+            repository: Repository name (searches all repos if None)
+            case_sensitive: Whether search should be case-sensitive (default: False)
+            context_lines: Number of context lines to show (default: 0)
+            file_pattern: Optional glob pattern to filter files (e.g., '*.md')
+            branch: Branch to search (defaults to primary branch)
+
+        Returns:
+            List of match dictionaries from all searched repositories
+        """
+        all_matches = []
+
+        if repository:
+            # Search specific repository
+            if repository not in self.git_trackers:
+                raise ValueError(f"Repository '{repository}' not found")
+
+            tracker = self.git_trackers[repository]
+            matches = tracker.search_content(
+                pattern=pattern,
+                branch=branch,
+                case_sensitive=case_sensitive,
+                context_lines=context_lines,
+                file_pattern=file_pattern
+            )
+            all_matches.extend(matches)
+        else:
+            # Search all repositories
+            for repo_name, tracker in self.git_trackers.items():
+                matches = tracker.search_content(
+                    pattern=pattern,
+                    branch=branch,
+                    case_sensitive=case_sensitive,
+                    context_lines=context_lines,
+                    file_pattern=file_pattern
+                )
+                all_matches.extend(matches)
+
+        return all_matches

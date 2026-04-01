@@ -45,6 +45,12 @@ Examples:
   # Show contributor activity
   %(prog)s contributor --repo docs --name "john@example.com" --days 30
 
+  # Search repository content
+  %(prog)s search "Rev5" --repo docs
+  %(prog)s search "control SA-4" --context 3 --case-sensitive
+  %(prog)s search "baseline" --file-pattern "*.md"
+  %(prog)s search "High baseline"  # searches all repos
+
   # Track a discussion
   %(prog)s track add-discussion --url "https://github.com/..." --title "Title" --reason "Why" --priority critical
 
@@ -90,6 +96,14 @@ Examples:
     contributor_parser.add_argument('--repo', required=True, help='Repository name')
     contributor_parser.add_argument('--name', required=True, help='Contributor name or email')
     contributor_parser.add_argument('--days', type=int, default=30, help='Days to look back (default: 30)')
+
+    # Search command
+    search_parser = subparsers.add_parser('search', help='Search repository content')
+    search_parser.add_argument('pattern', help='Search pattern (supports regex)')
+    search_parser.add_argument('--repo', help='Repository name (searches all repos if not specified)')
+    search_parser.add_argument('--case-sensitive', action='store_true', help='Case-sensitive search')
+    search_parser.add_argument('--context', type=int, default=0, help='Number of context lines to show (default: 0)')
+    search_parser.add_argument('--file-pattern', help='Filter files by pattern (e.g., "*.md", "*.py")')
 
     # RFCs command
     rfcs_parser = subparsers.add_parser('rfcs', help='Show GitHub Discussions RFCs')
@@ -169,6 +183,9 @@ Examples:
 
         elif args.command == 'contributor':
             return cmd_contributor(functions, args)
+
+        elif args.command == 'search':
+            return cmd_search(functions, args)
 
         elif args.command == 'rfcs':
             return cmd_rfcs(functions, args)
@@ -334,6 +351,69 @@ def cmd_contributor(functions: TrackerFunctions, args) -> int:
     if len(activity['commits']) > 10:
         print(f"... and {len(activity['commits']) - 10} more commits")
     print()
+
+    return 0
+
+
+def cmd_search(functions: TrackerFunctions, args) -> int:
+    """Search repository content"""
+    repo_msg = f"in {args.repo}" if args.repo else "across all repositories"
+    print(f"Searching {repo_msg} for: \"{args.pattern}\"")
+    if args.file_pattern:
+        print(f"Filtering files: {args.file_pattern}")
+    print()
+
+    # Ensure repos are up to date
+    functions.ensure_repositories()
+
+    try:
+        matches = functions.search_content(
+            pattern=args.pattern,
+            repository=args.repo,
+            case_sensitive=args.case_sensitive,
+            context_lines=args.context,
+            file_pattern=args.file_pattern
+        )
+    except ValueError as e:
+        print(f"Error: {e}")
+        return 1
+
+    if not matches:
+        print(f"No matches found for \"{args.pattern}\"")
+        return 0
+
+    # Group matches by file
+    by_file = {}
+    for match in matches:
+        file_key = f"{match['repository']}:{match['file']}"
+        if file_key not in by_file:
+            by_file[file_key] = []
+        by_file[file_key].append(match)
+
+    print(f"Found {len(matches)} matches in {len(by_file)} files:")
+    print()
+
+    # Display results grouped by file
+    for file_key, file_matches in by_file.items():
+        repo_name = file_matches[0]['repository']
+        filepath = file_matches[0]['file']
+
+        print(f"## [{repo_name}] {filepath}")
+        print()
+
+        for match in file_matches:
+            if match.get('is_context'):
+                # Context line (grayed out)
+                print(f"    {match['line_number']:4d}  {match['content']}")
+            else:
+                # Actual match (highlighted)
+                print(f"  → {match['line_number']:4d}  {match['content']}")
+
+        print()
+
+    # Summary
+    total_repos = len(set(m['repository'] for m in matches))
+    print(f"Summary: {len(matches)} matches across {len(by_file)} files in {total_repos} repositories")
 
     return 0
 

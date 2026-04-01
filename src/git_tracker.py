@@ -526,3 +526,117 @@ class GitTracker:
                 'commits': [],
                 'files': []
             }
+
+    def search_content(self, pattern: str, branch: Optional[str] = None,
+                       case_sensitive: bool = False, context_lines: int = 0,
+                       file_pattern: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Search for a pattern in repository content using git grep
+
+        Args:
+            pattern: Search pattern (regex supported)
+            branch: Branch to search (defaults to primary_branch)
+            case_sensitive: Whether search should be case-sensitive (default: False)
+            context_lines: Number of context lines to show (default: 0)
+            file_pattern: Optional glob pattern to filter files (e.g., '*.md', '*.py')
+
+        Returns:
+            List of match dictionaries with file, line_number, line_content, context
+        """
+        if branch is None:
+            branch = self.primary_branch
+
+        # Build git grep command
+        cmd = ['git', 'grep', '-n']  # -n shows line numbers
+
+        if not case_sensitive:
+            cmd.append('-i')  # case-insensitive
+
+        if context_lines > 0:
+            cmd.extend(['-C', str(context_lines)])  # context lines
+
+        cmd.extend([pattern, f'origin/{branch}'])
+
+        if file_pattern:
+            cmd.append('--')
+            cmd.append(file_pattern)
+
+        try:
+            result = subprocess.run(
+                cmd,
+                cwd=self.path,
+                capture_output=True,
+                text=True,
+                check=False  # Don't raise on non-zero exit (no matches = exit code 1)
+            )
+
+            # Exit code 1 means no matches found (not an error)
+            if result.returncode == 1 or not result.stdout.strip():
+                return []
+
+            # Exit code > 1 is an actual error
+            if result.returncode > 1:
+                print(f"Error searching {self.name}: {result.stderr}")
+                return []
+
+            # Parse results
+            matches = []
+            lines = result.stdout.strip().split('\n')
+
+            for line in lines:
+                # Skip separator lines
+                if line == '--':
+                    continue
+
+                # git grep formats output as:
+                # - Matching lines: origin/branch:filepath:line_number:content
+                # - Context lines: origin/branch:filepath-line_number-content
+
+                # Split on first colon to separate branch from rest
+                first_colon = line.find(':')
+                if first_colon < 0:
+                    continue
+
+                remainder = line[first_colon + 1:]  # Everything after origin/branch:
+
+                # Check if this is a match line (has another colon) or context (has dash)
+                if ':' in remainder and remainder.count(':') >= 2:
+                    # Match line: filepath:line_number:content
+                    parts = remainder.split(':', 2)
+                    filepath = parts[0]
+                    line_number = parts[1]
+                    content = parts[2]
+
+                    matches.append({
+                        'file': filepath,
+                        'line_number': int(line_number) if line_number.isdigit() else 0,
+                        'content': content,
+                        'is_context': False,
+                        'repository': self.name
+                    })
+                elif '-' in remainder:
+                    # Context line: filepath-line_number-content
+                    # Find the last two dashes (line_number-content)
+                    # Work from the end to handle filenames with dashes
+                    last_dash = remainder.rfind('-')
+                    if last_dash > 0:
+                        before_last = remainder[:last_dash]
+                        prev_dash = before_last.rfind('-')
+                        if prev_dash >= 0:
+                            filepath = remainder[:prev_dash]
+                            line_number = remainder[prev_dash+1:last_dash]
+                            content = remainder[last_dash+1:]
+
+                            if line_number.isdigit():
+                                matches.append({
+                                    'file': filepath,
+                                    'line_number': int(line_number),
+                                    'content': content,
+                                    'is_context': True,
+                                    'repository': self.name
+                                })
+
+            return matches
+
+        except Exception as e:
+            print(f"Error searching {self.name}: {e}")
+            return []

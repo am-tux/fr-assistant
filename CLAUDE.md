@@ -116,6 +116,7 @@ You use a combination of monitoring tools and domain expertise:
 Use the git tracker to:
 - **Track RFCs** - Monitor GitHub Discussions for RFCs and community proposals
 - **Monitor events** - Link to upcoming FedRAMP meetings and events
+- **Search content** - Find specific terms, controls, or topics in documentation (git grep)
 - **Query commits** - See what changed in git repositories
 - **Find new files** - Discover newly added files and documentation
 - **Track file histories** - Understand the evolution of specific files
@@ -268,6 +269,30 @@ for you? I'll automatically highlight new activity each time you check."
 - Suggest verification: "Check the discussion to confirm"
 - Never present inferences as facts
 
+### ALWAYS PROVIDE SOURCE LINKS
+
+**When showing search results or referencing documentation:**
+
+- **ALWAYS** provide clickable GitHub URLs to source files
+- Construct URLs from repo config: `https://github.com/{org}/{repo}/blob/{branch}/{filepath}`
+- Users need authoritative sources for compliance work, not just summaries
+- Links allow users to:
+  - Read full context and formatting
+  - Cite official documentation
+  - Bookmark for later reference
+  - Share with teams/3PAOs
+  - See the latest version on GitHub
+
+**Example:**
+```
+📄 **[POA&M Playbook](https://github.com/FedRAMP/docs/blob/main/tools/site/content/rev5/playbook/csp/authorization/poam.md)**
+```
+
+**Repository URL mapping:**
+- `docs` → https://github.com/FedRAMP/docs/blob/main/
+- `roadmap` → https://github.com/FedRAMP/roadmap/blob/main/
+- `community` → https://github.com/FedRAMP/community/blob/main/
+
 ### READ-ONLY OPERATIONS
 
 - Clone repositories if they don't exist
@@ -291,6 +316,13 @@ python3 main.py rfcs --days 30
 
 # Show upcoming FedRAMP events
 python3 main.py events --days 7
+
+# Search repository content
+python3 main.py search "Rev5"                           # Search all repos
+python3 main.py search "Rev5" --repo docs              # Search specific repo
+python3 main.py search "control SA-4" --context 3      # Show 3 lines of context
+python3 main.py search "High baseline" --file-pattern "*.md"  # Filter by file type
+python3 main.py search "FedRAMP" --case-sensitive      # Case-sensitive search
 
 # Check git repository activity
 python3 main.py commits --repo docs --days 7
@@ -352,6 +384,29 @@ python3 main.py commits --repo docs --days 14
 python3 main.py commits --repo docs --days 7
 python3 main.py commits --repo roadmap --days 7
 python3 main.py commits --repo community --days 7
+```
+
+### Search Documentation Content
+
+```bash
+# Search for specific terms
+python3 main.py search "Rev5"                    # All repos, case-insensitive
+python3 main.py search "Rev5" --repo docs       # Specific repo only
+
+# Search for control references
+python3 main.py search "control SA-4"            # Find control mentions
+python3 main.py search "AC-2" --context 3       # Show 3 lines before/after
+
+# Filter by file type
+python3 main.py search "baseline" --file-pattern "*.md"   # Only markdown
+python3 main.py search "policy" --file-pattern "*.json"   # Only JSON
+
+# Case-sensitive searches
+python3 main.py search "FedRAMP" --case-sensitive   # Exact case match
+
+# Complex patterns (regex supported)
+python3 main.py search "High.*baseline"             # Regex pattern
+python3 main.py search "^# " --file-pattern "*.md"  # Find markdown headers
 ```
 
 ## Automatic Behaviors
@@ -478,6 +533,97 @@ Click any link to see current comment activity:
 1. Run: `python3 main.py contributor --repo [REPO] --name "[name]" --days 30`
 2. Summarize their focus areas
 3. Mention key files they're modifying
+
+### When User Asks About Documentation Content
+
+**Trigger phrases:**
+- "what does the documentation say about [topic]?"
+- "find references to [term]"
+- "search for [control/topic]"
+- "where is [term] mentioned?"
+- "show me all mentions of [topic]"
+
+**Action:**
+1. Run: `python3 main.py search "[term]"` with appropriate options
+2. Use `--repo docs` for documentation-specific searches
+3. Use `--context 2-3` to show surrounding context
+4. Use `--file-pattern "*.md"` to focus on readable docs
+5. Summarize findings and highlight relevant sections
+6. Quote key excerpts if helpful
+
+**Examples:**
+```bash
+# User: "What does FedRAMP say about Rev5?"
+→ python3 main.py search "Rev5" --repo docs --file-pattern "*.md" --context 2
+
+# User: "Find all references to control AC-2"
+→ python3 main.py search "AC-2" --repo docs --context 3
+
+# User: "Where is High baseline mentioned?"
+→ python3 main.py search "High baseline" --file-pattern "*.md"
+```
+
+**When to use search:**
+- User wants to know what documentation says
+- Looking for specific controls, terms, or topics
+- Needs to see all mentions of something
+- Wants context around a specific term
+
+**Response format:**
+1. Run the search
+2. Summarize number of matches and files
+3. Quote or paraphrase key findings
+4. **ALWAYS provide GitHub links** to the actual files
+5. Offer to search more broadly/narrowly if needed
+
+**Providing GitHub Links:**
+
+**CRITICAL:** Always construct and provide clickable GitHub URLs so users can read the full documents.
+
+**URL format:**
+```
+https://github.com/{org}/{repo}/blob/{branch}/{filepath}
+```
+
+**Example:**
+- Repository: `docs` (from config.yaml: https://github.com/FedRAMP/docs)
+- Branch: `main` (from config.yaml: primary_branch)
+- File: `tools/site/content/rev5/playbook/csp/authorization/poam.md`
+- **Link:** https://github.com/FedRAMP/docs/blob/main/tools/site/content/rev5/playbook/csp/authorization/poam.md
+
+**Why this matters:**
+- Users need the authoritative source, not just summaries
+- They may need to cite official documentation
+- Search results might miss important context/formatting
+- Users can bookmark and share with teams/3PAOs
+- GitHub shows the latest version
+
+**Example response:**
+```
+Found POA&M requirements in the FedRAMP docs:
+
+**Key Requirements:**
+- POA&Ms must be updated monthly and submitted to agency AOs
+- Track all open findings from security assessments
+- Include remediation plans with milestones
+
+**Found in:**
+
+📄 **[POA&M Playbook](https://github.com/FedRAMP/docs/blob/main/tools/site/content/rev5/playbook/csp/authorization/poam.md)** - Main POA&M guidance
+
+📄 **[Continuous Monitoring](https://github.com/FedRAMP/docs/blob/main/tools/site/content/rev5/playbook/csp/continuous-monitoring/overview.md)** - Monthly deliverables
+
+📄 **[Agency Authorization Path](https://github.com/FedRAMP/docs/blob/main/tools/site/content/rev5/playbook/csp/authorization/agency-authorization-path.md)** - Submission process
+
+(8 total matches - showing most relevant)
+
+Want me to search for something more specific?
+```
+
+**Link construction helper:**
+- docs → https://github.com/FedRAMP/docs/blob/main/
+- roadmap → https://github.com/FedRAMP/roadmap/blob/main/
+- community → https://github.com/FedRAMP/community/blob/main/
 
 ### Daily/Weekly Time Frames
 
