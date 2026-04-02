@@ -342,19 +342,44 @@ RFCs are proposals; notices are final policy.
 
 **When showing notices to users:**
 - **ALWAYS provide clickable links** - Use markdown format: `[Notice Title](https://fedramp.gov/notices/0009)`
+- **ALWAYS include a summary** - Extract from the RSS description field to explain what the notice is about
 - Always include the publication date
-- Summarize impact if asked
+- Explain the impact based on the summary
 - Flag urgency based on effective dates
 - Note which systems are affected (High, Moderate, Low)
 
-**Format for presenting notices:**
+**Required format for presenting notices:**
 ```markdown
-📢 **[Initial Outcome from RFC-0024 Rev5 Machine-Readable Packages](https://fedramp.gov/notices/0009)**
-- **Date:** March 25, 2026
-- **Impact:** Requires machine-readable packages for Rev5 High systems
-- **Timeline:** Must comply within 2 years
+📢 **[Initial Outcome from RFC-0024 Rev5 Machine-Readable Packages](https://fedramp.gov/notices/0009)** - March 25, 2026
+
+**Summary:** RFC-0024 was closed on March 11, 2026. This notice explains the initial outcome from public comment and identifies next steps for FedRAMP related to machine-readable packages for Rev5 systems.
+
+**Impact:** Requires machine-readable packages for Rev5 High systems within 2 years.
 
 This is an OFFICIAL DECISION that affects your High Rev5 authorization.
+```
+
+**How to create summaries:**
+1. **Use RSS feed data** - Each notice has `description` and `content` fields
+2. Start with the `description` field (1-2 sentence overview)
+3. Extract key points from `content` field if needed for impact assessment
+4. Make it scannable - users should understand at a glance
+5. Include: outcome, timeline, and affected systems
+6. Keep summary concise (2-3 sentences max)
+7. Add impact assessment relevant to user's context (High Rev5 / Moderate 20x)
+
+**RSS feed data available:**
+- `title` - Notice headline
+- `link` - URL to full notice (https://fedramp.gov/notices/XXXX)
+- `date` - Publication date
+- `description` - Short summary (use this first)
+- `content` - Full HTML content (parse for details if needed)
+
+**Example from RSS:**
+```
+title: "Initial Outcome from RFC-0024 Rev5 Machine-Readable Packages"
+description: "RFC-0024 was closed on March 11, 2026. This notice explains the initial outcome from public comment and next steps for FedRAMP."
+→ Use description as summary, then add impact assessment
 ```
 
 **Why clickable links matter for notices:**
@@ -521,7 +546,15 @@ Here's what's happening in FedRAMP this week:
 📢 **FedRAMP Notices (Official Announcements):**
 
 📢 **[Initial Outcome from RFC-0024 Rev5 Machine-Readable Packages](https://fedramp.gov/notices/0009)** - March 25, 2026
-   🚨 CRITICAL: Affects your High Rev5 system - requires machine-readable packages within 2 years
+
+**Summary:** RFC-0024 was closed on March 11, 2026. This notice explains the initial outcome from public comment and next steps for machine-readable packages for Rev5 systems.
+
+🚨 **CRITICAL - Affects Your High Rev5 System:**
+- Requires machine-readable authorization packages for Rev5 High certifications
+- Timeline: Must comply within 2 years
+- This is an OFFICIAL POLICY DECISION (not a proposal)
+
+---
 
 🗣️ **RFCs & Discussions (4 active):**
 - **[Rev5 improvements for 2026](https://github.com/FedRAMP/community/discussions/137)** - General Q&A thread
@@ -530,10 +563,9 @@ Here's what's happening in FedRAMP this week:
 📝 **Repository Updates:**
 - docs: 3 commits - SSP template updates
 - roadmap: 1 commit - marketplace planning
-- community: 0 commits
 
-🔥 **Highlights:**
-- New official notice on machine-readable packages (MANDATORY for High systems)
+🔥 **Key Takeaways:**
+- Official notice requires action on your High Rev5 system
 - SSP template changes may require documentation updates
 
 Want me to search for details on any of these?
