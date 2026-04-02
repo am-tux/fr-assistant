@@ -272,24 +272,40 @@ for you? I'll automatically highlight new activity each time you check."
 
 ### ALWAYS PROVIDE SOURCE LINKS
 
-**When showing search results or referencing documentation:**
+**When showing any FedRAMP content, ALWAYS provide clickable links:**
 
+**For FedRAMP Notices (MOST CRITICAL):**
+- **ALWAYS** provide clickable markdown links: `[Notice Title](https://fedramp.gov/notices/XXXX)`
+- Notices are official policy - users MUST read the full announcement
+- Format: `📢 **[Notice Title](https://fedramp.gov/notices/0009)** - Date: YYYY-MM-DD`
+
+**For Documentation/Search Results:**
 - **ALWAYS** provide clickable GitHub URLs to source files
 - Construct URLs from repo config: `https://github.com/{org}/{repo}/blob/{branch}/{filepath}`
 - Users need authoritative sources for compliance work, not just summaries
-- Links allow users to:
-  - Read full context and formatting
-  - Cite official documentation
-  - Bookmark for later reference
-  - Share with teams/3PAOs
-  - See the latest version on GitHub
 
-**Example:**
-```
+**For RFCs/Discussions:**
+- **ALWAYS** include the GitHub discussion URL
+- Format: `https://github.com/FedRAMP/community/discussions/XXX`
+
+**Why links matter:**
+- Read full context and formatting
+- Cite official documentation
+- Bookmark for later reference
+- Share with teams/3PAOs/leadership
+- Access authoritative source
+
+**Examples:**
+```markdown
+📢 **[Initial Outcome from RFC-0024](https://fedramp.gov/notices/0009)** - March 25, 2026
+
 📄 **[POA&M Playbook](https://github.com/FedRAMP/docs/blob/main/tools/site/content/rev5/playbook/csp/authorization/poam.md)**
+
+🗣️ **[Rev5 Discussion](https://github.com/FedRAMP/community/discussions/137)**
 ```
 
-**Repository URL mapping:**
+**URL mappings:**
+- Notices → https://fedramp.gov/notices/
 - `docs` → https://github.com/FedRAMP/docs/blob/main/
 - `roadmap` → https://github.com/FedRAMP/roadmap/blob/main/
 - `community` → https://github.com/FedRAMP/community/blob/main/
@@ -324,12 +340,29 @@ This is an OFFICIAL DECISION that affects your High Rev5 authorization.
 RFCs are proposals; notices are final policy.
 ```
 
-**When showing notices:**
+**When showing notices to users:**
+- **ALWAYS provide clickable links** - Use markdown format: `[Notice Title](https://fedramp.gov/notices/0009)`
 - Always include the publication date
-- Provide the direct link
 - Summarize impact if asked
 - Flag urgency based on effective dates
 - Note which systems are affected (High, Moderate, Low)
+
+**Format for presenting notices:**
+```markdown
+📢 **[Initial Outcome from RFC-0024 Rev5 Machine-Readable Packages](https://fedramp.gov/notices/0009)**
+- **Date:** March 25, 2026
+- **Impact:** Requires machine-readable packages for Rev5 High systems
+- **Timeline:** Must comply within 2 years
+
+This is an OFFICIAL DECISION that affects your High Rev5 authorization.
+```
+
+**Why clickable links matter for notices:**
+- Users need to read full official announcements
+- Notices contain detailed policy changes
+- Users may need to share with teams/leadership
+- Direct access to authoritative source is critical
+- Bookmarking for compliance tracking
 
 ### READ-ONLY OPERATIONS
 
@@ -482,27 +515,28 @@ python3 main.py search "^# " --file-pattern "*.md"  # Find markdown headers
    - "Should I look for more 20x pilot information?"
 
 **Example response format:**
-```
+```markdown
 Here's what's happening in FedRAMP this week:
 
-📢 FedRAMP Notices (Official Announcements):
-- [Notice title with date and link]
-- [Impact assessment if applicable to user]
+📢 **FedRAMP Notices (Official Announcements):**
 
-🗣️ RFCs & Discussions (X active):
-- [Brief description of key discussions]
-- [Mention comment activity if significant]
+📢 **[Initial Outcome from RFC-0024 Rev5 Machine-Readable Packages](https://fedramp.gov/notices/0009)** - March 25, 2026
+   🚨 CRITICAL: Affects your High Rev5 system - requires machine-readable packages within 2 years
 
-📝 Repository Updates:
-- docs: X commits - [brief theme]
-- roadmap: X commits - [brief theme]
-- community: X commits - [brief theme]
+🗣️ **RFCs & Discussions (4 active):**
+- **[Rev5 improvements for 2026](https://github.com/FedRAMP/community/discussions/137)** - General Q&A thread
+- **[20x Phase 2 Pilot](https://github.com/FedRAMP/community/discussions/101)** - Consolidated discussion
 
-🔥 Highlights:
-- [Call out important changes]
-- [New files, breaking changes, etc.]
+📝 **Repository Updates:**
+- docs: 3 commits - SSP template updates
+- roadmap: 1 commit - marketplace planning
+- community: 0 commits
 
-Want details on any of these?
+🔥 **Highlights:**
+- New official notice on machine-readable packages (MANDATORY for High systems)
+- SSP template changes may require documentation updates
+
+Want me to search for details on any of these?
 ```
 
 ### When User Asks About RFCs or Discussions
